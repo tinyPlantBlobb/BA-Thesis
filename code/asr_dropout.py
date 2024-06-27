@@ -1,3 +1,4 @@
+from random import sample
 import numpy as np
 import torch.utils
 import torch.utils.data
@@ -7,6 +8,7 @@ try:
 except ImportError:
     pass
 
+import yaml
 import torch
 import pandas as pd
 import urllib
@@ -36,20 +38,35 @@ def transcriptionProbability(tensor, **options):
     result = {"translationProb": torch.nn.functional.softmax(tensor, dim=-1),"translationMean":torch.mean(tensor, dim=-1).mean(dim=0)}
     return result
 
+def getsegments(): 
+    with open("$HOME/dataset/IWSLT23.tst2023.en-de/benchmark/en-de/tst2023/IWSLT.TED.tst2023.en-de.yaml", 'r') as file:
+        data = yaml.load(file, Loader=yaml.FullLoader)
+        
+        return data
+            #print(l, "\n", l.get("wav"))
+
 def segmentAudio():
-    frame_offset= 0
-    num_frames= 1000
-    filepath= ""
-    waveform2, sample_rate2 = torchaudio.load(
-        filepath, frame_offset=frame_offset, num_frames=num_frames
-    )
+    data= getsegments()
+    sample_rate= 16000
+    audiopath= "$HOME/dataset/IWSLT23.tst2023.en-de/benchmark/en-de/tst2023/IWSLT.TED.tst2023.en-de.yaml"
+    path = "$HOME/dataset/IWSLT23.tst2023.en-de/benchmark/en-de/tst2023/wav/"
+    dataset= []
+    for i,seg in enumerate(data):
+        frame_offset= seg.get("offset")*16000
+        num_frames= seg.get("duration")*16000
+        waveform, sample_rate = torchaudio.load(
+            audiopath+seg.get("wav"), frame_offset=frame_offset, num_frames=num_frames
+        )
+        torchaudio.save(path+seg.get("wav")+i+"wav", waveform, sample_rate)
+
+        dataset.append( {"waveform":waveform, "sample_rate":sample_rate, "transcript":seg.get("text"), "audiofile": seg.get("wav"), "timestamp": (seg.get("offset"),seg.get("offset")+seg.get("duration"))}) #falls man noch die xmls rein matchen will: , "transcript":seg.get("text"), "translation":seg.get("translation")
+        return dataset
 
 
 class IWSLT2023(torch.utils.data.Dataset):
     def __init__(self, split="test-clean", device=DEVICE):
-        self.dataset = torch.utils.datasets.IWSLT2023(
-            "data", split=split, download=True
-        )
+        self.dataset = segmentAudio()
+        
         self.device = device
     
     def __len__(self):
@@ -63,7 +80,7 @@ class IWSLT2023(torch.utils.data.Dataset):
         
         return (mel, text)
 
-dataset= IWSLT2023
+dataset= segmentAudio()
 
 references = []
 transcriptions = []
