@@ -4,24 +4,18 @@ import xml.etree.ElementTree as ET
 
 
 #get the data ready for the Models 
+BASE = "/home/plantpalfynn/uni/BA/BA-Thesis/code/"
+# BASE = "/"
 
-
-with open("/home/plantpalfynn/uni/BA/BA-Thesis/code/dataset/IWSLT23.tst2023.en-de/benchmark/en-de/tst2023/IWSLT.TED.tst2023.en-de.yaml", 'r') as file:
+with open(BASE +"dataset/IWSLT23.tst2023.en-de/benchmark/en-de/tst2023/IWSLT.TED.tst2023.en-de.yaml", 'r') as file:
     timestamps = yaml.load(file, Loader=yaml.FullLoader)
 
 allwavs = list(set([l.get("wav") for l in timestamps]))
 timestamps = {wav: [elem for elem in timestamps if elem.get("wav") == wav] for wav in allwavs}
 
-#tar_path = download_asset("dataset/IWSLT23.tst2023.en-de.tar.gz")
-#tar_item = "IWSLT23.tst2023.en-de/benchmark/en-de/tst2023/wav/ted_13587.wav"
-#with tarfile.open(tar_path, mode="r") as tarfile_:
-#    fileobj = tarfile_.extractfile(tar_item)
-#    waveform, sample_rate = torchaudio.load(fileobj)
-
-
 #XML PART 
-detree = ET.parse('/home/plantpalfynn/uni/BA/BA-Thesis/code/dataset/IWSLT23.tst2023.en-de/benchmark/en-de/tst2023/IWSLT.TED.tst2023.en-de.de.xml')
-entree = ET.parse('/home/plantpalfynn/uni/BA/BA-Thesis/code/dataset/IWSLT23.tst2023.en-de/benchmark/en-de/tst2023/IWSLT.TED.tst2023.en-de.en.xml')
+detree = ET.parse(BASE +'/dataset/IWSLT23.tst2023.en-de/benchmark/en-de/tst2023/IWSLT.TED.tst2023.en-de.de.xml')
+entree = ET.parse(BASE +'/dataset/IWSLT23.tst2023.en-de/benchmark/en-de/tst2023/IWSLT.TED.tst2023.en-de.en.xml')
 deroot = detree.getroot()
 enroot = entree.getroot()
 
@@ -50,5 +44,5 @@ for child in deroot:
 
 # DUmping everything into the yaml file
 
-with open("/home/plantpalfynn/uni/BA/BA-Thesis/code/dataset/IWSLT23.tst2023.en-de/benchmark/en-de/tst2023/IWSLT.TED.tst2023.en-de.matched.yaml", 'w') as file:
+with open(BASE +"/dataset/IWSLT23.tst2023.en-de/benchmark/en-de/tst2023/IWSLT.TED.tst2023.en-de.matched.yaml", 'w') as file:
     yaml.dump(timestamps, file)
