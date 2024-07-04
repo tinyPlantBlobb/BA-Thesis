@@ -1,7 +1,7 @@
-from random import sample
-import numpy as np
 import torch.utils
 import torch.utils.data
+
+from transformers import WhisperProcessor, WhisperForConditionalGeneration
 
 try:
     import tensorflow  # required in Colab to avoid protobuf compatibility issues
@@ -10,9 +10,7 @@ except ImportError:
 
 import yaml
 import torch
-import pandas as pd
-import urllib
-import tarfile
+
 import whisper
 import torchaudio
 
@@ -21,8 +19,9 @@ from tqdm import tqdm
 
 
 #import ipywidgets as widgets
-# Whisper
-asr_model = whisper.load_model("medium")
+# Whisper  from the huggingface whisper implementation
+processor = WhisperProcessor.from_pretrained("openai/whisper-medium.en")
+asr_model = WhisperForConditionalGeneration.from_pretrained("openai/whisper-medium.en")
 options = dict(language="German", beam_size=5, best_of=5, dropout=0.3)
 transcribe_options = dict(task="transcribe", **options)
 #translate_options = dict(task="translate", **options)
@@ -39,28 +38,29 @@ def transcriptionProbability(tensor, **options):
     return result
 
 def getsegments(): 
-    with open("$HOME/dataset/IWSLT23.tst2023.en-de/benchmark/en-de/tst2023/IWSLT.TED.tst2023.en-de.yaml", 'r') as file:
+    with open("$HOME/dataset/IWSLT23.tst2023.en-de/benchmark/en-de/tst2023/IWSLT.TED.tst2023.en-de.matched.yaml", 'r') as file:
         data = yaml.load(file, Loader=yaml.FullLoader)
         
         return data
             #print(l, "\n", l.get("wav"))
 
 def segmentAudio():
-    data= getsegments()
+    dataset = getsegments()
     sample_rate= 16000
     audiopath= "$HOME/dataset/IWSLT23.tst2023.en-de/benchmark/en-de/tst2023/IWSLT.TED.tst2023.en-de.yaml"
     path = "$HOME/dataset/IWSLT23.tst2023.en-de/benchmark/en-de/tst2023/wav/"
     dataset= []
-    for i,seg in enumerate(data):
-        frame_offset= seg.get("offset")*16000
-        num_frames= seg.get("duration")*16000
-        waveform, sample_rate = torchaudio.load(
-            audiopath+seg.get("wav"), frame_offset=frame_offset, num_frames=num_frames
-        )
-        torchaudio.save(path+seg.get("wav")+i+"wav", waveform, sample_rate)
+    for data in dataset:
+        for i,seg in enumerate(data):
+            frame_offset= seg.get("offset")*16000
+            num_frames= seg.get("duration")*16000
+            waveform, sample_rate = torchaudio.load(
+                audiopath+seg.get("wav"), frame_offset=frame_offset, num_frames=num_frames
+            )
+            torchaudio.save(path+seg.get("wav")+i+"wav", waveform, sample_rate)
 
-        dataset.append( {"waveform":waveform, "sample_rate":sample_rate, "transcript":seg.get("text"), "audiofile": seg.get("wav"), "timestamp": (seg.get("offset"),seg.get("offset")+seg.get("duration"))}) #falls man noch die xmls rein matchen will: , "transcript":seg.get("text"), "translation":seg.get("translation")
-        return dataset
+            dataset.append( {"waveform":waveform, "sample_rate":sample_rate, "transcript":seg.get("transcript"), "audiofile": seg.get("wav"),"translation": seg.get("translation"), "timestamp": (seg.get("offset"),seg.get("offset")+seg.get("duration"))}) #falls man noch die xmls rein matchen will: , "transcript":seg.get("text"), "translation":seg.get("translation")
+            return dataset
 
 
 class IWSLT2023(torch.utils.data.Dataset):
