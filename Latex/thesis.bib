@@ -6,13 +6,325 @@
       archivePrefix={arXiv},
       primaryClass={cs.CL}
 }
-
-@article{mittelbach2014,
-  author = {Frank Mittelbach},
-  title = {How to influence the position of float environments like figure and table in \LaTeX?},
-  journal = {TUGboat},
-  year = {2014},
-  volume = {35},
-  pages = {248--254},
-  url = {https://www.latex-project.org/publications/tb111mitt-float.pdf},
+@misc{le2016automatic,
+      title={Automatic Quality Assessment for Speech Translation Using Joint ASR and MT Features}, 
+      author={Ngoc-Tien Le and Benjamin Lecouteux and Laurent Besacier},
+      year={2016},
+      eprint={1609.06049},
+      archivePrefix={arXiv},
+      primaryClass={cs.CL}
 }
+@inproceedings{Freitag_2017,
+   title={Beam Search Strategies for Neural Machine Translation},
+   url={http://dx.doi.org/10.18653/v1/W17-3207},
+   DOI={10.18653/v1/w17-3207},
+   booktitle={Proceedings of the First Workshop on Neural Machine Translation},
+   publisher={Association for Computational Linguistics},
+   author={Freitag, Markus and Al-Onaizan, Yaser},
+   year={2017} }
+
+@inproceedings{negri-etal-2014-quality,
+    title = "Quality Estimation for Automatic Speech Recognition",
+    author = "Negri, Matteo  and
+      Turchi, Marco  and
+      C. de Souza, Jos{\'e} G.  and
+      Falavigna, Daniele",
+    editor = "Tsujii, Junichi  and
+      Hajic, Jan",
+    booktitle = "Proceedings of {COLING} 2014, the 25th International Conference on Computational Linguistics: Technical Papers",
+    month = aug,
+    year = "2014",
+    address = "Dublin, Ireland",
+    publisher = "Dublin City University and Association for Computational Linguistics",
+    url = "https://aclanthology.org/C14-1171",
+    pages = "1813--1823",
+}
+@inproceedings{BLEUMetric,
+author = {Papineni, Kishore and Roukos, Salim and Ward, Todd and Zhu, Wei-Jing},
+title = {BLEU: a method for automatic evaluation of machine translation},
+year = {2002},
+publisher = {Association for Computational Linguistics},
+address = {USA},
+url = {https://doi.org/10.3115/1073083.1073135},
+doi = {10.3115/1073083.1073135},
+abstract = {Human evaluations of machine translation are extensive but expensive. Human evaluations can take months to finish and involve human labor that can not be reused. We propose a method of automatic machine translation evaluation that is quick, inexpensive, and language-independent, that correlates highly with human evaluation, and that has little marginal cost per run. We present this method as an automated understudy to skilled human judges which substitutes for them when there is need for quick or frequent evaluations.},
+booktitle = {Proceedings of the 40th Annual Meeting on Association for Computational Linguistics},
+pages = {311–318},
+numpages = {8},
+location = {Philadelphia, Pennsylvania},
+series = {ACL '02}
+}
+@inproceedings{rei-etal-2020-comet,
+    title = "{COMET}: A Neural Framework for {MT} Evaluation",
+    author = "Rei, Ricardo  and
+      Stewart, Craig  and
+      Farinha, Ana C  and
+      Lavie, Alon",
+    editor = "Webber, Bonnie  and
+      Cohn, Trevor  and
+      He, Yulan  and
+      Liu, Yang",
+    booktitle = "Proceedings of the 2020 Conference on Empirical Methods in Natural Language Processing (EMNLP)",
+    month = nov,
+    year = "2020",
+    address = "Online",
+    publisher = "Association for Computational Linguistics",
+    url = "https://aclanthology.org/2020.emnlp-main.213",
+    doi = "10.18653/v1/2020.emnlp-main.213",
+    pages = "2685--2702",
+    abstract = "We present COMET, a neural framework for training multilingual machine translation evaluation models which obtains new state-of-the-art levels of correlation with human judgements. Our framework leverages recent breakthroughs in cross-lingual pretrained language modeling resulting in highly multilingual and adaptable MT evaluation models that exploit information from both the source input and a target-language reference translation in order to more accurately predict MT quality. To showcase our framework, we train three models with different types of human judgements: Direct Assessments, Human-mediated Translation Edit Rate and Multidimensional Quality Metric. Our models achieve new state-of-the-art performance on the WMT 2019 Metrics shared task and demonstrate robustness to high-performing systems.",
+}
+
+@inproceedings{blain-etal-2020-quality,
+    title = "Quality In, Quality Out: Learning from Actual Mistakes",
+    author = "Blain, Frederic  and
+      Aletras, Nikolaos  and
+      Specia, Lucia",
+    editor = "Martins, Andr{\'e}  and
+      Moniz, Helena  and
+      Fumega, Sara  and
+      Martins, Bruno  and
+      Batista, Fernando  and
+      Coheur, Luisa  and
+      Parra, Carla  and
+      Trancoso, Isabel  and
+      Turchi, Marco  and
+      Bisazza, Arianna  and
+      Moorkens, Joss  and
+      Guerberof, Ana  and
+      Nurminen, Mary  and
+      Marg, Lena  and
+      Forcada, Mikel L.",
+    booktitle = "Proceedings of the 22nd Annual Conference of the European Association for Machine Translation",
+    month = nov,
+    year = "2020",
+    address = "Lisboa, Portugal",
+    publisher = "European Association for Machine Translation",
+    url = "https://aclanthology.org/2020.eamt-1.16",
+    pages = "145--153",
+    abstract = "Approaches to Quality Estimation (QE) of machine translation have shown promising results at predicting quality scores for translated sentences. However, QE models are often trained on noisy approximations of quality annotations derived from the proportion of post-edited words in translated sentences instead of direct human annotations of translation errors. The latter is a more reliable ground-truth but more expensive to obtain. In this paper, we present the first attempt to model the task of predicting the proportion of actual translation errors in a sentence while minimising the need for direct human annotation. For that purpose, we use transfer-learning to leverage large scale noisy annotations and small sets of high-fidelity human annotated translation errors to train QE models. Experiments on four language pairs and translations obtained by statistical and neural models show consistent gains over strong baselines.",
+}
+@inproceedings{kim-etal-2017-predictor,
+    title = "Predictor-Estimator using Multilevel Task Learning with Stack Propagation for Neural Quality Estimation",
+    author = "Kim, Hyun  and
+      Lee, Jong-Hyeok  and
+      Na, Seung-Hoon",
+    editor = "Bojar, Ond{\v{r}}ej  and
+      Buck, Christian  and
+      Chatterjee, Rajen  and
+      Federmann, Christian  and
+      Graham, Yvette  and
+      Haddow, Barry  and
+      Huck, Matthias  and
+      Yepes, Antonio Jimeno  and
+      Koehn, Philipp  and
+      Kreutzer, Julia",
+    booktitle = "Proceedings of the Second Conference on Machine Translation",
+    month = sep,
+    year = "2017",
+    address = "Copenhagen, Denmark",
+    publisher = "Association for Computational Linguistics",
+    url = "https://aclanthology.org/W17-4763",
+    doi = "10.18653/v1/W17-4763",
+    pages = "562--568",
+}
+@inproceedings{ott2019fairseq,
+  title = {fairseq: A Fast, Extensible Toolkit for Sequence Modeling},
+  author = {Myle Ott and Sergey Edunov and Alexei Baevski and Angela Fan and Sam Gross and Nathan Ng and David Grangier and Michael Auli},
+  booktitle = {Proceedings of NAACL-HLT 2019: Demonstrations},
+  year = {2019},
+}
+@misc{radford2022robust,
+      title={Robust Speech Recognition via Large-Scale Weak Supervision}, 
+      author={Alec Radford and Jong Wook Kim and Tao Xu and Greg Brockman and Christine McLeavey and Ilya Sutskever},
+      year={2022},
+      eprint={2212.04356},
+      archivePrefix={arXiv},
+      primaryClass={eess.AS}
+}
+@misc{fomicheva2020unsupervised,
+      title={Unsupervised Quality Estimation for Neural Machine Translation}, 
+      author={Marina Fomicheva and Shuo Sun and Lisa Yankovskaya and Frédéric Blain and Francisco Guzmán and Mark Fishel and Nikolaos Aletras and Vishrav Chaudhary and Lucia Specia},
+      year={2020},
+      eprint={2005.10608},
+      archivePrefix={arXiv},
+      primaryClass={cs.CL}
+}
+@misc{le2016automatic,
+      title={Automatic Quality Assessment for Speech Translation Using Joint ASR and MT Features}, 
+      author={Ngoc-Tien Le and Benjamin Lecouteux and Laurent Besacier},
+      year={2016},
+      eprint={1609.06049},
+      archivePrefix={arXiv},
+      primaryClass={cs.CL}
+}
+@inproceedings{Freitag_2017,
+   title={Beam Search Strategies for Neural Machine Translation},
+   url={http://dx.doi.org/10.18653/v1/W17-3207},
+   DOI={10.18653/v1/w17-3207},
+   booktitle={Proceedings of the First Workshop on Neural Machine Translation},
+   publisher={Association for Computational Linguistics},
+   author={Freitag, Markus and Al-Onaizan, Yaser},
+   year={2017} }
+
+@inproceedings{negri-etal-2014-quality,
+    title = "Quality Estimation for Automatic Speech Recognition",
+    author = "Negri, Matteo  and
+      Turchi, Marco  and
+      C. de Souza, Jos{\'e} G.  and
+      Falavigna, Daniele",
+    editor = "Tsujii, Junichi  and
+      Hajic, Jan",
+    booktitle = "Proceedings of {COLING} 2014, the 25th International Conference on Computational Linguistics: Technical Papers",
+    month = aug,
+    year = "2014",
+    address = "Dublin, Ireland",
+    publisher = "Dublin City University and Association for Computational Linguistics",
+    url = "https://aclanthology.org/C14-1171",
+    pages = "1813--1823",
+}
+@inproceedings{BLEUMetric,
+author = {Papineni, Kishore and Roukos, Salim and Ward, Todd and Zhu, Wei-Jing},
+title = {BLEU: a method for automatic evaluation of machine translation},
+year = {2002},
+publisher = {Association for Computational Linguistics},
+address = {USA},
+url = {https://doi.org/10.3115/1073083.1073135},
+doi = {10.3115/1073083.1073135},
+abstract = {Human evaluations of machine translation are extensive but expensive. Human evaluations can take months to finish and involve human labor that can not be reused. We propose a method of automatic machine translation evaluation that is quick, inexpensive, and language-independent, that correlates highly with human evaluation, and that has little marginal cost per run. We present this method as an automated understudy to skilled human judges which substitutes for them when there is need for quick or frequent evaluations.},
+booktitle = {Proceedings of the 40th Annual Meeting on Association for Computational Linguistics},
+pages = {311–318},
+numpages = {8},
+location = {Philadelphia, Pennsylvania},
+series = {ACL '02}
+}
+@inproceedings{rei-etal-2020-comet,
+    title = "{COMET}: A Neural Framework for {MT} Evaluation",
+    author = "Rei, Ricardo  and
+      Stewart, Craig  and
+      Farinha, Ana C  and
+      Lavie, Alon",
+    editor = "Webber, Bonnie  and
+      Cohn, Trevor  and
+      He, Yulan  and
+      Liu, Yang",
+    booktitle = "Proceedings of the 2020 Conference on Empirical Methods in Natural Language Processing (EMNLP)",
+    month = nov,
+    year = "2020",
+    address = "Online",
+    publisher = "Association for Computational Linguistics",
+    url = "https://aclanthology.org/2020.emnlp-main.213",
+    doi = "10.18653/v1/2020.emnlp-main.213",
+    pages = "2685--2702",
+    abstract = "We present COMET, a neural framework for training multilingual machine translation evaluation models which obtains new state-of-the-art levels of correlation with human judgements. Our framework leverages recent breakthroughs in cross-lingual pretrained language modeling resulting in highly multilingual and adaptable MT evaluation models that exploit information from both the source input and a target-language reference translation in order to more accurately predict MT quality. To showcase our framework, we train three models with different types of human judgements: Direct Assessments, Human-mediated Translation Edit Rate and Multidimensional Quality Metric. Our models achieve new state-of-the-art performance on the WMT 2019 Metrics shared task and demonstrate robustness to high-performing systems.",
+}
+
+@inproceedings{blain-etal-2020-quality,
+    title = "Quality In, Quality Out: Learning from Actual Mistakes",
+    author = "Blain, Frederic  and
+      Aletras, Nikolaos  and
+      Specia, Lucia",
+    editor = "Martins, Andr{\'e}  and
+      Moniz, Helena  and
+      Fumega, Sara  and
+      Martins, Bruno  and
+      Batista, Fernando  and
+      Coheur, Luisa  and
+      Parra, Carla  and
+      Trancoso, Isabel  and
+      Turchi, Marco  and
+      Bisazza, Arianna  and
+      Moorkens, Joss  and
+      Guerberof, Ana  and
+      Nurminen, Mary  and
+      Marg, Lena  and
+      Forcada, Mikel L.",
+    booktitle = "Proceedings of the 22nd Annual Conference of the European Association for Machine Translation",
+    month = nov,
+    year = "2020",
+    address = "Lisboa, Portugal",
+    publisher = "European Association for Machine Translation",
+    url = "https://aclanthology.org/2020.eamt-1.16",
+    pages = "145--153",
+    abstract = "Approaches to Quality Estimation (QE) of machine translation have shown promising results at predicting quality scores for translated sentences. However, QE models are often trained on noisy approximations of quality annotations derived from the proportion of post-edited words in translated sentences instead of direct human annotations of translation errors. The latter is a more reliable ground-truth but more expensive to obtain. In this paper, we present the first attempt to model the task of predicting the proportion of actual translation errors in a sentence while minimising the need for direct human annotation. For that purpose, we use transfer-learning to leverage large scale noisy annotations and small sets of high-fidelity human annotated translation errors to train QE models. Experiments on four language pairs and translations obtained by statistical and neural models show consistent gains over strong baselines.",
+}
+@inproceedings{kim-etal-2017-predictor,
+    title = "Predictor-Estimator using Multilevel Task Learning with Stack Propagation for Neural Quality Estimation",
+    author = "Kim, Hyun  and
+      Lee, Jong-Hyeok  and
+      Na, Seung-Hoon",
+    editor = "Bojar, Ond{\v{r}}ej  and
+      Buck, Christian  and
+      Chatterjee, Rajen  and
+      Federmann, Christian  and
+      Graham, Yvette  and
+      Haddow, Barry  and
+      Huck, Matthias  and
+      Yepes, Antonio Jimeno  and
+      Koehn, Philipp  and
+      Kreutzer, Julia",
+    booktitle = "Proceedings of the Second Conference on Machine Translation",
+    month = sep,
+    year = "2017",
+    address = "Copenhagen, Denmark",
+    publisher = "Association for Computational Linguistics",
+    url = "https://aclanthology.org/W17-4763",
+    doi = "10.18653/v1/W17-4763",
+    pages = "562--568",
+}
+@inproceedings{ott2019fairseq,
+  title = {fairseq: A Fast, Extensible Toolkit for Sequence Modeling},
+  author = {Myle Ott and Sergey Edunov and Alexei Baevski and Angela Fan and Sam Gross and Nathan Ng and David Grangier and Michael Auli},
+  booktitle = {Proceedings of NAACL-HLT 2019: Demonstrations},
+  year = {2019},
+}
+@misc{radford2022robust,
+      title={Robust Speech Recognition via Large-Scale Weak Supervision}, 
+      author={Alec Radford and Jong Wook Kim and Tao Xu and Greg Brockman and Christine McLeavey and Ilya Sutskever},
+      year={2022},
+      eprint={2212.04356},
+      archivePrefix={arXiv},
+      primaryClass={eess.AS}
+}
+@misc{chowdhury2023multilingual,
+      title={Multilingual Word Error Rate Estimation: e-WER3}, 
+      author={Shammur Absar Chowdhury and Ahmed Ali},
+      year={2023},
+      eprint={2304.00649},
+      archivePrefix={arXiv},
+      primaryClass={cs.CL}
+}
+@misc{ma2021deltalm,
+      title={DeltaLM: Encoder-Decoder Pre-training for Language Generation and Translation by Augmenting Pretrained Multilingual Encoders}, 
+      author={Shuming Ma and Li Dong and Shaohan Huang and Dongdong Zhang and Alexandre Muzio and Saksham Singhal and Hany Hassan Awadalla and Xia Song and Furu Wei},
+      year={2021},
+      eprint={2106.13736},
+      archivePrefix={arXiv},
+      primaryClass={cs.CL}
+}
+@misc{communication2023seamlessm4t,
+      title={SeamlessM4T: Massively Multilingual\& Multimodal Machine Translation}, 
+      author={Seamless Communication and Loïc Barrault and Yu-An Chung and Mariano Cora Meglioli and David Dale and Ning Dong and Paul-Ambroise Duquenne and Hady Elsahar and Hongyu Gong and Kevin Heffernan and John Hoffman and Christopher Klaiber and Pengwei Li and Daniel Licht and Jean Maillard and Alice Rakotoarison and Kaushik Ram Sadagopan and Guillaume Wenzek and Ethan Ye and Bapi Akula and Peng-Jen Chen and Naji El Hachem and Brian Ellis and Gabriel Mejia Gonzalez and Justin Haaheim and Prangthip Hansanti and Russ Howes and Bernie Huang and Min-Jae Hwang and Hirofumi Inaguma and Somya Jain and Elahe Kalbassi and Amanda Kallet and Ilia Kulikov and Janice Lam and Daniel Li and Xutai Ma and Ruslan Mavlyutov and Benjamin Peloquin and Mohamed Ramadan and Abinesh Ramakrishnan and Anna Sun and Kevin Tran and Tuan Tran and Igor Tufanov and Vish Vogeti and Carleigh Wood and Yilin Yang and Bokai Yu and Pierre Andrews and Can Balioglu and Marta R. Costa-jussà and Onur Celebi and Maha Elbayad and Cynthia Gao and Francisco Guzmán and Justine Kao and Ann Lee and Alexandre Mourachko and Juan Pino and Sravya Popuri and Christophe Ropers and Safiyyah Saleem and Holger Schwenk and Paden Tomasello and Changhan Wang and Jeff Wang and Skyler Wang},
+      year={2023},
+      eprint={2308.11596},
+      archivePrefix={arXiv},
+      primaryClass={cs.CL}
+}
+@misc{sperber2024evaluating,
+      title={Evaluating the IWSLT2023 Speech Translation Tasks: Human Annotations, Automatic Metrics, and Segmentation}, 
+      author={Matthias Sperber and Ondřej Bojar and Barry Haddow and Dávid Javorský and Xutai Ma and Matteo Negri and Jan Niehues and Peter Polák and Elizabeth Salesky and Katsuhito Sudoh and Marco Turchi},
+      year={2024},
+      eprint={2406.03881},
+      archivePrefix={arXiv},
+      primaryClass={id='cs.CL' full_name='Computation and Language' is_active=True alt_name='cmp-lg' in_archive='cs' is_general=False description='Covers natural language processing. Roughly includes material in ACM Subject Class I.2.7. Note that work on artificial languages (programming languages, logics, formal systems) that does not explicitly address natural-language issues broadly construed (natural-language processing, computational linguistics, speech, text retrieval, etc.) is not appropriate for this area.'}
+}
+@INPROCEEDINGS{8683086,
+  author={Vyas, Apoorv and Dighe, Pranay and Tong, Sibo and Bourlard, Hervé},
+  booktitle={ICASSP 2019 - 2019 IEEE International Conference on Acoustics, Speech and Signal Processing (ICASSP)}, 
+  title={Analyzing Uncertainties in Speech Recognition Using Dropout}, 
+  year={2019},
+  volume={},
+  number={},
+  pages={6730-6734},
+  keywords={Hidden Markov models;Uncertainty;Acoustics;Training;Decoding;Predictive models;Estimation;dropout uncertainty;WER estimation;word confidence;error localization},
+  doi={10.1109/ICASSP.2019.8683086}}
