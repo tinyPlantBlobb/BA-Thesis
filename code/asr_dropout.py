@@ -71,32 +71,9 @@ def segmentAudio():
 
 dataset= Dataset.from_dict(segmentAudio()).cast_column("audiofile", Audio())
 
-# class IWSLT2023(torch.utils.data.Dataset):
-#     def __init__(self, split="test-clean", device=DEVICE):
-#         self.dataset = segmentAudio()
-        
-#         self.device = device
-    
-#     def __len__(self):
-#         return len(self.dataset)
-
-#     def __getitem__(self, item):
-#         audio, sample_rate, text, _, _, _ = self.dataset[item]
-#         assert sample_rate == 16000
-#         audio = whisper.pad_or_trim(audio.flatten()).to(self.device)
-#         mel = whisper.log_mel_spectrogram(audio)
-        
-#         return (mel, text)
-
-
-
-references = []
-transcriptions = []
-translations = []
-outputptobabilities = []
 # Returns the last layer proabbliities of the model as a dict containing the decoded text and the segments and the language
 asr_model.eval()
-
+result={}
 
 for sample in tqdm(dataset):
     audio = waveform = sample["waveform"]
@@ -112,16 +89,15 @@ for sample in tqdm(dataset):
 
 #decode the audio 
     options = whisper.DecodingOptions()
-    result = whisper.decode(asr_model,mel,options)
+    result_trans = whisper.decode(asr_model,mel,options)
     input_features=  processor(waveform, sampling_rate=16000, return_tensors="pt").input_features
     res= asr_model.generate(input_features.to("cuda"), output_scores=True)
-    logits = asr_model().logits
+    logits = asr_model(res).logits
     # get the frist average log probability of the model for that aucio
-    outputptobability = result[0].avg_logprob
-    transcription = asr_model.transcribe(audio, **transcribe_options)["text"]
+    result["audiofile"].append(sample["audiofile"])
+    result["timestamp"].append(sample["timestamp"])
+    result["logits"].append(logits)
+    result["outputptobability"].append(result[0].avg_logprob)
+    result["transcription"].append(asr_model.transcribe(audio, **transcribe_options)["text"])
     #translation = asr_model.transcribe(audio, **translate_options)["text"]
 
-    outputptobabilities.append(outputptobability)
-    transcriptions.append(transcription)
-    #translations.append(translation)
-    references.append(text)
