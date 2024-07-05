@@ -1,7 +1,6 @@
-from cgitb import text
 import torch.utils
 import torch.utils.data
-from datasets import load_dataset, Dataset, Audio
+from datasets import Dataset, Audio
 from transformers import WhisperProcessor, WhisperForConditionalGeneration
 
 #try:
@@ -15,7 +14,6 @@ import torch
 import whisper
 import torchaudio
 
-from scipy.io import wavfile
 from tqdm import tqdm
 
 
@@ -90,6 +88,8 @@ for sample in tqdm(dataset):
 #decode the audio 
     options = whisper.DecodingOptions()
     result_trans = whisper.decode(asr_model,mel,options)
+
+#this will return the last layer probabilities of the model
     input_features=  processor(waveform, sampling_rate=16000, return_tensors="pt").input_features
     res= asr_model.generate(input_features.to("cuda"), output_scores=True)
     logits = asr_model(res).logits
