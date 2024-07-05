@@ -4,14 +4,16 @@ import xml.etree.ElementTree as ET
 
 
 #get the data ready for the Models 
-BASE = "/home/plantpalfynn/uni/BA/BA-Thesis/code/"
+BASE = "$HOME"
 # BASE = "/"
 
 with open(BASE +"dataset/IWSLT23.tst2023.en-de/benchmark/en-de/tst2023/IWSLT.TED.tst2023.en-de.yaml", 'r') as file:
     timestamps = yaml.load(file, Loader=yaml.FullLoader)
+with open(BASE +"dataset/IWSLT23.tst2023.en-de/FILE_ORDER", 'r') as wavlist:
+    wavlist = wavlist.readlines()
+    allwavs = [l.strip() for l in wavlist]
 
-allwavs = list(set([l.get("wav") for l in timestamps]))
-timestamps = {wav: [elem for elem in timestamps if elem.get("wav") == wav] for wav in allwavs}
+timestamps = {wav: [elem for elem in timestamps if elem.get("wav") == wav+".wav"] for wav in allwavs}
 
 #XML PART 
 detree = ET.parse(BASE +'/dataset/IWSLT23.tst2023.en-de/benchmark/en-de/tst2023/IWSLT.TED.tst2023.en-de.de.xml')
