@@ -92,7 +92,7 @@ for sample in tqdm(dataset):
 #this will return the last layer probabilities of the model
     input_features=  processor(waveform, sampling_rate=16000, return_tensors="pt").input_features
     res= asr_model.generate(input_features.to("cuda"), output_scores=True)
-    logits = asr_model(res).logits
+    logits = asr_model(res).logits #gets the last layer probabilities of the model  
     # get the frist average log probability of the model for that aucio
     result["audiofile"].append(sample["audiofile"])
     result["timestamp"].append(sample["timestamp"])
