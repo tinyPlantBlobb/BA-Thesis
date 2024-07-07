@@ -58,7 +58,7 @@ def getsegments():
 def segmentAudio():
     #TODO make sectioning optional if the data is already sectioned and saved to seperate files
     dataset = getsegments()
-    print(dataset,"\n")
+    #print(dataset,"\n")
     sample_rate = 16000
     audiopath = BASE+"/dataset/IWSLT23.tst2023.en-de/benchmark/en-de/tst2023/wav/"
     path = BASE+"/dataset/IWSLT23.tst2023.en-de/benchmark/en-de/tst2023/segmented/"
@@ -79,7 +79,7 @@ def segmentAudio():
                 num_frames=num_frames,
             )
             path = BASE+"/dataset/IWSLT23.tst2023.en-de/benchmark/en-de/tst2023/segmented/"+ seg.get("wav") + str(i) + ".wav"
-            torchaudio.save(path, waveform, sample_rate)
+            #torchaudio.save(path, waveform, sample_rate)
 
             resdataset["audiofile"].append(path)
             resdataset["waveform"].append(waveform)
@@ -89,45 +89,54 @@ def segmentAudio():
             resdataset["timestamp"].append(
                 (seg.get("offset"), seg.get("offset") + seg.get("duration"))
             )  # falls man noch die xmls rein matchen will: , "transcript":seg.get("text"), "translation":seg.get("translation")
-            return resdataset
+    return resdataset
 
 
 dataset = Dataset.from_dict(segmentAudio()).cast_column("audiofile", Audio())
 
 # # Returns the last layer proabbliities of the model as a dict containing the decoded text and the segments and the language
 # asr_model.eval()
-# result = {}
+result = {"sample": [], "audiofile": [], "timestamp": [], "logits": [], "softmax": [], "outputptobability": [], "transcription": []}
+print(dataset[1]["audiofile"])
+for i in range(10):
+    sample = dataset[i]
+    #for sample in tdqm(dataset):
+    #print(sample)
+    #audio = waveform = sample["waveform"]
+    #sample_rate = sample["audiofile"]['sampling_rate'] # alternatively set to 16000
+    #text = sample["transcript"]
 
-# for sample in tqdm(dataset[:10]):
-#     audio = waveform = sample["waveform"]
-#     sample_rate = sample["sample_rate"]
-#     text = sample["transcript"]
+    # # this will generate the log-mel spectrogram of the given audio which will serve as an input to the whisper model
+    # #mel = whisper.log_mel_spectrogram(audio)
 
-#     # this will generate the log-mel spectrogram of the given audio which will serve as an input to the whisper model
-#     #mel = whisper.log_mel_spectrogram(audio)
+    # # Since the whisper is a multilingual ASR model, this will detect the spoken language.
+    # #_, probs = asr_model.detect_language(mel)
+    # #print("Detected language is " + " " + str({max(probs, key=probs.get)}))
 
-#     # Since the whisper is a multilingual ASR model, this will detect the spoken language.
-#     #_, probs = asr_model.detect_language(mel)
-#     #print("Detected language is " + " " + str({max(probs, key=probs.get)}))
+    # # decode the audio
+    # #options = whisper.DecodingOptions()
+    # #result_trans = whisper.decode(asr_model, mel, options)
 
-#     # decode the audio
-#     #options = whisper.DecodingOptions()
-#     #result_trans = whisper.decode(asr_model, mel, options)
+    # # this will return the last layer probabilities of the model
+    # input_features = processor(
+    #     waveform, sampling_rate=16000, return_tensors="pt"
+    # ).input_features
+    # res = asr_model.generate(input_features.to("cuda"), output_scores=True)
+    # logits = asr_model(res).logits  # gets the last layer probabilities of the model
+    # # get the frist average log probability of the model for that aucio
+    # result["audiofile"].append(sample["audiofile"])
+    # result["timestamp"].append(sample["timestamp"])
+    # result["logits"].append(logits)
+    # result["softmax"].append(torch.nn.functional.softmax(logits, dim=-1))
+    # result["outputptobability"].append(result[0].avg_logprob)
+    # result["transcription"].append(
+    #     asr_model.transcribe(audio, **transcribe_options)["text"]
+    # )
+    # translation = asr_model.transcribe(audio, **translate_options)["text"]
+    result["sample"].append(sample)
 
-#     # this will return the last layer probabilities of the model
-#     input_features = processor(
-#         waveform, sampling_rate=16000, return_tensors="pt"
-#     ).input_features
-#     res = asr_model.generate(input_features.to("cuda"), output_scores=True)
-#     logits = asr_model(res).logits  # gets the last layer probabilities of the model
-#     # get the frist average log probability of the model for that aucio
-#     result["audiofile"].append(sample["audiofile"])
-#     result["timestamp"].append(sample["timestamp"])
-#     result["logits"].append(logits)
-#     result["outputptobability"].append(result[0].avg_logprob)
-#     result["transcription"].append(
-#         asr_model.transcribe(audio, **transcribe_options)["text"]
-#     )
-#     # translation = asr_model.transcribe(audio, **translate_options)["text"]
-#     print(result)
-segmentAudio()
+print(result)
+with open("result.txt", "w") as file:
+    file.write(str(result))
+# #segmentAudio()
+file.close()
