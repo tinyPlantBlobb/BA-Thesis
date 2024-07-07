@@ -5,16 +5,15 @@ import xml.etree.ElementTree as ET
 
 #get the data ready for the Models 
 BASE = "$HOME"
-# BASE = "/"
+#BASE = "/home/plantpalfynn/uni/BA-Thesis/code"
 
-with open(BASE +"dataset/IWSLT23.tst2023.en-de/benchmark/en-de/tst2023/IWSLT.TED.tst2023.en-de.yaml", 'r') as file:
+with open(BASE +"/dataset/IWSLT23.tst2023.en-de/benchmark/en-de/tst2023/IWSLT.TED.tst2023.en-de.yaml", 'r') as file:
     timestamps = yaml.load(file, Loader=yaml.FullLoader)
-with open(BASE +"dataset/IWSLT23.tst2023.en-de/FILE_ORDER", 'r') as wavlist:
+with open(BASE +"/dataset/IWSLT23.tst2023.en-de/FILE_ORDER", 'r') as wavlist:
     wavlist = wavlist.readlines()
     allwavs = [l.strip() for l in wavlist]
 
-timestamps = {wav: [elem for elem in timestamps if elem.get("wav") == wav+".wav"] for wav in allwavs}
-
+timestamps = {wav+".wav": [elem for elem in timestamps if elem.get("wav") == wav+".wav"] for wav in allwavs}
 #XML PART 
 detree = ET.parse(BASE +'/dataset/IWSLT23.tst2023.en-de/benchmark/en-de/tst2023/IWSLT.TED.tst2023.en-de.de.xml')
 entree = ET.parse(BASE +'/dataset/IWSLT23.tst2023.en-de/benchmark/en-de/tst2023/IWSLT.TED.tst2023.en-de.en.xml')
@@ -28,8 +27,9 @@ for child in enroot:
         print(refset.attrib, id)
         for i,doc in enumerate(refset):
 
-            print(doc.attrib, i)
+            print(doc.attrib, i, "\n next thing  \n")
             if doc.attrib != {}:
+               print(id)
                print(timestamps["ted_"+id+".wav"][i-1] , doc.attrib, doc.text)
 
                timestamps["ted_"+id+".wav"][i-1]['transcript']= doc.text
