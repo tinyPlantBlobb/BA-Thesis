@@ -56,6 +56,7 @@ def getsegments():
 
 
 def segmentAudio():
+    #TODO make sectioning optional if the data is already sectioned and saved to seperate files
     dataset = getsegments()
     print(dataset,"\n")
     sample_rate = 16000
