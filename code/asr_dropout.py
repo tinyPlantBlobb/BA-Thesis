@@ -64,7 +64,6 @@ def getsegments():
 
 
 def segmentAudio():
-    # TODO make sectioning optional if the data is already sectioned and saved to seperate files
     dataset = getsegments()
     # print(dataset,"\n")
     sample_rate = 16000
@@ -181,6 +180,7 @@ for i in tqdm(range(10)):
 
 print(result)
 with open("result.txt", "w") as file:
+    #TODO better output file format, maybe a yaml?
     file.write(str(result))
 # #segmentAudio()
 file.close()
