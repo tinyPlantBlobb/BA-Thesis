@@ -131,18 +131,25 @@ for i in tqdm(range(10)):
     #############################################
 
     # this will return the last layer probabilities of the model
-    input_features = processor(
+    input= processor(
         audio, sampling_rate=16000, return_tensors="pt"
-    ).input_features
-    res = asr_model.generate(input_features.to("cuda"), output_scores=True)
-    logits = asr_model(res).logits  # gets the last layer probabilities of the model
-    # get the frist average log probability of the model for that aucio
+    )
+    input_features= input.input_features.to(DEVICE)
+    print(input_features, "\n result:")
+    logits = asr_model.generate(input_features=input_features, output_scores=True)
+    print(logits)
+    #res = asr_model.generate(input_features=input_features)
+    #print(type(res), "\n", res, "\n")
+
+    #logits = asr_model(input_features).logits  # gets the last layer probabilities of the model
+    #print(logits)
+    # # get the frist average log probability of the model for that aucio
     result["audiofile"].append(sample["audiofile"])
     result["timestamp"].append(sample["timestamp"])
     result["logits"].append(logits)
     result["softmax"].append(torch.nn.functional.softmax(logits, dim=-1))
     result["outputptobability"].append(result[0].avg_logprob)
-    result["res"].append(res)
+    #result["res"].append(res)
     result["sample"].append(sample)
 
 print(result)
