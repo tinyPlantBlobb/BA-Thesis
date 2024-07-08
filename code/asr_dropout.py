@@ -2,8 +2,13 @@ from sqlite3 import DatabaseError
 import torch.utils
 import torch.utils.data
 from datasets import Dataset, Audio
-from transformers import WhisperProcessor, WhisperForConditionalGeneration, WhisperFeatureExtractor
+from transformers import (
+    WhisperProcessor,
+    WhisperForConditionalGeneration,
+    WhisperFeatureExtractor,
+)
 import os
+
 # try:
 # import tensorflow  # required in Colab to avoid protobuf compatibility issues
 # except ImportError:
@@ -12,14 +17,14 @@ import os
 import yaml
 import torch
 
-#import whisper
+# import whisper
 import torchaudio
 
 from tqdm import tqdm
 
-#BASE = "$HOME"
-#BASE = "/home/plantpalfynn/uni/BA-Thesis/code"
-BASE = "/home/plantpalfynn/uni/BA/BA-Thesis/code"
+# BASE = "$HOME"
+BASE = "/home/plantpalfynn/uni/BA-Thesis/code"
+# BASE = "/home/plantpalfynn/uni/BA/BA-Thesis/code"
 # import ipywidgets as widgets
 # Whisper  from the huggingface whisper implementation
 processor = WhisperProcessor.from_pretrained("openai/whisper-medium.en")
@@ -36,6 +41,7 @@ if DEVICE == "cuda":
 # with tarfile.open(tar_path, mode="r") as tarfile_:
 #     fileobj = tarfile_.extractfile(tar_item)
 #     waveform, sample_rate = torchaudio.load(fileobj)
+asr_model.generation_config.forced_decoder_ids = None
 
 
 def transcriptionProbability(tensor, **options):
@@ -48,29 +54,35 @@ def transcriptionProbability(tensor, **options):
 
 def getsegments():
     with open(
-        BASE +"/dataset/IWSLT23.tst2023.en-de/benchmark/en-de/tst2023/IWSLT.TED.tst2023.en-de.matched.yaml",
+        BASE
+        + "/dataset/IWSLT23.tst2023.en-de/benchmark/en-de/tst2023/IWSLT.TED.tst2023.en-de.matched.yaml",
         "r",
     ) as file:
         data = yaml.load(file, Loader=yaml.FullLoader)
 
         return data
 
+
 def segmentAudio():
-    #TODO make sectioning optional if the data is already sectioned and saved to seperate files
+    # TODO make sectioning optional if the data is already sectioned and saved to seperate files
     dataset = getsegments()
-    #print(dataset,"\n")
+    # print(dataset,"\n")
     sample_rate = 16000
-    audiopath = BASE+"/dataset/IWSLT23.tst2023.en-de/benchmark/en-de/tst2023/wav/"
-    path = BASE+"/dataset/IWSLT23.tst2023.en-de/benchmark/en-de/tst2023/segmented/"
+    audiopath = BASE + "/dataset/IWSLT23.tst2023.en-de/benchmark/en-de/tst2023/wav/"
+    path = BASE + "/dataset/IWSLT23.tst2023.en-de/benchmark/en-de/tst2023/segmented/"
     resdataset = {
         "audiofile": [],
-        #"waveform": [],
+        # "waveform": [],
         "transcript": [],
         "translation": [],
         "timestamp": [],
     }
-    if not os.path.exists(BASE+"/dataset/IWSLT23.tst2023.en-de/benchmark/en-de/tst2023/segmented/"):
-        os.makedirs(BASE+"/dataset/IWSLT23.tst2023.en-de/benchmark/en-de/tst2023/segmented/")
+    if not os.path.exists(
+        BASE + "/dataset/IWSLT23.tst2023.en-de/benchmark/en-de/tst2023/segmented/"
+    ):
+        os.makedirs(
+            BASE + "/dataset/IWSLT23.tst2023.en-de/benchmark/en-de/tst2023/segmented/"
+        )
     for data in dataset:
         for i, seg in enumerate(dataset[data]):
             frame_offset = seg.get("offset") * 16000
@@ -81,12 +93,18 @@ def segmentAudio():
                 num_frames=num_frames,
             )
 
-            path = BASE+"/dataset/IWSLT23.tst2023.en-de/benchmark/en-de/tst2023/segmented/"+ seg.get("wav") + str(i) + ".wav"
-            if not os.path.exists(path):     
+            path = (
+                BASE
+                + "/dataset/IWSLT23.tst2023.en-de/benchmark/en-de/tst2023/segmented/"
+                + seg.get("wav")
+                + str(i)
+                + ".wav"
+            )
+            if not os.path.exists(path):
                 torchaudio.save(path, waveform, sample_rate)
 
             resdataset["audiofile"].append(path)
-            #resdataset["waveform"].append(waveform)
+            # resdataset["waveform"].append(waveform)
             resdataset["transcript"].append(seg.get("transcript"))
             # resdataset["audiofile"].append(seg.get("wav"))
             resdataset["translation"].append(seg.get("translation"))
@@ -99,15 +117,24 @@ def segmentAudio():
 dataset = Dataset.from_dict(segmentAudio()).cast_column("audiofile", Audio())
 
 # # Returns the last layer proabbliities of the model as a dict containing the decoded text and the segments and the language
-# asr_model.eval()
-result = {"sample": [], "audiofile": [], "timestamp": [], "res":[], "logits": [], "softmax": [], "outputptobability": [], "transcription": []}
-#print(dataset[1]["audiofile"])
+asr_model.eval()
+result = {
+    "sample": [],
+    "audiofile": [],
+    "timestamp": [],
+    "res": [],
+    "logits": [],
+    "softmax": [],
+#    "outputptobability": [],
+    "transcription": [],
+}
+# print(dataset[1]["audiofile"])
 for i in tqdm(range(10)):
     sample = dataset[i]
-    #for sample in tdqm(dataset):
+    # for sample in tdqm(dataset):
     print(sample["transcript"])
     audio = waveform = sample["audiofile"]["array"]
-    sample_rate = sample["audiofile"]['sampling_rate'] # alternatively set to 16000
+    sample_rate = sample["audiofile"]["sampling_rate"]  # alternatively set to 16000
     text = sample["transcript"]
 
     ########################################
@@ -131,25 +158,25 @@ for i in tqdm(range(10)):
     #############################################
 
     # this will return the last layer probabilities of the model
-    input= processor(
-        audio, sampling_rate=16000, return_tensors="pt"
-    )
-    input_features= input.input_features.to(DEVICE)
+    input = processor(audio, sampling_rate=16000, return_tensors="pt")
+    input_features = input.input_features.to(DEVICE)
     print(input_features, "\n result:")
-    logits = asr_model.generate(input_features=input_features, output_scores=True)
-    print(logits)
-    #res = asr_model.generate(input_features=input_features)
-    #print(type(res), "\n", res, "\n")
+    # logitsmaybe = asr_model.generate(input_features=input_features, output_scores=True)
+    # print(logitsmaybe)
+    res = asr_model.generate(input_features=input_features)
+    print(res, "\n")
 
-    #logits = asr_model(input_features).logits  # gets the last layer probabilities of the model
-    #print(logits)
+    logits = asr_model(
+        input_features, decoder_input_ids=res
+    ).logits  # gets the last layer probabilities of the model
+    print(logits)
     # # get the frist average log probability of the model for that aucio
     result["audiofile"].append(sample["audiofile"])
     result["timestamp"].append(sample["timestamp"])
     result["logits"].append(logits)
     result["softmax"].append(torch.nn.functional.softmax(logits, dim=-1))
-    result["outputptobability"].append(result[0].avg_logprob)
-    #result["res"].append(res)
+    # result["outputptobability"].append(result[0].avg_logprob)
+    # result["res"].append(res)
     result["sample"].append(sample)
 
 print(result)
