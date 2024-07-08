@@ -4,8 +4,9 @@ import xml.etree.ElementTree as ET
 
 
 #get the data ready for the Models 
-BASE = "$HOME"
+#BASE = "$HOME"
 #BASE = "/home/plantpalfynn/uni/BA-Thesis/code"
+BASE = "/home/plantpalfynn/uni/BA/BA-Thesis/code"
 
 with open(BASE +"/dataset/IWSLT23.tst2023.en-de/benchmark/en-de/tst2023/IWSLT.TED.tst2023.en-de.yaml", 'r') as file:
     timestamps = yaml.load(file, Loader=yaml.FullLoader)
