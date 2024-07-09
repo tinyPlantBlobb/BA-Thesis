@@ -38,12 +38,12 @@ if DEVICE == "cuda":
 #     waveform, sample_rate = torchaudio.load(fileobj)
 
 
-def transcriptionProbability(tensor, **options):
-    result = {
-        "translationProb": torch.nn.functional.softmax(tensor, dim=-1),
-        "translationMean": torch.mean(tensor, dim=-1).mean(dim=0),
-    }
-    return result
+# def transcriptionProbability(tensor, **options):
+#     result = {
+#         "translationProb": torch.nn.functional.softmax(tensor, dim=-1),
+#         "translationMean": torch.mean(tensor, dim=-1).mean(dim=0),
+#     }
+#     return result
 
 
 def getsegments():
@@ -52,7 +52,7 @@ def getsegments():
         "r",
     ) as file:
         data = yaml.load(file, Loader=yaml.FullLoader)
-
+        file.close()
         return data
 
 def segmentAudio():
