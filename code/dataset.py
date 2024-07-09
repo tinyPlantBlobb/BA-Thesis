@@ -1,4 +1,5 @@
 
+from os import close
 import yaml
 import xml.etree.ElementTree as ET
 
@@ -10,9 +11,11 @@ BASE = "/home/plantpalfynn/uni/BA/BA-Thesis/code"
 
 with open(BASE +"/dataset/IWSLT23.tst2023.en-de/benchmark/en-de/tst2023/IWSLT.TED.tst2023.en-de.yaml", 'r') as file:
     timestamps = yaml.load(file, Loader=yaml.FullLoader)
+    file.close()
 with open(BASE +"/dataset/IWSLT23.tst2023.en-de/FILE_ORDER", 'r') as wavlist:
     wavlist = wavlist.readlines()
     allwavs = [l.strip() for l in wavlist]
+    wavlist.close()
 
 timestamps = {wav+".wav": [elem for elem in timestamps if elem.get("wav") == wav+".wav"] for wav in allwavs}
 #XML PART 
@@ -49,3 +52,4 @@ for child in deroot:
 
 with open(BASE +"/dataset/IWSLT23.tst2023.en-de/benchmark/en-de/tst2023/IWSLT.TED.tst2023.en-de.matched.yaml", 'w') as file:
     yaml.dump(timestamps, file)
+    file.close()
