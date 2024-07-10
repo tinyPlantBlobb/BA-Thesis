@@ -11,10 +11,10 @@ import torch
 import torchaudio
 from tqdm import tqdm
 
-# BASE = "$HOME"
-# BASE = "/home/plantpalfynn/uni/BA-Thesis/code"
-BASE = "/home/plantpalfynn/uni/BA/BA-Thesis/code"
-# import ipywidgets as widgets
+BASE = "$HOME"
+#BASE = "/home/plantpalfynn/uni/BA-Thesis/code"
+#BASE = "/home/plantpalfynn/uni/BA/BA-Thesis/code"
+
 # Whisper  from the huggingface whisper implementation
 processor = WhisperProcessor.from_pretrained("openai/whisper-medium.en")
 # feature_extractor = WhisperFeatureExtractor.from_pretrained("openai/whisper-small")
@@ -29,6 +29,7 @@ transcribe_options = dict(task="transcribe", **options)
 DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
 if DEVICE == "cuda":
     asr_model = asr_model.to(DEVICE)
+    asr_model_drop = asr_model_drop.to(DEVICE)
 
 asr_model.generation_config.forced_decoder_ids = None
 
