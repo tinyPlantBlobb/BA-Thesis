@@ -8,7 +8,7 @@
 tar -C $TMPDIR/ -xvzf $(ws_find data-ssd)/dataset.tgz
 
 # The application reads data from dataset on $TMPDIR and writes results to $TMPDIR
-myapp -input $TMPDIR/dataset/myinput.csv -outputdir $TMPDIR/results
+#myapp -input $TMPDIR/dataset/myinput.csv -outputdir $TMPDIR/results
 
 python3 asr_dropout.py --data_dir $TMPDIR/dataset --output_dir $TMPDIR/results
 
