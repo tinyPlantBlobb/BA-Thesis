@@ -22,7 +22,7 @@ asr_model = WhisperForConditionalGeneration.from_pretrained("openai/whisper-medi
 
 #dropout set to 0.1 based on the paper that uses the same dropout as during training
 asr_model_drop = WhisperForConditionalGeneration.from_pretrained("openai/whisper-medium.en", dropout=0.1)
-
+processor_drop = WhisperProcessor.from_pretrained("openai/whisper-medium.en")
 options = dict(language="German", beam_size=5, best_of=5, dropout=0.3)
 transcribe_options = dict(task="transcribe", **options)
 # translate_options = dict(task="translate", **options)
@@ -97,7 +97,7 @@ def segmentAudio():
 dataset = Dataset.from_dict(segmentAudio()).cast_column("audiofile", Audio())
 
 # # Returns the last layer proabbliities of the model as a dict containing the decoded text and the segments and the language
-asr_model.eval()
+
 result = {
     #"sample": [],
     "audiofile": [],
@@ -108,9 +108,24 @@ result = {
     #    "outputptobability": [],
     "transcription": [],
 }
+dropoutresult = {
+    #"sample": [],
+    "audiofile": [],
+    "timestamp": [],
+    "all":{"number":[],
+           "transcription": [],
+           "logits": [],
+            "softmax": [],
+        },
+    
+    "ref": [],
+    #    "outputptobability": [],
+    
+}
 # print(dataset[1]["audiofile"])
 with torch.no_grad():
     for i in tqdm(range(10)):
+        asr_model.eval()
         sample = dataset[i]
         # for sample in tdqm(dataset):
         #print(sample["transcript"])
@@ -123,7 +138,7 @@ with torch.no_grad():
         #############################################
 
         # this will return the last layer probabilities of the model
-        input = processor(audio, sampling_rate=16000, return_tensors="pt")
+        input = processor_drop(audio, sampling_rate=16000, return_tensors="pt")
         input_features = input.input_features.to(DEVICE)
         # logitsmaybe = asr_model.generate(input_features=input_features, output_scores=True)
         # print(logitsmaybe)
@@ -166,10 +181,43 @@ with torch.no_grad():
         ####################
         # dropout based shit#
         #####################
+        dropoutresult["audiofile"].append(sample["audiofile"])
+        dropoutresult["timestamp"].append(sample["timestamp"])
+        dropoutresult["ref"].append(text)
+        for j in tqdm(range(30)):
+            #############################################
+            # Huggingface whisper implementation things #
+            #############################################
+            dropoutresult["all"]["number"].append(j)
+            asr_model_drop.train()
+            # this will return the last layer probabilities of the model
+            input = processor_drop(audio, sampling_rate=16000, return_tensors="pt")
+            input_features = input.input_features.to(DEVICE)
+            # logitsmaybe = asr_model.generate(input_features=input_features, output_scores=True)
+            # print(logitsmaybe)
+            res = asr_model_drop.generate(input_features=input_features)
+            
+            logits = asr_model_drop(
+                input_features, decoder_input_ids=res
+            ).logits  # gets the last layer probabilities of the model
+            trans = processor_drop.batch_decode(res, skip_special_tokens=True)[0]
+            # # get the frist average log probability of the model for that aucio
+            
+            dropoutresult["all"]["logits"].append(logits)
+            dropoutresult["all"]["softmax"].append(torch.nn.functional.softmax(logits, dim=-1))
+            # result["outputptobability"].append(result[0].avg_logprob)
+            
+            #result["sample"].append(sample)
+            dropoutresult["all"]["transcription"].append(trans)
+
+            torch.cuda.empty_cache()
 
 
 with open("result.yaml", "w") as file:
     # TODO better output file format, maybe a yaml?
-    torch.save(result, "result.pt")
+    file.write(str(result["transcription"]))
+    file.write(str(dropoutresult["all"]["transcription"]))
 # file.write(str(result))
 file.close()
+torch.save(result, "result.pt")
+torch.save(dropoutresult, "dropoutresult.pt")
