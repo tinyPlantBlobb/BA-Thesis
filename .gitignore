@@ -3,4 +3,6 @@ code/mwerSegmenter
 mwerSegmenter*
 ._mwer*
 code/dataset
-result.txt
+*.txt
+result.yaml
+*.pt
