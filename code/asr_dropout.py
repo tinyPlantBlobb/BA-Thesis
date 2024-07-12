@@ -125,7 +125,7 @@ dropoutresult = {
 }
 # print(dataset[1]["audiofile"])
 with torch.no_grad():
-    for i in tqdm(range(10)):
+    for i in tqdm(range(5)):
         asr_model.eval()
         sample = dataset[i]
         # for sample in tdqm(dataset):
@@ -185,7 +185,7 @@ with torch.no_grad():
         dropoutresult["audiofile"].append(sample["audiofile"])
         dropoutresult["timestamp"].append(sample["timestamp"])
         dropoutresult["ref"].append(text)
-        for j in tqdm(range(30)):
+        for j in tqdm(range(20)):
             #############################################
             # Huggingface whisper implementation things #
             #############################################
