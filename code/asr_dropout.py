@@ -11,9 +11,9 @@ import torch
 import torchaudio
 from tqdm import tqdm
 
-BASE = "$HOME"
-#BASE = "/home/plantpalfynn/uni/BA-Thesis/code"
-#BASE = "/home/plantpalfynn/uni/BA/BA-Thesis/code"
+BASE = ""
+#BASE = "/home/plantpalfynn/uni/BA-Thesis/code/dataset/"
+#BASE = "/home/plantpalfynn/uni/BA/BA-Thesis/code/dataset/"
 
 # Whisper  from the huggingface whisper implementation
 processor = WhisperProcessor.from_pretrained("openai/whisper-medium.en")
@@ -37,7 +37,7 @@ asr_model.generation_config.forced_decoder_ids = None
 def getsegments():
     with open(
         BASE
-        + "/dataset/IWSLT23.tst2023.en-de/benchmark/en-de/tst2023/IWSLT.TED.tst2023.en-de.matched.yaml",
+        + "IWSLT23.tst2023.en-de/benchmark/en-de/tst2023/IWSLT.TED.tst2023.en-de.matched.yaml",
         "r",
     ) as file:
         data = yaml.load(file, Loader=yaml.FullLoader)
@@ -49,8 +49,8 @@ def segmentAudio():
     dataset = getsegments()
     # print(dataset,"\n")
     sample_rate = 16000
-    audiopath = BASE + "/dataset/IWSLT23.tst2023.en-de/benchmark/en-de/tst2023/wav/"
-    path = BASE + "/dataset/IWSLT23.tst2023.en-de/benchmark/en-de/tst2023/segmented/"
+    audiopath = BASE + "IWSLT23.tst2023.en-de/benchmark/en-de/tst2023/wav/"
+    path = BASE + "IWSLT23.tst2023.en-de/benchmark/en-de/tst2023/segmented/"
     resdataset = {
         "audiofile": [],
         # "waveform": [],
@@ -59,10 +59,10 @@ def segmentAudio():
         "timestamp": [],
     }
     if not os.path.exists(
-        BASE + "/dataset/IWSLT23.tst2023.en-de/benchmark/en-de/tst2023/segmented/"
+        BASE + "IWSLT23.tst2023.en-de/benchmark/en-de/tst2023/segmented/"
     ):
         os.makedirs(
-            BASE + "/dataset/IWSLT23.tst2023.en-de/benchmark/en-de/tst2023/segmented/"
+            BASE + "IWSLT23.tst2023.en-de/benchmark/en-de/tst2023/segmented/"
         )
     for data in dataset:
         for i, seg in enumerate(dataset[data]):
@@ -76,7 +76,7 @@ def segmentAudio():
 
             path = (
                 BASE
-                + "/dataset/IWSLT23.tst2023.en-de/benchmark/en-de/tst2023/segmented/"
+                + "IWSLT23.tst2023.en-de/benchmark/en-de/tst2023/segmented/"
                 + seg.get("wav")
                 + str(i)
                 + ".wav"
