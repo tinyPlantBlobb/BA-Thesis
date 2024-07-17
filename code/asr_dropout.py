@@ -87,13 +87,14 @@ def getlogits(dataset, asr_model, processor, num_samples, rank):
         "audiofile": [],
         "timestamp": [],
         "ref": [],
+        "generationoutput": [],
         "logits": [],
         "softmax": [],
         "transcription": [],
     }
 
         with torch.no_grad():
-            for i in tqdm(range(5)):
+            for i in tqdm(range(len(dataset))):
                 asr_model.eval()
                 sample = dataset[i]
                 # for sample in tdqm(dataset):
@@ -103,7 +104,7 @@ def getlogits(dataset, asr_model, processor, num_samples, rank):
                 text = sample["transcript"]
                 input = processor(audio, sampling_rate=16000, return_tensors="pt")
                 input_features = input.input_features.to(rank)
-                res = asr_model.generate(input_features=input_features)
+                res = asr_model.generate(input_features=input_features,return_dict_in_generate=True, output_scores=True, output_logits=True)
                 #############################################
                 # Huggingface whisper implementation things #
                 #############################################
@@ -111,7 +112,7 @@ def getlogits(dataset, asr_model, processor, num_samples, rank):
                 # this will return the last layer probabilities of the model
 
                 logits = asr_model(
-                    input_features, decoder_input_ids=res
+                    input_features, decoder_input_ids=res.sequences
                 ).logits  # gets the last layer probabilities of the model
                 trans = processor.batch_decode(res, skip_special_tokens=True)[0]
                 # # get the frist average log probability of the model for that aucio
@@ -119,7 +120,7 @@ def getlogits(dataset, asr_model, processor, num_samples, rank):
                 result["timestamp"].append(sample["timestamp"])
                 result["logits"].append(logits)
                 result["softmax"].append(torch.nn.functional.softmax(logits, dim=-1))
-                # result["outputptobability"].append(result[0].avg_logprob)
+                result["generationoutput"].append(res)
                 result["ref"].append(text)
                 #result["sample"].append(sample)
                 result["transcription"].append(trans+"\n")
@@ -136,7 +137,8 @@ def getlogits(dataset, asr_model, processor, num_samples, rank):
         "all":{"number":[],
             "transcription": [],
             "logits": [],
-                "softmax": [],
+            "softmax": [],
+            "generationoutput": [],
             },
 
         "ref": [],
@@ -144,7 +146,7 @@ def getlogits(dataset, asr_model, processor, num_samples, rank):
 
     }
         with torch.no_grad():
-            for i in range(5):
+            for i in range(30):
                 sample = dataset[i]
                 # for sample in tdqm(dataset):
                 #print(sample["transcript"])
@@ -168,16 +170,16 @@ def getlogits(dataset, asr_model, processor, num_samples, rank):
                     input_features = input.input_features.to(rank)
                     # logitsmaybe = asr_model.generate(input_features=input_features, output_scores=True)
                     # print(logitsmaybe)
-                    res = asr_model.generate(input_features=input_features)
+                    res = asr_model.generate(input_features=input_features, return_dict_in_generate=True, output_scores=True, output_logits=True)
 
-                    logits = asr_model(input_features, decoder_input_ids=res).logits  # gets the last layer probabilities of the model
+                    logits = asr_model(input_features, decoder_input_ids=res.sequences).logits  # gets the last layer probabilities of the model
                     trans = processor.batch_decode(res, skip_special_tokens=True)[0]
                     # # get the frist average log probability of the model for that aucio
 
                     dropoutresult["all"]["logits"].append(logits)
                     dropoutresult["all"]["softmax"].append(torch.nn.functional.softmax(logits, dim=-1))
                     # result["outputptobability"].append(result[0].avg_logprob)
-
+                    dropoutresult["all"]["generationoutput"].append(res)
                     #result["sample"].append(sample)
                     dropoutresult["all"]["transcription"].append(trans+"\n")
 
@@ -206,9 +208,6 @@ def run_inference(rank, world_size):
 
     file.close()
     
-
-
-
 
 BASE = ""
 
