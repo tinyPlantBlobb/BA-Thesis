@@ -53,6 +53,7 @@ def segmentAudio(BASE):
                 audiopath + seg.get("wav"),
                 frame_offset=frame_offset,
                 num_frames=num_frames,
+                format="wav",
             )
 
             path = (
@@ -126,8 +127,7 @@ def getlogits(dataset, asr_model, processor, num_samples, rank):
                 print(text)
                 torch.cuda.empty_cache()
     elif num_samples == 30:
-       dropoutresult = {
-        #"sample": [],
+        dropoutresult = {
         "audiofile": [],
         "timestamp": [],
         "all":{"number":[],
@@ -135,53 +135,48 @@ def getlogits(dataset, asr_model, processor, num_samples, rank):
             "logits": [],
                 "softmax": [],
             },
-        
-        "ref": [],
-        #    "outputptobability": [],
-        
-    }
-    
-    with torch.no_grad():
-        for i in range(5):
-            sample = dataset[i]
-            # for sample in tdqm(dataset):
-            #print(sample["transcript"])
-            audio = waveform = sample["audiofile"]["array"]
-            sample_rate = sample["audiofile"]["sampling_rate"]  # alternatively set to 16000
-            text = sample["transcript"]
-            ####################
-            # dropout based shit#
-            #####################
-            dropoutresult["audiofile"].append(sample["audiofile"])
-            dropoutresult["timestamp"].append(sample["timestamp"])
-            dropoutresult["ref"].append(text)
-            for j in tqdm(range(20)):
-                #############################################
-                # Huggingface whisper implementation things #
-                #############################################
-                dropoutresult["all"]["number"].append(j)
-                asr_model.train()
-                # this will return the last layer probabilities of the model
-                input = processor(audio, sampling_rate=16000, return_tensors="pt")
-                input_features = input.input_features.to(rank)
-                # logitsmaybe = asr_model.generate(input_features=input_features, output_scores=True)
-                # print(logitsmaybe)
-                res = asr_model.generate(input_features=input_features)
-                
-                logits = asr_model(
-                    input_features, decoder_input_ids=res
-                ).logits  # gets the last layer probabilities of the model
-                trans = processor.batch_decode(res, skip_special_tokens=True)[0]
-                # # get the frist average log probability of the model for that aucio
-                
-                dropoutresult["all"]["logits"].append(logits)
-                dropoutresult["all"]["softmax"].append(torch.nn.functional.softmax(logits, dim=-1))
-                # result["outputptobability"].append(result[0].avg_logprob)
-                
-                #result["sample"].append(sample)
-                dropoutresult["all"]["transcription"].append(trans)
+        "ref": [],}
+        with torch.no_grad():
+            for i in range(5):
+                sample = dataset[i]
+                # for sample in tdqm(dataset):
+                #print(sample["transcript"])
+                audio = waveform = sample["audiofile"]["array"]
+                sample_rate = sample["audiofile"]["sampling_rate"]  # alternatively set to 16000
+                text = sample["transcript"]
+                ####################
+                # dropout based shit#
+                #####################
+                dropoutresult["audiofile"].append(sample["audiofile"])
+                dropoutresult["timestamp"].append(sample["timestamp"])
+                dropoutresult["ref"].append(text)
+                for j in tqdm(range(20)):
+                    #############################################
+                    # Huggingface whisper implementation things #
+                    #############################################
+                    dropoutresult["all"]["number"].append(j)
+                    asr_model.train()
+                    # this will return the last layer probabilities of the model
+                    input = processor(audio, sampling_rate=16000, return_tensors="pt")
+                    input_features = input.input_features.to(rank)
+                    # logitsmaybe = asr_model.generate(input_features=input_features, output_scores=True)
+                    # print(logitsmaybe)
+                    res = asr_model.generate(input_features=input_features)
+                    
+                    logits = asr_model(
+                        input_features, decoder_input_ids=res
+                    ).logits  # gets the last layer probabilities of the model
+                    trans = processor.batch_decode(res, skip_special_tokens=True)[0]
+                    # # get the frist average log probability of the model for that aucio
+                    
+                    dropoutresult["all"]["logits"].append(logits)
+                    dropoutresult["all"]["softmax"].append(torch.nn.functional.softmax(logits, dim=-1))
+                    # result["outputptobability"].append(result[0].avg_logprob)
+                    
+                    #result["sample"].append(sample)
+                    dropoutresult["all"]["transcription"].append(trans)
 
-                torch.cuda.empty_cache()
+                    torch.cuda.empty_cache()
 
 
 
@@ -202,29 +197,21 @@ def run_inference(rank, world_size):
         dropoutresult = getlogits(dataset, asr_model_drop, processor_drop, 30, rank)
         
     asr_model.generation_config.forced_decoder_ids = None
-    
-    if not os.path.exists(
-        TEMPDIR + "results/"
-    ):
-        os.makedirs(
-            TEMPDIR + "results/"
-        )       
+         
 
-    with open(TEMPDIR + "results/result.yaml", "w") as file:
+    with open(TEMPDIR + "/results/result.yaml", "w") as file:
         file.write(str(result["transcription"]))
         file.write(str(dropoutresult["all"]["transcription"]))
     # file.write(str(result))
 
     
     file.close()
-    torch.save(result, TEMPDIR + "results/result.pt")
-    torch.save(dropoutresult, TEMPDIR + "results/dropoutresult.pt")
+    torch.save(result, TEMPDIR + "/results/result.pt")
+    torch.save(dropoutresult, TEMPDIR + "/results/dropoutresult.pt")
 
 
 
 BASE = ""
-#BASE = "/home/plantpalfynn/uni/BA-Thesis/code/dataset/"
-#BASE = "/home/plantpalfynn/uni/BA/BA-Thesis/code/dataset/"
 
 # Whisper  from the huggingface whisper implementation
 processor = WhisperProcessor.from_pretrained("openai/whisper-medium.en")
@@ -234,7 +221,10 @@ asr_model = WhisperForConditionalGeneration.from_pretrained("openai/whisper-medi
 #dropout set to 0.1 based on the paper that uses the same dropout as during training
 asr_model_drop = WhisperForConditionalGeneration.from_pretrained("openai/whisper-medium.en", dropout=0.1)
 processor_drop = WhisperProcessor.from_pretrained("openai/whisper-medium.en")
-TEMPDIR = "/"
+TEMPDIR = os.environ["TMPDIR"]
+BASE = TEMPDIR+"/"
+if not os.path.exists(TEMPDIR + "results/"):
+    os.mkdir(TEMPDIR + "results/")  
 def main():
     world_size= 2 
     mp.spawn(run_inference, args=(world_size,),nprocs=world_size, join=True)
