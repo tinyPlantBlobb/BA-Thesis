@@ -122,7 +122,7 @@ def getlogits(dataset, asr_model, processor, num_samples, rank):
                 # result["outputptobability"].append(result[0].avg_logprob)
                 result["ref"].append(text)
                 #result["sample"].append(sample)
-                result["transcription"].append(trans)
+                result["transcription"].append(trans+"\n")
                 print(trans)
                 print(text)
                 torch.cuda.empty_cache()
@@ -179,7 +179,7 @@ def getlogits(dataset, asr_model, processor, num_samples, rank):
                     # result["outputptobability"].append(result[0].avg_logprob)
 
                     #result["sample"].append(sample)
-                    dropoutresult["all"]["transcription"].append(trans)
+                    dropoutresult["all"]["transcription"].append(trans+"\n")
 
                     torch.cuda.empty_cache()
         return dropoutresult
@@ -191,13 +191,13 @@ def run_inference(rank, world_size):
         asr_model.to(rank)
 
         result = getlogits(dataset, asr_model, processor,1, rank)
-        with open(TEMPDIR + "/results/result.yaml", "w") as file:
+        with open(TEMPDIR + "/results/result.txt", "w") as file:
             file.write(str(result["transcription"]))
         torch.save(result, TEMPDIR + "/results/result.pt")
     elif torch.distributed.get_rank() == 1:
         asr_model_drop.to(rank)
         dropoutresult = getlogits(dataset, asr_model_drop, processor_drop, 30, rank)
-        with open(TEMPDIR + "/results/result.yaml", "w") as file:
+        with open(TEMPDIR + "/results/dropresult.txt", "w") as file:
             file.write(str(dropoutresult["all"]["transcription"]))
         torch.save(dropoutresult, TEMPDIR + "/results/dropoutresult.pt")
     # file.write(str(result))
