@@ -3,7 +3,7 @@ import torch.utils
 import torch.utils.data
 import torch.distributed as dist
 import torch.multiprocessing as mp
-from torch.nn.parallel import DistributedDataParallel as DDP 
+from torch.nn.parallel import DistributedDataParallel as DDP
 from datasets import Dataset, Audio
 from transformers import (
     WhisperProcessor,
@@ -47,14 +47,14 @@ def segmentAudio(BASE):
         )
     for data in dataset:
         for i, seg in enumerate(dataset[data]):
-            frame_offset = seg.get("offset") * 16000
-            num_frames = seg.get("duration") * 16000
+            frame_offset = int(seg.get("offset") * 16000)
+            num_frames = int(seg.get("duration") * 16000)
             waveform, sample_rate = torchaudio.load(
                 audiopath + seg.get("wav"),
                 frame_offset=frame_offset,
                 num_frames=num_frames,
                 format="wav",
-            )
+                )
 
             path = (
                 BASE
@@ -77,13 +77,13 @@ def segmentAudio(BASE):
     return resdataset
 
 def getlogits(dataset, asr_model, processor, num_samples, rank):
-    
+
     # logitsmaybe = asr_model.generate(input_features=input_features, output_scores=True)
     # print(logitsmaybe)
 
-                    
+
     if num_samples == 1:
-        result = {        
+        result = {
         "audiofile": [],
         "timestamp": [],
         "ref": [],
@@ -109,7 +109,7 @@ def getlogits(dataset, asr_model, processor, num_samples, rank):
                 #############################################
 
                 # this will return the last layer probabilities of the model
-                
+
                 logits = asr_model(
                     input_features, decoder_input_ids=res
                 ).logits  # gets the last layer probabilities of the model
@@ -126,8 +126,11 @@ def getlogits(dataset, asr_model, processor, num_samples, rank):
                 print(trans)
                 print(text)
                 torch.cuda.empty_cache()
+        return result
+        
     elif num_samples == 30:
         dropoutresult = {
+        #"sample": [],
         "audiofile": [],
         "timestamp": [],
         "all":{"number":[],
@@ -135,7 +138,11 @@ def getlogits(dataset, asr_model, processor, num_samples, rank):
             "logits": [],
                 "softmax": [],
             },
-        "ref": [],}
+
+        "ref": [],
+        #    "outputptobability": [],
+
+    }
         with torch.no_grad():
             for i in range(5):
                 sample = dataset[i]
@@ -162,52 +169,44 @@ def getlogits(dataset, asr_model, processor, num_samples, rank):
                     # logitsmaybe = asr_model.generate(input_features=input_features, output_scores=True)
                     # print(logitsmaybe)
                     res = asr_model.generate(input_features=input_features)
-                    
-                    logits = asr_model(
-                        input_features, decoder_input_ids=res
-                    ).logits  # gets the last layer probabilities of the model
+
+                    logits = asr_model(input_features, decoder_input_ids=res).logits  # gets the last layer probabilities of the model
                     trans = processor.batch_decode(res, skip_special_tokens=True)[0]
                     # # get the frist average log probability of the model for that aucio
-                    
+
                     dropoutresult["all"]["logits"].append(logits)
                     dropoutresult["all"]["softmax"].append(torch.nn.functional.softmax(logits, dim=-1))
                     # result["outputptobability"].append(result[0].avg_logprob)
-                    
+
                     #result["sample"].append(sample)
                     dropoutresult["all"]["transcription"].append(trans)
 
                     torch.cuda.empty_cache()
-
-
+        return dropoutresult
 
 def run_inference(rank, world_size):
     dist.init_process_group("nccl", rank=rank, world_size=world_size)
-
-    # options = dict(language="German", beam_size=5, best_of=5, dropout=0.3)
-    # transcribe_options = dict(task="transcribe", **options)
-    # translate_options = dict(task="translate", **options)
-
     dataset = Dataset.from_dict(segmentAudio(BASE)).cast_column("audiofile", Audio())
     if torch.distributed.get_rank() == 0:
         asr_model.to(rank)
-        
+
         result = getlogits(dataset, asr_model, processor,1, rank)
+        with open(TEMPDIR + "/results/result.yaml", "w") as file:
+            file.write(str(result["transcription"]))
+        torch.save(result, TEMPDIR + "/results/result.pt")
     elif torch.distributed.get_rank() == 1:
         asr_model_drop.to(rank)
         dropoutresult = getlogits(dataset, asr_model_drop, processor_drop, 30, rank)
-        
-    asr_model.generation_config.forced_decoder_ids = None
-         
-
-    with open(TEMPDIR + "/results/result.yaml", "w") as file:
-        file.write(str(result["transcription"]))
-        file.write(str(dropoutresult["all"]["transcription"]))
+        with open(TEMPDIR + "/results/result.yaml", "w") as file:
+            file.write(str(dropoutresult["all"]["transcription"]))
+        torch.save(dropoutresult, TEMPDIR + "/results/dropoutresult.pt")
     # file.write(str(result))
+    asr_model.generation_config.forced_decoder_ids = None
 
-    
+
     file.close()
-    torch.save(result, TEMPDIR + "/results/result.pt")
-    torch.save(dropoutresult, TEMPDIR + "/results/dropoutresult.pt")
+    
+
 
 
 
@@ -222,11 +221,13 @@ asr_model = WhisperForConditionalGeneration.from_pretrained("openai/whisper-medi
 asr_model_drop = WhisperForConditionalGeneration.from_pretrained("openai/whisper-medium.en", dropout=0.1)
 processor_drop = WhisperProcessor.from_pretrained("openai/whisper-medium.en")
 TEMPDIR = os.environ["TMPDIR"]
-BASE = TEMPDIR+"/"
-if not os.path.exists(TEMPDIR + "results/"):
-    os.mkdir(TEMPDIR + "results/")  
+respath = os.path.join(TEMPDIR, "results")
+BASE = TEMPDIR +"/"
+if not os.path.exists(respath):
+        os.mkdir(respath)
+
 def main():
-    world_size= 2 
+    world_size= 2
     mp.spawn(run_inference, args=(world_size,),nprocs=world_size, join=True)
 if __name__ == "__main__":
     main()
