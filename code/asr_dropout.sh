@@ -22,6 +22,8 @@ head_node_ip=$(srun --nodes=1 --time=1:00 --ntasks=1 -w "$head_node" hostname --
 echo Node IP: $head_node_ip
 export LOGLEVEL=INFO
 
+tar -C $TMPDIR/ -xvzf $(ws_find iswslt-dataset)/dataset.tgz
+
 source qe-whitebox/bin/activate
 
 pip install transformers
@@ -31,4 +33,4 @@ pip install librosa
 torchrun --nnodes 1:4 --nproc_per_node 1 --rdzv_id $RANDOM --rdzv_backend c10d --rdzv_endpoint $head_node_ip:29500 asr_dropout.py 
 
 # Before job completes save results on a workspace
-rsync -av /results $(ws_find data-ssd)/results-${SLURM_JOB_ID}/
+rsync -av $TMPDIR/results $(ws_find iswslt-dataset)/results-${SLURM_JOB_ID}/
