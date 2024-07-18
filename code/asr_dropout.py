@@ -28,13 +28,11 @@ def getsegments(BASE):
 
 def segmentAudio(BASE):
     dataset = getsegments(BASE)
-    # print(dataset,"\n")
     sample_rate = 16000
     audiopath = BASE + "IWSLT23.tst2023.en-de/benchmark/en-de/tst2023/wav/"
     path = BASE + "IWSLT23.tst2023.en-de/benchmark/en-de/tst2023/segmented/"
     resdataset = {
         "audiofile": [],
-        # "waveform": [],
         "transcript": [],
         "translation": [],
         "timestamp": [],
@@ -76,25 +74,21 @@ def segmentAudio(BASE):
             )  # falls man noch die xmls rein matchen will: , "transcript":seg.get("text"), "translation":seg.get("translation")
     return resdataset
 
-def getlogits(dataset, asr_model, processor, num_samples, rank):
-
-    # logitsmaybe = asr_model.generate(input_features=input_features, output_scores=True)
-    # print(logitsmaybe)
-
+def getlogits(dataset, asr_model, processor, num_samples, rank, elements= 60, offset=0):
 
     if num_samples == 1:
-        result = {
-        "audiofile": [],
-        "timestamp": [],
-        "ref": [],
-        "generationoutput": [],
-        "logits": [],
-        "softmax": [],
-        "transcription": [],
-    }
-
+       
         with torch.no_grad():
-            for i in tqdm(range(len(dataset))):
+            for i in tqdm(range(offset, elements)):
+                result = {
+                    "audiofile": [],
+                    "timestamp": [],
+                    "ref": [],
+                    "generationoutput": [],
+                    "logits": [],
+                    "softmax": [],
+                    "transcription": [],
+                }
                 asr_model.eval()
                 sample = dataset[i]
                 # for sample in tdqm(dataset):
@@ -104,7 +98,8 @@ def getlogits(dataset, asr_model, processor, num_samples, rank):
                 text = sample["transcript"]
                 input = processor(audio, sampling_rate=16000, return_tensors="pt")
                 input_features = input.input_features.to(rank)
-                res = asr_model.generate(input_features=input_features,return_dict_in_generate=True, output_scores=True, output_logits=True)
+                res = asr_model.generate(input_features=input_features, return_dict_in_generate=True, output_scores=True, output_logits=True)
+                print(res["sequences"])
                 #############################################
                 # Huggingface whisper implementation things #
                 #############################################
@@ -112,9 +107,9 @@ def getlogits(dataset, asr_model, processor, num_samples, rank):
                 # this will return the last layer probabilities of the model
 
                 logits = asr_model(
-                    input_features, decoder_input_ids=res.sequences
+                    input_features, decoder_input_ids=res["sequences"]
                 ).logits  # gets the last layer probabilities of the model
-                trans = processor.batch_decode(res, skip_special_tokens=True)[0]
+                trans = processor.batch_decode(res["sequences"], skip_special_tokens=True)[0]
                 # # get the frist average log probability of the model for that aucio
                 result["audiofile"].append(sample["audiofile"])
                 result["timestamp"].append(sample["timestamp"])
@@ -122,34 +117,32 @@ def getlogits(dataset, asr_model, processor, num_samples, rank):
                 result["softmax"].append(torch.nn.functional.softmax(logits, dim=-1))
                 result["generationoutput"].append(res)
                 result["ref"].append(text)
-                #result["sample"].append(sample)
                 result["transcription"].append(trans+"\n")
                 print(trans)
                 print(text)
+                # with open(TEMPDIR + "/results/result"+str(i)+".txt", "w") as file:
+                #     file.write(str(result["transcription"]))
+                #     file.close()
+                torch.save(result, TEMPDIR + "/results/result"+str(i)+".pt")
                 torch.cuda.empty_cache()
+
         return result
         
     elif num_samples == 30:
-        dropoutresult = {
-        #"sample": [],
-        "audiofile": [],
-        "timestamp": [],
-        "all":{"number":[],
-            "transcription": [],
-            "logits": [],
-            "softmax": [],
-            "generationoutput": [],
-            },
-
-        "ref": [],
-        #    "outputptobability": [],
-
-    }
+        
         with torch.no_grad():
-            for i in range(30):
+            for i in range(offset, elements):
+                dropoutresult = {
+            "audiofile": [],
+            "timestamp": [],
+            "all":{"number":[],
+                "transcription": [],
+                "logits": [],
+                "softmax": [],
+                "generationoutput": [],
+                },
+            "ref": [],}
                 sample = dataset[i]
-                # for sample in tdqm(dataset):
-                #print(sample["transcript"])
                 audio = waveform = sample["audiofile"]["array"]
                 sample_rate = sample["audiofile"]["sampling_rate"]  # alternatively set to 16000
                 text = sample["transcript"]
@@ -159,7 +152,7 @@ def getlogits(dataset, asr_model, processor, num_samples, rank):
                 dropoutresult["audiofile"].append(sample["audiofile"])
                 dropoutresult["timestamp"].append(sample["timestamp"])
                 dropoutresult["ref"].append(text)
-                for j in tqdm(range(20)):
+                for j in tqdm(range(num_samples)):
                     #############################################
                     # Huggingface whisper implementation things #
                     #############################################
@@ -168,45 +161,44 @@ def getlogits(dataset, asr_model, processor, num_samples, rank):
                     # this will return the last layer probabilities of the model
                     input = processor(audio, sampling_rate=16000, return_tensors="pt")
                     input_features = input.input_features.to(rank)
-                    # logitsmaybe = asr_model.generate(input_features=input_features, output_scores=True)
-                    # print(logitsmaybe)
                     res = asr_model.generate(input_features=input_features, return_dict_in_generate=True, output_scores=True, output_logits=True)
-
-                    logits = asr_model(input_features, decoder_input_ids=res.sequences).logits  # gets the last layer probabilities of the model
-                    trans = processor.batch_decode(res, skip_special_tokens=True)[0]
+                    logits = asr_model(input_features, decoder_input_ids=res["sequences"]).logits  # gets the last layer probabilities of the model
+                    trans = processor.batch_decode(res["sequences"], skip_special_tokens=True)[0]
                     # # get the frist average log probability of the model for that aucio
 
                     dropoutresult["all"]["logits"].append(logits)
                     dropoutresult["all"]["softmax"].append(torch.nn.functional.softmax(logits, dim=-1))
-                    # result["outputptobability"].append(result[0].avg_logprob)
                     dropoutresult["all"]["generationoutput"].append(res)
-                    #result["sample"].append(sample)
                     dropoutresult["all"]["transcription"].append(trans+"\n")
-
+                    
                     torch.cuda.empty_cache()
-        return dropoutresult
+                with open(TEMPDIR + "/results/dropresult"+str(i)+".txt", "w") as file:
+                    file.write(str(dropoutresult["all"]["transcription"]))
+                    file.close()
+                torch.save(dropoutresult, TEMPDIR + "/results/dropoutresult"+str(i)+".pt")
 
 def run_inference(rank, world_size):
     dist.init_process_group("nccl", rank=rank, world_size=world_size)
     dataset = Dataset.from_dict(segmentAudio(BASE)).cast_column("audiofile", Audio())
+    elemdp = 5
+    low = 10
     if torch.distributed.get_rank() == 0:
         asr_model.to(rank)
-
-        result = getlogits(dataset, asr_model, processor,1, rank)
-        with open(TEMPDIR + "/results/result.txt", "w") as file:
-            file.write(str(result["transcription"]))
-        torch.save(result, TEMPDIR + "/results/result.pt")
+        getlogits(dataset, asr_model, processor,1, rank, 30, 60)
     elif torch.distributed.get_rank() == 1:
         asr_model_drop.to(rank)
-        dropoutresult = getlogits(dataset, asr_model_drop, processor_drop, 30, rank)
-        with open(TEMPDIR + "/results/dropresult.txt", "w") as file:
-            file.write(str(dropoutresult["all"]["transcription"]))
-        torch.save(dropoutresult, TEMPDIR + "/results/dropoutresult.pt")
+        getlogits(dataset, asr_model_drop, processor_drop, 30, rank, elemdp, low)
+    elif torch.distributed.get_rank() == 2:
+        asr_model_drop.to(rank)
+        getlogits(dataset, asr_model_drop, processor_drop, 30, rank, elemdp, low + elemdp)
+    elif torch.distributed.get_rank() == 3:
+        asr_model_drop.to(rank)
+        getlogits(dataset, asr_model_drop, processor_drop, 30, rank, elemdp, low+elemdp*2)
     # file.write(str(result))
     asr_model.generation_config.forced_decoder_ids = None
 
 
-    file.close()
+
     
 
 BASE = ""
@@ -226,7 +218,7 @@ if not os.path.exists(respath):
         os.mkdir(respath)
 
 def main():
-    world_size= 2
+    world_size= 4
     mp.spawn(run_inference, args=(world_size,),nprocs=world_size, join=True)
 if __name__ == "__main__":
     main()
