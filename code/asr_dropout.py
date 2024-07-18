@@ -75,11 +75,12 @@ def segmentAudio(BASE):
     return resdataset
 
 def getlogits(dataset, asr_model, processor, num_samples, rank, elements= 60, offset=0):
-
+    print("Starting inference", rank, elements, offset)
     if num_samples == 1:
        
         with torch.no_grad():
             for i in tqdm(range(offset, elements)):
+                print("normal element", rank, i)
                 result = {
                     "audiofile": [],
                     "timestamp": [],
@@ -125,13 +126,12 @@ def getlogits(dataset, asr_model, processor, num_samples, rank, elements= 60, of
                 #     file.close()
                 torch.save(result, TEMPDIR + "/results/result"+str(i)+".pt")
                 torch.cuda.empty_cache()
-
-        return result
         
     elif num_samples == 30:
         
         with torch.no_grad():
             for i in range(offset, elements):
+                print("dropout element", rank, i)
                 dropoutresult = {
             "audiofile": [],
             "timestamp": [],
@@ -178,6 +178,7 @@ def getlogits(dataset, asr_model, processor, num_samples, rank, elements= 60, of
                 torch.save(dropoutresult, TEMPDIR + "/results/dropoutresult"+str(i)+".pt")
 
 def run_inference(rank, world_size):
+    print("Starting inference", TEMPDIR, rank, world_size)
     dist.init_process_group("nccl", rank=rank, world_size=world_size)
     dataset = Dataset.from_dict(segmentAudio(BASE)).cast_column("audiofile", Audio())
     elemdp = 5
