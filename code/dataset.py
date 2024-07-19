@@ -94,13 +94,12 @@ def readfromtar(BASE):
         "timestamp": [],
     }
     for t in tar.getmembers():
+        if t.name == "IWSLT.TED.tst2023.en-de.matched.yaml":
+            continue
         tedwav = t.name.split(".")[0]
         segment= int(t.name.split(".")[1][3:]) 
         seg = data[tedwav+".wav"][segment]
-        print(seg)
-        file = tar.extractfile(t.name)
-        print(type(file))
-        waveform, sample_rate = torchaudio.load(file)
+        print(t)
         resdataset["audiofile"].append(t)
         resdataset["transcript"].append(seg.get("transcript"))
         resdataset["translation"].append(seg.get("translation"))
@@ -110,4 +109,4 @@ def readfromtar(BASE):
     tar.close()
     return resdataset
 
-readfromtar("/home/plantpalfynn/uni/BA/BA-Thesis/code/dataset/IWSLT23.tst2023.en-de/benchmark/en-de/tst2023/")
+readfromtar("/home/plantpalfynn/uni/BA/BA-Thesis/code/")

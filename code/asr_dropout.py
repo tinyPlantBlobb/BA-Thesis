@@ -89,13 +89,12 @@ def readfromtar(BASE):
         "timestamp": [],
     }
     for t in tar.getmembers():
+        if t.name == "IWSLT.TED.tst2023.en-de.matched.yaml":
+            continue
         tedwav = t.name.split(".")[0]
         segment= int(t.name.split(".")[1][3:]) 
         seg = data[tedwav+".wav"][segment]
-        print(seg)
-        file = tar.extractfile(t.name)
-        print(type(file))
-        waveform, sample_rate = torchaudio.load(file, sample_rate=sample_rate)
+        waveform, samplerate = torchaudio.load(t)
         resdataset["audiofile"].append(t)
         resdataset["transcript"].append(seg.get("transcript"))
         resdataset["translation"].append(seg.get("translation"))
@@ -198,13 +197,12 @@ def getlogits(dataset, asr_model, processor, num_samples, rank, elements= 60, of
                     dropoutresult["all"]["transcription"].append(trans+"\n")
                     
                     torch.cuda.empty_cache()
-                with open(TEMPDIR + "/results/dropresult"+str(i)+".txt", "w") as file:
-                    file.write(str(dropoutresult["all"]["transcription"]))
-                    file.close()
+                # with open(TEMPDIR + "/results/dropresult"+str(i)+".txt", "w") as file:
+                #     file.write(str(dropoutresult["all"]["transcription"]))
+                #     file.close()
                 torch.save(dropoutresult, TEMPDIR + "/results/dropoutresult"+str(i)+".pt")
 
 def run_inference(rank, world_size):
-    print("Starting inference", TEMPDIR, rank, world_size)
     dist.init_process_group("nccl", rank=rank, world_size=world_size)
     dataset = Dataset.from_dict(readfromtar(BASE)).cast_column("audiofile", Audio())
     elemdp = 5

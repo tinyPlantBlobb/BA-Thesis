@@ -18,9 +18,7 @@ head_node_ip=$(srun --nodes=1 --time=1:00 --ntasks=1 -w "$head_node" hostname --
 
 echo Node IP: $head_node_ip 
 export LOGLEVEL=INFO
-
-tar -C $TMPDIR/ -xvzf $(ws_find iswslt-dataset)/dataset.tgz
-
+cp $(ws_find iswslt-dataset)/segments_IWSLT-23.en-de.tar.gz $TMPDIR
 source qe-whitebox/bin/activate
 
 pip install transformers
