@@ -11,76 +11,104 @@ from transformers import (
 )
 import os
 import yaml
+import tarfile
 import torch
 import torchaudio
 from tqdm import tqdm
 
-def getsegments(BASE):
-    with open(
-        BASE
-        + "IWSLT23.tst2023.en-de/benchmark/en-de/tst2023/IWSLT.TED.tst2023.en-de.matched.yaml",
-        "r",
-    ) as file:
-        data = yaml.load(file, Loader=yaml.FullLoader)
-        file.close()
-        return data
+# def getsegments(BASE):
+#     with open(
+#         BASE
+#         + "IWSLT23.tst2023.en-de/benchmark/en-de/tst2023/IWSLT.TED.tst2023.en-de.matched.yaml",
+#         "r",
+#     ) as file:
+#         data = yaml.load(file, Loader=yaml.FullLoader)
+#         file.close()
+#         return data
 
 
-def segmentAudio(BASE):
-    dataset = getsegments(BASE)
+# def segmentAudio(BASE):
+#     dataset = getsegments(BASE)
+#     sample_rate = 16000
+#     audiopath = BASE + "IWSLT23.tst2023.en-de/benchmark/en-de/tst2023/wav/"
+#     path = BASE + "IWSLT23.tst2023.en-de/benchmark/en-de/tst2023/segmented/"
+#     resdataset = {
+#         "audiofile": [],
+#         "transcript": [],
+#         "translation": [],
+#         "timestamp": [],
+#     }
+#     if not os.path.exists(
+#         BASE + "IWSLT23.tst2023.en-de/benchmark/en-de/tst2023/segmented/"
+#     ):
+#         os.makedirs(
+#             BASE + "IWSLT23.tst2023.en-de/benchmark/en-de/tst2023/segmented/"
+#         )
+#     for data in dataset:
+#         for i, seg in enumerate(dataset[data]):
+#             frame_offset = int(seg.get("offset") * 16000)
+#             num_frames = int(seg.get("duration") * 16000)
+#             waveform, sample_rate = torchaudio.load(
+#                 audiopath + seg.get("wav"),
+#                 frame_offset=frame_offset,
+#                 num_frames=num_frames,
+#                 format="wav",
+#                 )
+
+#             path = (
+#                 BASE
+#                 + "IWSLT23.tst2023.en-de/benchmark/en-de/tst2023/segmented/"
+#                 + seg.get("wav")
+#                 + str(i)
+#                 + ".wav"
+#             )
+#             if not os.path.exists(path):
+#                 torchaudio.save(path, waveform, sample_rate)
+
+#             resdataset["audiofile"].append(path)
+#             # resdataset["waveform"].append(waveform)
+#             resdataset["transcript"].append(seg.get("transcript"))
+#             # resdataset["audiofile"].append(seg.get("wav"))
+#             resdataset["translation"].append(seg.get("translation"))
+#             resdataset["timestamp"].append(
+#                 (seg.get("offset"), seg.get("offset") + seg.get("duration"))
+#             )  # falls man noch die xmls rein matchen will: , "transcript":seg.get("text"), "translation":seg.get("translation")
+#     return resdataset
+
+def readfromtar(BASE):
+    tar = tarfile.open(BASE + "segments_IWSLT-23.en-de.tar.gz", "r:gz")
+    with tar.extractfile("IWSLT.TED.tst2023.en-de.matched.yaml") as matched:
+        data = yaml.load(matched, Loader=yaml.FullLoader)
+        matched.close()
+    
     sample_rate = 16000
-    audiopath = BASE + "IWSLT23.tst2023.en-de/benchmark/en-de/tst2023/wav/"
-    path = BASE + "IWSLT23.tst2023.en-de/benchmark/en-de/tst2023/segmented/"
     resdataset = {
         "audiofile": [],
         "transcript": [],
         "translation": [],
         "timestamp": [],
     }
-    if not os.path.exists(
-        BASE + "IWSLT23.tst2023.en-de/benchmark/en-de/tst2023/segmented/"
-    ):
-        os.makedirs(
-            BASE + "IWSLT23.tst2023.en-de/benchmark/en-de/tst2023/segmented/"
-        )
-    for data in dataset:
-        for i, seg in enumerate(dataset[data]):
-            frame_offset = int(seg.get("offset") * 16000)
-            num_frames = int(seg.get("duration") * 16000)
-            waveform, sample_rate = torchaudio.load(
-                audiopath + seg.get("wav"),
-                frame_offset=frame_offset,
-                num_frames=num_frames,
-                format="wav",
-                )
-
-            path = (
-                BASE
-                + "IWSLT23.tst2023.en-de/benchmark/en-de/tst2023/segmented/"
-                + seg.get("wav")
-                + str(i)
-                + ".wav"
-            )
-            if not os.path.exists(path):
-                torchaudio.save(path, waveform, sample_rate)
-
-            resdataset["audiofile"].append(path)
-            # resdataset["waveform"].append(waveform)
-            resdataset["transcript"].append(seg.get("transcript"))
-            # resdataset["audiofile"].append(seg.get("wav"))
-            resdataset["translation"].append(seg.get("translation"))
-            resdataset["timestamp"].append(
-                (seg.get("offset"), seg.get("offset") + seg.get("duration"))
-            )  # falls man noch die xmls rein matchen will: , "transcript":seg.get("text"), "translation":seg.get("translation")
+    for t in tar.getmembers():
+        tedwav = t.name.split(".")[0]
+        segment= int(t.name.split(".")[1][3:]) 
+        seg = data[tedwav+".wav"][segment]
+        print(seg)
+        file = tar.extractfile(t.name)
+        print(type(file))
+        waveform, sample_rate = torchaudio.load(file, sample_rate=sample_rate)
+        resdataset["audiofile"].append(t)
+        resdataset["transcript"].append(seg.get("transcript"))
+        resdataset["translation"].append(seg.get("translation"))
+        resdataset["timestamp"].append(
+            (seg.get("offset"), seg.get("offset") + seg.get("duration"))
+        )  # falls man noch die xmls rein matchen will: , "transcript":seg.get("text"), "translation":seg.get("translation")
+    tar.close()
     return resdataset
 
 def getlogits(dataset, asr_model, processor, num_samples, rank, elements= 60, offset=0):
-    print("Starting inference", rank, elements, offset)
-    if num_samples == 1:
-       
+    if rank == 0:
         with torch.no_grad():
-            for i in tqdm(range(offset, elements)):
-                print("normal element", rank, i)
+            for i in tqdm(range(offset, offset+elements,1)):
                 result = {
                     "audiofile": [],
                     "timestamp": [],
@@ -94,10 +122,10 @@ def getlogits(dataset, asr_model, processor, num_samples, rank, elements= 60, of
                 sample = dataset[i]
                 # for sample in tdqm(dataset):
                 #print(sample["transcript"])
-                audio = waveform = sample["audiofile"]["array"]
+                audio =sample["audiofile"]["array"]
                 sample_rate = sample["audiofile"]["sampling_rate"]  # alternatively set to 16000
                 text = sample["transcript"]
-                input = processor(audio, sampling_rate=16000, return_tensors="pt")
+                input = processor(audio, sampling_rate=sample_rate, return_tensors="pt")
                 input_features = input.input_features.to(rank)
                 res = asr_model.generate(input_features=input_features, return_dict_in_generate=True, output_scores=True, output_logits=True)
                 print(res["sequences"])
@@ -127,11 +155,9 @@ def getlogits(dataset, asr_model, processor, num_samples, rank, elements= 60, of
                 torch.save(result, TEMPDIR + "/results/result"+str(i)+".pt")
                 torch.cuda.empty_cache()
         
-    elif num_samples == 30:
-        
+    elif rank>=1:
         with torch.no_grad():
-            for i in range(offset, elements):
-                print("dropout element", rank, i)
+            for i in range(offset, offset+elements,1):
                 dropoutresult = {
             "audiofile": [],
             "timestamp": [],
@@ -180,7 +206,7 @@ def getlogits(dataset, asr_model, processor, num_samples, rank, elements= 60, of
 def run_inference(rank, world_size):
     print("Starting inference", TEMPDIR, rank, world_size)
     dist.init_process_group("nccl", rank=rank, world_size=world_size)
-    dataset = Dataset.from_dict(segmentAudio(BASE)).cast_column("audiofile", Audio())
+    dataset = Dataset.from_dict(readfromtar(BASE)).cast_column("audiofile", Audio())
     elemdp = 5
     low = 10
     if torch.distributed.get_rank() == 0:
@@ -197,10 +223,6 @@ def run_inference(rank, world_size):
         getlogits(dataset, asr_model_drop, processor_drop, 30, rank, elemdp, low+elemdp*2)
     # file.write(str(result))
     asr_model.generation_config.forced_decoder_ids = None
-
-
-
-    
 
 BASE = ""
 
@@ -219,6 +241,7 @@ if not os.path.exists(respath):
         os.mkdir(respath)
 
 def main():
+    
     world_size= 4
     mp.spawn(run_inference, args=(world_size,),nprocs=world_size, join=True)
 if __name__ == "__main__":
