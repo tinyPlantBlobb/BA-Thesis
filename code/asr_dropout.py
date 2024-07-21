@@ -76,11 +76,11 @@ from tqdm import tqdm
 #     return resdataset
 
 def readfromtar(BASE):
-    tar = tarfile.open(BASE + "segments_IWSLT-23.en-de.tar.gz", "r:gz")
-    with tar.extractfile("IWSLT.TED.tst2023.en-de.matched.yaml") as matched:
+    print("starting reading from tar")
+    with open(TEMPDIR+"/data/IWSLT.TED.tst2023.en-de.matched.yaml") as matched:
         data = yaml.load(matched, Loader=yaml.FullLoader)
         matched.close()
-    
+    print("closed tar")
     sample_rate = 16000
     resdataset = {
         "audiofile": [],
@@ -88,20 +88,21 @@ def readfromtar(BASE):
         "translation": [],
         "timestamp": [],
     }
-    for t in tar.getmembers():
+    print("starting iterating over tar elements")
+    for t in os.scandir(TEMPDIR+"/data"):
         if t.name == "IWSLT.TED.tst2023.en-de.matched.yaml":
             continue
         tedwav = t.name.split(".")[0]
         segment= int(t.name.split(".")[1][3:]) 
         seg = data[tedwav+".wav"][segment]
-        waveform, samplerate = torchaudio.load(t)
-        resdataset["audiofile"].append(t)
+        waveform, samplerate = torchaudio.load(t.path)
+        resdataset["audiofile"].append(t.path)
         resdataset["transcript"].append(seg.get("transcript"))
         resdataset["translation"].append(seg.get("translation"))
         resdataset["timestamp"].append(
             (seg.get("offset"), seg.get("offset") + seg.get("duration"))
         )  # falls man noch die xmls rein matchen will: , "transcript":seg.get("text"), "translation":seg.get("translation")
-    tar.close()
+    print("finished iterating over elements")
     return resdataset
 
 def getlogits(dataset, asr_model, processor, num_samples, rank, elements= 60, offset=0):
