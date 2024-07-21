@@ -6,3 +6,4 @@ code/dataset
 *.txt
 result.yaml
 *.pt
+*.tar.gz
