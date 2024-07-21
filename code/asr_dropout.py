@@ -106,6 +106,7 @@ def readfromtar(BASE):
     return resdataset
 
 def getlogits(dataset, asr_model, processor, num_samples, rank, elements= 60, offset=0):
+    print("starting inference ", torch.distributed.get_rank(), " passed ",rank)
     if rank == 0:
         with torch.no_grad():
             for i in tqdm(range(offset, offset+elements,1)):
@@ -128,7 +129,6 @@ def getlogits(dataset, asr_model, processor, num_samples, rank, elements= 60, of
                 input = processor(audio, sampling_rate=sample_rate, return_tensors="pt")
                 input_features = input.input_features.to(rank)
                 res = asr_model.generate(input_features=input_features, return_dict_in_generate=True, output_scores=True, output_logits=True)
-                print(res["sequences"])
                 #############################################
                 # Huggingface whisper implementation things #
                 #############################################
@@ -147,13 +147,10 @@ def getlogits(dataset, asr_model, processor, num_samples, rank, elements= 60, of
                 result["generationoutput"].append(res)
                 result["ref"].append(text)
                 result["transcription"].append(trans+"\n")
-                print(trans)
-                print(text)
-                # with open(TEMPDIR + "/results/result"+str(i)+".txt", "w") as file:
-                #     file.write(str(result["transcription"]))
-                #     file.close()
                 torch.save(result, TEMPDIR + "/results/result"+str(i)+".pt")
                 torch.cuda.empty_cache()
+            del result
+            del sample
         
     elif rank>=1:
         with torch.no_grad():
@@ -184,40 +181,52 @@ def getlogits(dataset, asr_model, processor, num_samples, rank, elements= 60, of
                     #############################################
                     dropoutresult["all"]["number"].append(j)
                     asr_model.train()
-                    # this will return the last layer probabilities of the model
-                    input = processor(audio, sampling_rate=16000, return_tensors="pt")
-                    input_features = input.input_features.to(rank)
-                    res = asr_model.generate(input_features=input_features, return_dict_in_generate=True, output_scores=True, output_logits=True)
-                    logits = asr_model(input_features, decoder_input_ids=res["sequences"]).logits  # gets the last layer probabilities of the model
-                    trans = processor.batch_decode(res["sequences"], skip_special_tokens=True)[0]
-                    # # get the frist average log probability of the model for that aucio
+                    with torch.no_grad():
+                        # this will return the last layer probabilities of the model
+                        input = processor(audio, sampling_rate=16000, return_tensors="pt")
+                        input_features = input.input_features.to(rank)
+                        res = asr_model.generate(input_features=input_features, return_dict_in_generate=True, output_scores=True, output_logits=True)
+                        logits = asr_model(input_features, decoder_input_ids=res["sequences"]).logits  # gets the last layer probabilities of the model
+                        trans = processor.batch_decode(res["sequences"], skip_special_tokens=True)[0]
+                        # # get the frist average log probability of the model for that aucio
 
-                    dropoutresult["all"]["logits"].append(logits)
-                    dropoutresult["all"]["softmax"].append(torch.nn.functional.softmax(logits, dim=-1))
-                    dropoutresult["all"]["generationoutput"].append(res)
-                    dropoutresult["all"]["transcription"].append(trans+"\n")
-                    
+                        dropoutresult["all"]["logits"].append(logits)
+                        dropoutresult["all"]["softmax"].append(torch.nn.functional.softmax(logits, dim=-1))
+                        dropoutresult["all"]["generationoutput"].append(res)
+                        dropoutresult["all"]["transcription"].append(trans+"\n")
+                        
                     torch.cuda.empty_cache()
                 # with open(TEMPDIR + "/results/dropresult"+str(i)+".txt", "w") as file:
                 #     file.write(str(dropoutresult["all"]["transcription"]))
                 #     file.close()
                 torch.save(dropoutresult, TEMPDIR + "/results/dropoutresult"+str(i)+".pt")
+            del dropoutresult
+            del sample
 
-def run_inference(rank, world_size):
+def run_inference(rank, world_size, dataset):
+    # TODO make it work with the distributed data on the different gpus, aka figure out which rank to use and make it work
     dist.init_process_group("nccl", rank=rank, world_size=world_size)
-    dataset = Dataset.from_dict(readfromtar(BASE)).cast_column("audiofile", Audio())
+    print(torch.cuda.device(), torch.cuda.current_device())
+    torchrunrank= os.environ["LOCAL_RANK"]
+    trglrank = os.environ["RANK"]
+    print("rank", rank, torchrunrank, trglrank)
+    
     elemdp = 5
     low = 10
-    if torch.distributed.get_rank() == 0:
+    if rank== 0:
+        print("general run")
         asr_model.to(rank)
         getlogits(dataset, asr_model, processor,1, rank, 30, 60)
-    elif torch.distributed.get_rank() == 1:
+    elif rank==1:
+        print("dropout run 1")
         asr_model_drop.to(rank)
         getlogits(dataset, asr_model_drop, processor_drop, 30, rank, elemdp, low)
-    elif torch.distributed.get_rank() == 2:
+    elif rank==2:
+        print("dropout run 2")
         asr_model_drop.to(rank)
         getlogits(dataset, asr_model_drop, processor_drop, 30, rank, elemdp, low + elemdp)
-    elif torch.distributed.get_rank() == 3:
+    elif rank==3:
+        print("dropout run 3")
         asr_model_drop.to(rank)
         getlogits(dataset, asr_model_drop, processor_drop, 30, rank, elemdp, low+elemdp*2)
     # file.write(str(result))
@@ -240,8 +249,8 @@ if not os.path.exists(respath):
         os.mkdir(respath)
 
 def main():
-    
+    dataset = Dataset.from_dict(readfromtar(BASE)).cast_column("audiofile", Audio())
     world_size= 4
-    mp.spawn(run_inference, args=(world_size,),nprocs=world_size, join=True)
+    mp.spawn(run_inference, args=(world_size,dataset),nprocs=world_size, join=True)
 if __name__ == "__main__":
     main()
