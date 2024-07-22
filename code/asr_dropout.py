@@ -1,5 +1,3 @@
-from ast import List, Tuple
-from hmac import new
 import torch.distributed
 import torch.utils
 import torch.utils.data
@@ -63,15 +61,16 @@ def run_inference(rank, world_size, dataset):
     offset = low + rank*elemdp
     with torch.no_grad():
         for i in range(offset, offset+elemdp,1):
-                
-            all={
-                "number":[],
-                "transcription": [],
-                "logits": [],
-                "softmax": [],
-                "generationoutput": [],
-            }
-
+            dropoutresult = {
+        "audiofile": [],
+        "timestamp": [],
+        "all":{"number":[],
+            "transcription": [],
+            "logits": [],
+            "softmax": [],
+            "generationoutput": [],
+            },
+        "ref": [],}
             sample = dataset[i]
             audio = waveform = sample["audiofile"]["array"]
             sample_rate = sample["audiofile"]["sampling_rate"]  # alternatively set to 16000
@@ -79,11 +78,14 @@ def run_inference(rank, world_size, dataset):
             ####################
             # dropout based shit#
             #####################
+            dropoutresult["audiofile"].append(sample["audiofile"])
+            dropoutresult["timestamp"].append(sample["timestamp"])
+            dropoutresult["ref"].append(text)
             for j in tqdm(range(num_samples)):
                 #############################################
                 # Huggingface whisper implementation things #
                 #############################################
-                all["number"].append(j)
+                dropoutresult["all"]["number"].append(j)
                 asr_model_drop.train()
                 with torch.no_grad():
                     # this will return the last layer probabilities of the model
@@ -94,11 +96,11 @@ def run_inference(rank, world_size, dataset):
                     trans = processor_drop.batch_decode(res["sequences"], skip_special_tokens=True)[0]
                     # # get the frist average log probability of the model for that aucio
 
-                    all["logits"].append(logits)
-                    all["softmax"].append(torch.nn.functional.softmax(logits, dim=-1))
-                    all["generationoutput"].append(res)
-                    all["transcription"].append(trans+"\n")
-                    dropoutresult= Result(audiofile=sample["audiofile"], timestamp=all, ref=text)
+                    dropoutresult["all"]["logits"].append(logits)
+                    dropoutresult["all"]["softmax"].append(torch.nn.functional.softmax(logits, dim=-1))
+                    dropoutresult["all"]["generationoutput"].append(res)
+                    dropoutresult["all"]["transcription"].append(trans+"\n")
+                    
                 torch.cuda.empty_cache()
             # with open(TEMPDIR + "/results/dropresult"+str(i)+".txt", "w") as file:
             #     file.write(str(dropoutresult["all"]["transcription"]))
@@ -129,28 +131,3 @@ def main():
     mp.spawn(run_inference, args=(world_size,dataset),nprocs=world_size, join=True)
 if __name__ == "__main__":
     main()
-
-class Result():
-    audiofile: os.PathLike =None
-    timestamp: tuple = None
-    runs: List[int] = None
-    ref: str = ""
-    logits: List[torch.Tensor] = None
-    softmax: List[torch.Tensor]= None
-    generationoutput: List[dict] = None
-    transcription: List[str] = None
-
-    def __init__(self, audiofile: os.PathLike, timestamp: tuple, runs:dict, ref):
-        self.audiofile = audiofile
-        self.timestamp = timestamp
-        self.runs = runs["number"]
-        self.ref = ref
-        self.logits = runs["logits"]
-        self.softmax = runs["softmax"]
-        self.generationoutput = runs["generationoutput"]
-        self.transcription = runs["transcription"]
-
-    def __str__(self):
-        return str(self.all["transcription"])
-    def __repr__(self):
-        return
