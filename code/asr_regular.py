@@ -11,7 +11,6 @@ from transformers import (
 )
 import os
 import yaml
-import tarfile
 import torch
 import torchaudio
 from tqdm import tqdm
@@ -47,22 +46,13 @@ def readfromtar(BASE):
     return resdataset
 
 
-        
-
 def run_inference(rank, world_size, dataset):
-    # TODO make it work with the distributed data on the different gpus, aka figure out which rank to use and make it work
     torch.cuda.set_device(rank)
     dist.init_process_group("nccl", rank=rank, world_size=world_size)
-    torchrunrank= os.environ["LOCAL_RANK"]
-    trrank = os.environ["RANK"]
-    print("inference rank", rank, torchrunrank, trrank, torch.distributed.get_rank())
-    print(torch.distributed.get_rank()== 0)
-
     asr_model.to(rank)
     asr_model.generation_config.forced_decoder_ids = None
 
-    print("starting inference ", torch.distributed.get_rank(), " passed ",rank)
-    offset = 60 + rank*30
+    offset = 180 + rank*((len(dataset)-180)//world_size)
     with torch.no_grad():
         for i in tqdm(range(offset, offset+30,1)):
             result = {
