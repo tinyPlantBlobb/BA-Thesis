@@ -27,6 +27,7 @@ pip install datasets
 pip install librosa
 
 srun torchrun --nnodes 1 --nproc_per_node 4 asr_dropout.py 
+srun torchrun --nnodes 1 --nproc_per_node 4 asr_regular.py 
 
 # Before job completes save results on a workspace
 rsync -av $TMPDIR/results $(ws_find iswslt-dataset)/results-${SLURM_JOB_ID}/
