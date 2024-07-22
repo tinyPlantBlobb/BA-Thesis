@@ -27,3 +27,5 @@ def main():
     mp.spawn(run_inference, args=(world_size,),nprocs=world_size, join=True)
 if __name__ == "__main__":
     main()
+
+# load model
