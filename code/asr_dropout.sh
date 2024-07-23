@@ -1,13 +1,10 @@
 #!/bin/bash
-# running a distributed job with PyTorch
 #SBATCH --job-name=whisper-eval
 #SBATCH --nodes=1
-#SBATCH --ntasks=4
+#SBATCH --ntasks=1
 #SBATCH --mail-type=END,BEGIN,FAIL
 #SBATCH --gres=gpu:4
-#SBATCH --gpus-per-task=1
-#SBATCH --cpus-per-task=4
-#SBATCH --time=20:00
+#SBATCH --time=70:00
 #SBATCH --output=whispereval.txt
 
 nodes=( $( scontrol show hostnames $SLURM_JOB_NODELIST ) )

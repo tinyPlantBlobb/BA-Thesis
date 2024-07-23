@@ -1,5 +1,6 @@
 from ast import List, Tuple
 from hmac import new
+from pdb import run
 import torch.distributed
 import torch.utils
 import torch.utils.data
@@ -68,7 +69,7 @@ def run_inference(rank, world_size, dataset):
                 "number":[],
                 "transcription": [],
                 "logits": [],
-                "softmax": [],
+                #"softmax": [],
                 "generationoutput": [],
             }
 
@@ -95,10 +96,10 @@ def run_inference(rank, world_size, dataset):
                     # # get the frist average log probability of the model for that aucio
 
                     all["logits"].append(logits)
-                    all["softmax"].append(torch.nn.functional.softmax(logits, dim=-1))
+                    #all["softmax"].append(torch.nn.functional.softmax(logits, dim=-1))
                     all["generationoutput"].append(res)
                     all["transcription"].append(trans+"\n")
-                    dropoutresult= Result(audiofile=sample["audiofile"], timestamp=all, ref=text)
+                    dropoutresult= Result(audiofile=sample["audiofile"], timestamp=sample["timestamp"], runs=all,ref=text)
                 torch.cuda.empty_cache()
             # with open(TEMPDIR + "/results/dropresult"+str(i)+".txt", "w") as file:
             #     file.write(str(dropoutresult["all"]["transcription"]))
@@ -131,22 +132,21 @@ if __name__ == "__main__":
     main()
 
 class Result():
-    audiofile: os.PathLike =None
-    timestamp: tuple = None
-    runs: List[int] = None
-    ref: str = ""
-    logits: List[torch.Tensor] = None
-    softmax: List[torch.Tensor]= None
-    generationoutput: List[dict] = None
-    transcription: List[str] = None
+    audiofile=None
+    timestamp= None
+    runs = None
+    ref = ""
+    logits= None
+    softmax= None
+    generationoutput = None
+    transcriptio= None
 
-    def __init__(self, audiofile: os.PathLike, timestamp: tuple, runs:dict, ref):
+    def __init__(self, audiofile, timestamp, runs, ref):
         self.audiofile = audiofile
         self.timestamp = timestamp
         self.runs = runs["number"]
         self.ref = ref
         self.logits = runs["logits"]
-        self.softmax = runs["softmax"]
         self.generationoutput = runs["generationoutput"]
         self.transcription = runs["transcription"]
 
