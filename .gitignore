@@ -7,3 +7,4 @@ code/dataset
 result.yaml
 *.pt
 *.tar.gz
+*.tgz
