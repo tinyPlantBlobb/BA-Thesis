@@ -14,7 +14,7 @@ import yaml
 import torch
 import torchaudio
 from tqdm import tqdm
-
+from qeLogic import TranslationProbability, softmaxEntropy, sentStd, Result
 def readfromtar(BASE):
     print("starting reading from tar")
     with open(TEMPDIR+"/data/IWSLT.TED.tst2023.en-de.matched.yaml") as matched:
@@ -63,6 +63,8 @@ def run_inference(rank, world_size, dataset):
                 "logits": [],
                 "softmax": [],
                 "transcription": [],
+                "qe": [],
+                "qeent": [],
             }
             asr_model.eval()
             sample = dataset[i]
@@ -84,7 +86,15 @@ def run_inference(rank, world_size, dataset):
                 input_features, decoder_input_ids=res["sequences"]
             ).logits  # gets the last layer probabilities of the model
             trans = processor.batch_decode(res["sequences"], skip_special_tokens=True)[0]
+            qe = TranslationProbability(res)
+            qeent = softmaxEntropy(res)
+            qesent = sentStd(res)
+
+
             # # get the frist average log probability of the model for that aucio
+            result["qe"].append(qe)
+            result["qeent"].append(qeent)
+            result["qesent"].append(qesent)
             result["audiofile"].append(sample["audiofile"])
             result["timestamp"].append(sample["timestamp"])
             result["logits"].append(logits)

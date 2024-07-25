@@ -8,6 +8,7 @@ import torch.distributed as dist
 import torch.multiprocessing as mp
 from torch.nn.parallel import DistributedDataParallel as DDP
 from datasets import Dataset, Audio
+import imp
 from transformers import (
     WhisperProcessor,
     WhisperForConditionalGeneration,
@@ -18,6 +19,7 @@ import tarfile
 import torch
 import torchaudio
 from tqdm import tqdm
+from qeLogic import TranslationProbability, softmaxEntropy, sentStd, Result
 
 def readfromtar(BASE):
     print("starting reading from tar")
@@ -49,9 +51,6 @@ def readfromtar(BASE):
     print("finished iterating over elements")
     return resdataset
 
-
-    
-
 def run_inference(rank, world_size, dataset):
     # TODO make it work with the distributed data on the different gpus, aka figure out which rank to use and make it work
     torch.cuda.set_device(rank)
@@ -63,19 +62,16 @@ def run_inference(rank, world_size, dataset):
     asr_model_drop.generation_config.forced_decoder_ids = None
     offset = low + rank*elemdp
     with torch.no_grad():
-        for i in range(offset, offset+elemdp,1):
-                
+        for i in range(offset, offset+elemdp,1):   
             all={
                 "number":[],
                 "transcription": [],
-                "logits": [],
-                #"softmax": [],
+                "qetp": [],
+                "qe-soft-ent"
                 "generationoutput": [],
             }
-
             sample = dataset[i]
-            audio = waveform = sample["audiofile"]["array"]
-            sample_rate = sample["audiofile"]["sampling_rate"]  # alternatively set to 16000
+            audio = sample["audiofile"]["array"]
             text = sample["transcript"]
             ####################
             # dropout based shit#
@@ -91,19 +87,20 @@ def run_inference(rank, world_size, dataset):
                     input = processor_drop(audio, sampling_rate=16000, return_tensors="pt")
                     input_features = input.input_features.to(rank)
                     res = asr_model_drop.generate(input_features=input_features, return_dict_in_generate=True, output_scores=True, output_logits=True)
-                    logits = asr_model_drop(input_features, decoder_input_ids=res["sequences"]).logits  # gets the last layer probabilities of the model
                     trans = processor_drop.batch_decode(res["sequences"], skip_special_tokens=True)[0]
-                    # # get the frist average log probability of the model for that aucio
-
-                    all["logits"].append(logits)
-                    #all["softmax"].append(torch.nn.functional.softmax(logits, dim=-1))
+                    # get the frist average log probability of the model for that aucio
+                    qe= TranslationProbability(res)
+                    qeent= softmaxEntropy(res)
+                    qestd= sentStd(res)
+                    
+                    all["qetp"].append(qe)
+                    all["qe-soft-ent"].append(qeent)
+                    all["qesent"].append(qestd)
                     all["generationoutput"].append(res)
                     all["transcription"].append(trans+"\n")
                     dropoutresult= Result(audiofile=sample["audiofile"], timestamp=sample["timestamp"], runs=all,ref=text)
                 torch.cuda.empty_cache()
-            # with open(TEMPDIR + "/results/dropresult"+str(i)+".txt", "w") as file:
-            #     file.write(str(dropoutresult["all"]["transcription"]))
-            #     file.close()
+
             torch.save(dropoutresult, TEMPDIR + "/results/dropoutresult"+str(i)+".pt")
         del dropoutresult
         del sample
@@ -131,26 +128,3 @@ def main():
 if __name__ == "__main__":
     main()
 
-class Result():
-    audiofile=None
-    timestamp= None
-    runs = None
-    ref = ""
-    logits= None
-    softmax= None
-    generationoutput = None
-    transcriptio= None
-
-    def __init__(self, audiofile, timestamp, runs, ref):
-        self.audiofile = audiofile
-        self.timestamp = timestamp
-        self.runs = runs["number"]
-        self.ref = ref
-        self.logits = runs["logits"]
-        self.generationoutput = runs["generationoutput"]
-        self.transcription = runs["transcription"]
-
-    def __str__(self):
-        return str(self.transcription)
-    def __repr__(self):
-        return
