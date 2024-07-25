@@ -60,33 +60,24 @@ def TranslationProbability(path):
                 print(data.generationoutput[i].scores[j][0][toptoken])
                 prop= torch.log(data.generationoutput[i].scores[j][0][toptoken])+prop
                 print(prop)
-            print(i, (1/len(data.generationoutput[i].scores[0]))*prop)
-            return (1/len(data.generationoutput[i].scores[0]))*prop
+            print(i, "reg", (1/len(data.generationoutput[i].scores[0]))*prop)
+            
 
 def softmaxEntropy(path):
 
-    data = torch.load(path, weights_only=False)
+    data = torch.load(path, weights_only=False, map_location="cpu")
     #Prediction scores of the language modeling head (scores for each vocabulary token before SoftMax).
-    logits = data["logits"]
-    sm = data["softmax"]
-    se = []
-    for i in range(len(sm)):
-        se.append(-1/len(sm[i])*torch.sum(sm[i]* torch.log(sm[i])))
-    print(se)
+    logits = data.logits
+    
     for i in range(len(data.generationoutput)):
-        #toptoken= data.generationoutput[i].scores
-        print(len(data.generationoutput[i].scores[0]))
+
         prop= 1
         for j in range(len(data.generationoutput[i].scores)):
-            toptoken= torch.argmax(torch.nn.functional.softmax(data.generationoutput[i].scores[j], dim=-1))
-            print("toptoken", toptoken)
-            print(data.generationoutput[i].scores[j][0][toptoken])
-            prop= torch.sum(data.generationoutput[i].scores[j][0]*torch.log(data.generationoutput[i].scores[j][0]))+prop
-            print(prop)
+            prop= torch.sum(torch.nn.functional.log_softmax(data.generationoutput[i].scores[j], dim=-1)[0]*torch.nn.functional.log_softmax(data.generationoutput[i].scores[j], dim=-1)[0])+prop
         print(i, (-1/len(data.generationoutput[i].scores[0]))*prop)
-        return (-1/len(data.generationoutput[i].scores[0]))*prop
+
 
 
 path = "/home/plantpalfynn/uni/BA/BA-Thesis/code/results/dropoutresult70.pt"
 TranslationProbability(path)
-#softmaxEntropy(path)
+softmaxEntropy(path)
