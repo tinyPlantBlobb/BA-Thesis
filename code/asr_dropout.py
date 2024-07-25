@@ -151,6 +151,6 @@ class Result():
         self.transcription = runs["transcription"]
 
     def __str__(self):
-        return str(self.all["transcription"])
+        return str(self.transcription)
     def __repr__(self):
         return
