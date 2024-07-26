@@ -11,6 +11,7 @@ import yaml
 import torch
 import torchaudio
 from tqdm import tqdm
+from qeLogic import TranslationProbability, softmaxEntropy, sentStd, Result
 
 # dropout would be 0.1 as done in the paper in the experiment for evaluating the translation
 model = SeamlessM4TForTextToText.from_pretrained("facebook/hf-seamless-m4t-medium")
@@ -91,13 +92,8 @@ def run_inference(rank, world_size, dataset):
                     input_features = input.input_features.to(rank)
                     res = model.generate(input_features=input_features,tgt_lang="deu", return_dict_in_generate=True, output_scores=True, output_logits=True, generate_speech=False)
                     logits = model(input_features, decoder_input_ids=res["sequences"]).logits  # gets the last layer probabilities of the model
-                    #trans = processor.batch_decode(res["sequences"], skip_special_tokens=True)[0]
-                    # # get the frist average log probability of the model for that aucio
-
                     all["logits"].append(logits)
-                    #all["softmax"].append(torch.nn.functional.softmax(logits, dim=-1))
                     all["generationoutput"].append(res)
-                    #all["tranlateion"].append(trans+"\n")
                     dropoutresult= Result(audiofile=sample["audiofile"], timestamp=sample["timestamp"], runs=all,ref=text)
                 torch.cuda.empty_cache()
             # with open(TEMPDIR + "/results/dropresult"+str(i)+".txt", "w") as file:

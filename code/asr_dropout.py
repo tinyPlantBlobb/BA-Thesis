@@ -58,8 +58,8 @@ def run_inference(rank, world_size, dataset):
     num_samples = 30
     elemdp = 20
     low = 50
-    asr_model_drop.to(rank)
-    asr_model_drop.generation_config.forced_decoder_ids = None
+    model.to(rank)
+    model.generation_config.forced_decoder_ids = None
     offset = low + rank*elemdp
     with torch.no_grad():
         for i in range(offset, offset+elemdp,1):   
@@ -71,34 +71,29 @@ def run_inference(rank, world_size, dataset):
                 "generationoutput": [],
             }
             sample = dataset[i]
-            audio = sample["audiofile"]["array"]
-            text = sample["transcript"]
-            ####################
-            # dropout based shit#
-            #####################
+
             for j in tqdm(range(num_samples)):
-                #############################################
-                # Huggingface whisper implementation things #
-                #############################################
-                all["number"].append(j)
-                asr_model_drop.train()
+                model.train()
+                dpresults= []
                 with torch.no_grad():
                     # this will return the last layer probabilities of the model
-                    input = processor_drop(audio, sampling_rate=16000, return_tensors="pt")
+                    input = processor(audio, sampling_rate=16000, return_tensors="pt")
                     input_features = input.input_features.to(rank)
-                    res = asr_model_drop.generate(input_features=input_features, return_dict_in_generate=True, output_scores=True, output_logits=True)
-                    trans = processor_drop.batch_decode(res["sequences"], skip_special_tokens=True)[0]
+                    res = model.generate(input_features=input_features, return_dict_in_generate=True, output_scores=True, output_logits=True)
+                    trans = processor.batch_decode(res["sequences"], skip_special_tokens=True)[0]
                     # get the frist average log probability of the model for that aucio
-                    qe= TranslationProbability(res)
-                    qeent= softmaxEntropy(res)
-                    qestd= sentStd(res)
-                    
+                    # qe= TranslationProbability(res)
+                    # qeent= softmaxEntropy(res)
+                    # qestd= sentStd(res)
+                    dpresults.append(res)
+                    # getQE(res, dropout=True)
                     all["qetp"].append(qe)
                     all["qe-soft-ent"].append(qeent)
                     all["qesent"].append(qestd)
                     all["generationoutput"].append(res)
                     all["transcription"].append(trans+"\n")
-                    dropoutresult= Result(audiofile=sample["audiofile"], timestamp=sample["timestamp"], runs=all,ref=text)
+                    
+                getQE(res, dropouttrans = all["transcription"], dropout=True)
                 torch.cuda.empty_cache()
 
             torch.save(dropoutresult, TEMPDIR + "/results/dropoutresult"+str(i)+".pt")
@@ -109,8 +104,8 @@ BASE = ""
 
 
 #dropout set to 0.1 based on the paper that uses the same dropout as during training
-asr_model_drop = WhisperForConditionalGeneration.from_pretrained("openai/whisper-medium.en", dropout=0.1)
-processor_drop = WhisperProcessor.from_pretrained("openai/whisper-medium.en")
+model = WhisperForConditionalGeneration.from_pretrained("openai/whisper-medium.en", dropout=0.1)
+processor = WhisperProcessor.from_pretrained("openai/whisper-medium.en")
 TEMPDIR = os.environ["TMPDIR"]
 respath = os.path.join(TEMPDIR, "results")
 BASE = TEMPDIR +"/"
