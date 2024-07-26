@@ -8,30 +8,34 @@ import torch.multiprocessing as mp
 from torch.nn.parallel import DistributedDataParallel as DDP
 import numpy as np
 import torch
-
+import evaluate 
 from tqdm import tqdm
+
 
 class Result():
     audiofile=None
     timestamp= None
     runs = None
-    ref = ""
-    logits= None
-    softmax= None
-    generationoutput = None
-    transcriptio= None
+    ref = None
+    trans= None
+    data= None # result of the model
+    results= None # Tuple of (qe, qeent, qestd)
+    dropoutdata= None # result of the model for all droutout runs list of tuples
+    dropoutresults= None # list of Tuple of (qe, var, lex-simm)
 
-    def __init__(self, audiofile, timestamp, runs, ref):
+    def __init__(self, audiofile, timestamp, ref, trans, data, results, dropoutdata=None, dropoutresults = None):
         self.audiofile = audiofile
         self.timestamp = timestamp
-        self.runs = runs["number"]
         self.ref = ref
-        self.logits = runs["logits"]
-        self.generationoutput = runs["generationoutput"]
-        self.transcription = runs["transcription"]
+        self.trans= trans
+        self.data= data
+        self.results= results
+        self.dropoutresults= dropoutresults
+        self.dropoutdata= dropoutdata
+
 
     def __str__(self):
-        return str(self.transcription)
+        return str(self.trans)
     def __repr__(self):
         return
 
@@ -69,7 +73,33 @@ def sentStd(data):
     
     return qestd
 
+def variance(data):
+    return np.var(data)
 
+def combo(tp, var):
+    return (1-np.divide(tp. var))
+
+def lexsim(transhypo):
+    meteor = evaluate.load('meteor')
+    #TODO write code for the simmilarity with the help of meteor 
+    
+    return 0
+
+def getQE(data, dropout=False, dropouttrans=None):
+    if dropout:
+        for i in range(len(data.generationoutput)):
+            qe= TranslationProbability(data)
+            qevar= variance(data)
+            com = combo(qe, qevar)
+            lex = lexsim(dropouttrans)
+        res =(qe, var, com)
+    else:
+        qe= TranslationProbability(data)
+        qeent= softmaxEntropy(data)
+        qestd= sentStd(data)
+        res =(qe, qeent, qestd)
+    return res
+    
 path = "/home/plantpalfynn/uni/BA/BA-Thesis/code/results/dropoutresult70.pt"
 t = torch.load(path, map_location=torch.device('cpu'))
 

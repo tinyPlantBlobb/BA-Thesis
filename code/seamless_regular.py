@@ -5,16 +5,18 @@ import torch.distributed as dist
 import torch.multiprocessing as mp
 from torch.nn.parallel import DistributedDataParallel as DDP
 from datasets import Dataset, Audio
-from transformers import (
-    WhisperProcessor,
-    WhisperForConditionalGeneration,
-)
+from transformers import SeamlessM4TForTextToText,  AutoProcessor as SeamlessProcessor
 import os
 import yaml
 import torch
 import torchaudio
 from tqdm import tqdm
 from qeLogic import TranslationProbability, softmaxEntropy, sentStd, Result
+# dropout would be 0.1 as done in the paper in the experiment for evaluating the translation
+model = SeamlessM4TForTextToText.from_pretrained("facebook/hf-seamless-m4t-medium")
+processor = SeamlessProcessor.from_pretrained("facebook/seamless-m4t-v2-medium")
+
+
 def readfromtar(BASE):
     print("starting reading from tar")
     with open(TEMPDIR+"/data/IWSLT.TED.tst2023.en-de.matched.yaml") as matched:
@@ -49,43 +51,45 @@ def readfromtar(BASE):
 def run_inference(rank, world_size, dataset):
     torch.cuda.set_device(rank)
     dist.init_process_group("nccl", rank=rank, world_size=world_size)
+    num_samples = 30
+    elemdp = 20
+    low = 50
     model.to(rank)
     model.generation_config.forced_decoder_ids = None
-
-    offset = 180 + rank*((len(dataset)-180)//world_size)
+    offset = low + rank*elemdp
     with torch.no_grad():
-        for i in tqdm(range(offset, offset+30,1)):
-            result = {
-                "audiofile": [],
-                "timestamp": [],
-                "ref": [],
-                "generationoutput": [],
+        for i in range(offset, offset+elemdp,1):
+                
+            all={
+                "number":[],
+                "tranlateion": [],
                 "logits": [],
-                "softmax": [],
-                "transcription": [],
-                "qe": [],
-                "qeent": [],
+                #"softmax": [],
+                "generationoutput": [],
             }
-            model.eval()
+
             sample = dataset[i]
-            # for sample in tdqm(dataset):
-            #print(sample["transcript"])
-            audio =sample["audiofile"]["array"]
+            audio = waveform = sample["audiofile"]["array"]
             sample_rate = sample["audiofile"]["sampling_rate"]  # alternatively set to 16000
-            text = sample["transcript"]
-            input = processor(audio, sampling_rate=sample_rate, return_tensors="pt")
-            input_features = input.input_features.to(rank)
-            res = model.generate(input_features=input_features, return_dict_in_generate=True, output_scores=True, output_logits=True)
-            #############################################
-            # Huggingface whisper implementation things #
-            #############################################
+            text = sample["tranlate"]
+            ####################
+            # dropout based shit#
+            #####################
+            for j in tqdm(range(num_samples)):
+                #############################################
+                # Huggingface whisper implementation things #
+                #############################################
+                all["number"].append(j)
+                model.train()
+                with torch.no_grad():
+                    # this will return the last layer probabilities of the model
+                    input = processor(audio, sampling_rate=16000, return_tensors="pt")
+                    input_features = input.input_features.to(rank)
+                    res = model.generate(input_features=input_features,tgt_lang="deu", return_dict_in_generate=True, output_scores=True, output_logits=True, generate_speech=False)
+    
 
             # this will return the last layer probabilities of the model
 
-            logits = model(
-                input_features, decoder_input_ids=res["sequences"]
-            ).logits  # gets the last layer probabilities of the model
-            trans = processor.batch_decode(res["sequences"], skip_special_tokens=True)[0]
             qe = TranslationProbability(res)
             qeent = softmaxEntropy(res)
             qesent = sentStd(res)
@@ -106,11 +110,6 @@ def run_inference(rank, world_size, dataset):
             torch.cuda.empty_cache()
 
 BASE = ""
-
-# Whisper  from the huggingface whisper implementation
-processor = WhisperProcessor.from_pretrained("openai/whisper-medium.en")
-# feature_extractor = WhisperFeatureExtractor.from_pretrained("openai/whisper-small")
-model = WhisperForConditionalGeneration.from_pretrained("openai/whisper-medium.en")
 
 TEMPDIR = os.environ["TMPDIR"]
 respath = os.path.join(TEMPDIR, "results")
