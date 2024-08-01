@@ -14,37 +14,7 @@ import yaml
 import torch
 import torchaudio
 from tqdm import tqdm
-from qeLogic import TranslationProbability, softmaxEntropy, sentStd, Result
-def readfromtar(BASE):
-    print("starting reading from tar")
-    with open(TEMPDIR+"/data/IWSLT.TED.tst2023.en-de.matched.yaml") as matched:
-        data = yaml.load(matched, Loader=yaml.FullLoader)
-        matched.close()
-    print("closed tar")
-    sample_rate = 16000
-    resdataset = {
-        "audiofile": [],
-        "transcript": [],
-        "translation": [],
-        "timestamp": [],
-    }
-    print("starting iterating over tar elements")
-    for t in os.scandir(TEMPDIR+"/data"):
-        if t.name == "IWSLT.TED.tst2023.en-de.matched.yaml":
-            continue
-        tedwav = t.name.split(".")[0]
-        segment= int(t.name.split(".")[1][3:]) 
-        seg = data[tedwav+".wav"][segment]
-        waveform, samplerate = torchaudio.load(t.path)
-        resdataset["audiofile"].append(t.path)
-        resdataset["transcript"].append(seg.get("transcript"))
-        resdataset["translation"].append(seg.get("translation"))
-        resdataset["timestamp"].append(
-            (seg.get("offset"), seg.get("offset") + seg.get("duration"))
-        )  # falls man noch die xmls rein matchen will: , "transcript":seg.get("text"), "translation":seg.get("translation")
-    print("finished iterating over elements")
-    return resdataset
-
+from qeLogic import getAudios, TranslationProbability, softmaxEntropy, sentStd, Result, writeCSV
 
 def run_inference(rank, world_size, dataset):
     torch.cuda.set_device(rank)
@@ -52,7 +22,7 @@ def run_inference(rank, world_size, dataset):
     model.to(rank)
     model.generation_config.forced_decoder_ids = None
 
-    offset = 180 + rank*((len(dataset)-180)//world_size)
+    offset = 0 + rank*((len(dataset))//world_size)
     with torch.no_grad():
         for i in tqdm(range(offset, offset+30,1)):
             result = {
@@ -104,6 +74,7 @@ def run_inference(rank, world_size, dataset):
             result["transcription"].append(trans+"\n")
             torch.save(result, TEMPDIR + "/results/result"+str(i)+".pt")
             torch.cuda.empty_cache()
+            writeCSV(result["transcription"], TEMPDIR + "/results/fulltranscriptions.csv")
 
 BASE = ""
 
@@ -119,7 +90,7 @@ if not os.path.exists(respath):
         os.mkdir(respath)
 
 def main():
-    dataset = Dataset.from_dict(readfromtar(BASE)).cast_column("audiofile", Audio())
+    dataset = Dataset.from_dict(getAudios(BASE)).cast_column("audiofile", Audio())
     world_size= torch.cuda.device_count()
     torchrunrank= int(os.environ["LOCAL_RANK"])
     trglrank = int(os.environ["RANK"])

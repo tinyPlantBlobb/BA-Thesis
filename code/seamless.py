@@ -11,44 +11,11 @@ import yaml
 import torch
 import torchaudio
 from tqdm import tqdm
-from qeLogic import TranslationProbability, softmaxEntropy, sentStd, Result
+from qeLogic import TranslationProbability, softmaxEntropy, sentStd, Result, readCSV
 
 # dropout would be 0.1 as done in the paper in the experiment for evaluating the translation
 model = SeamlessM4TForTextToText.from_pretrained("facebook/hf-seamless-m4t-medium")
 processor = SeamlessProcessor.from_pretrained("facebook/seamless-m4t-v2-medium")
-
-
-
-def readfromtar(BASE):
-    print("starting reading from tar")
-    with open(TEMPDIR+"/data/IWSLT.TED.tst2023.en-de.matched.yaml") as matched:
-        data = yaml.load(matched, Loader=yaml.FullLoader)
-        matched.close()
-    print("closed tar")
-    sample_rate = 16000
-    resdataset = {
-        "audiofile": [],
-        "transcript": [],
-        "translation": [],
-        "timestamp": [],
-    }
-    print("starting iterating over tar elements")
-    for t in os.scandir(TEMPDIR+"/data"):
-        if t.name == "IWSLT.TED.tst2023.en-de.matched.yaml":
-            continue
-        tedwav = t.name.split(".")[0]
-        segment= int(t.name.split(".")[1][3:]) 
-        seg = data[tedwav+".wav"][segment]
-        waveform, samplerate = torchaudio.load(t.path)
-        resdataset["audiofile"].append(t.path)
-        resdataset["transcript"].append(seg.get("transcript"))
-        resdataset["translation"].append(seg.get("translation"))
-        resdataset["timestamp"].append(
-            (seg.get("offset"), seg.get("offset") + seg.get("duration"))
-        )  # falls man noch die xmls rein matchen will: , "tranlate":seg.get("text"), "translation":seg.get("translation")
-    print("finished iterating over elements")
-    return resdataset
-
 
     
 
@@ -113,7 +80,7 @@ if not os.path.exists(respath):
         os.mkdir(respath)
 
 def main():
-    dataset = Dataset.from_dict(readfromtar(BASE)).cast_column("audiofile", Audio())
+    dataset = Dataset.from_dict(readCSV(BASE+"results/fullstranscription.csv"))
     dataloader = torch.utils.data.DataLoader(dataset, batch_size=1, shuffle=False, num_workers=4)
     world_size= torch.cuda.device_count()
     torchrunrank= int(os.environ["LOCAL_RANK"])
