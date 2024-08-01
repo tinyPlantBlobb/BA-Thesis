@@ -14,7 +14,7 @@ import yaml
 import torch
 import torchaudio
 from tqdm import tqdm
-from qeLogic import getAudios, TranslationProbability, softmaxEntropy, sentStd, Result, writeCSV
+from qeLogic import getAudios, getQE, Result, writeCSV
 
 def run_inference(rank, world_size, dataset):
     torch.cuda.set_device(rank)
@@ -25,17 +25,17 @@ def run_inference(rank, world_size, dataset):
     offset = 0 + rank*((len(dataset))//world_size)
     with torch.no_grad():
         for i in tqdm(range(offset, offset+30,1)):
-            result = {
-                "audiofile": [],
-                "timestamp": [],
-                "ref": [],
-                "generationoutput": [],
-                "logits": [],
-                "softmax": [],
-                "transcription": [],
-                "qe": [],
-                "qeent": [],
-            }
+            # result = {
+            #     "audiofile": [],
+            #     "timestamp": [],
+            #     "ref": [],
+            #     "generationoutput": [],
+            #     "logits": [],
+            #     "softmax": [],
+            #     "transcription": [],
+            #     "qe": [],
+            #     "qeent": [],
+            # }
             model.eval()
             sample = dataset[i]
             # for sample in tdqm(dataset):
@@ -56,25 +56,28 @@ def run_inference(rank, world_size, dataset):
                 input_features, decoder_input_ids=res["sequences"]
             ).logits  # gets the last layer probabilities of the model
             trans = processor.batch_decode(res["sequences"], skip_special_tokens=True)[0]
-            qe = TranslationProbability(res)
-            qeent = softmaxEntropy(res)
-            qesent = sentStd(res)
+            # qe = TranslationProbability(res)
+            # qeent = softmaxEntropy(res)
+            # qesent = sentStd(res)
 
 
-            # # get the frist average log probability of the model for that aucio
-            result["qe"].append(qe)
-            result["qeent"].append(qeent)
-            result["qesent"].append(qesent)
-            result["audiofile"].append(sample["audiofile"])
-            result["timestamp"].append(sample["timestamp"])
-            result["logits"].append(logits)
-            result["softmax"].append(torch.nn.functional.softmax(logits, dim=-1))
-            result["generationoutput"].append(res)
-            result["ref"].append(text)
-            result["transcription"].append(trans+"\n")
+            # # # get the frist average log probability of the model for that aucio
+            # result["qe"].append(qe)
+            # result["qeent"].append(qeent)
+            # result["qesent"].append(qesent)
+            # result["audiofile"].append(sample["audiofile"])
+            # result["timestamp"].append(sample["timestamp"])
+            # result["logits"].append(logits)
+            # result["softmax"].append(torch.nn.functional.softmax(logits, dim=-1))
+            # result["generationoutput"].append(res)
+            # result["ref"].append(text)
+            # result["transcription"].append(trans+"\n")
+            qe= getQE(res, dropout=False)
+            torch.cuda.empty_cache()
+            result = Result(sample["audiofile"],sample["timestamp"],sample["transcript"],trans,res,qe)
             torch.save(result, TEMPDIR + "/results/result"+str(i)+".pt")
             torch.cuda.empty_cache()
-            writeCSV(result["transcription"], TEMPDIR + "/results/fulltranscriptions.csv")
+            writeCSV(trans, TEMPDIR + "/results/fulltranscriptions.csv", refence=text, dropout=False)
 
 BASE = ""
 
@@ -98,3 +101,4 @@ def main():
     mp.spawn(run_inference, args=(world_size,dataset),nprocs=world_size, join=True)
 if __name__ == "__main__":
     main()
+

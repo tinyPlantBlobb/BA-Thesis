@@ -25,8 +25,8 @@ pip install evaluate
 pip install librosa
 
 srun torchrun --nnodes 1 --nproc_per_node 1 asr_regular.py 
-srun torchrun --nnodes 1 --nproc_per_node 1 seamless.py
-srun torchrun --nnodes 1 --nproc_per_node 1 mnt_part.py
+#srun torchrun --nnodes 1 --nproc_per_node 1 seamless.py
+#srun torchrun --nnodes 1 --nproc_per_node 1 mnt_part.py
 
 # Before job completes save results on a workspace
 tar -cvzf $TMPDIR/results-${SLURM_JOB_ID}.tar.gz $TMPDIR/results

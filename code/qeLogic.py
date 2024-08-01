@@ -1,18 +1,12 @@
-from math import log
 import os
 import csv
 import torch.distributed
 import torch.utils
 import torch.utils.data
-import torch.distributed as dist
-import torch.multiprocessing as mp
-from torch.nn.parallel import DistributedDataParallel as DDP
 import numpy as np
 import torch
 import evaluate 
-from tqdm import tqdm
 import yaml
-import tarfile
 import torchaudio
 
 
@@ -27,21 +21,20 @@ class Result():
     dropoutdata= None # result of the model for all droutout runs list of tuples
     dropoutresults= None # list of Tuple of (qe, var, lex-simm)
 
-    def __init__(self, audiofile, timestamp, ref, trans, data, results, dropoutdata=None, dropoutresults = None):
+    def __init__(self, audiofile, timestamp, reference, transcription, modeldata, qualityestimate, dropoutdata=None, dropoutresults = None):
         self.audiofile = audiofile
         self.timestamp = timestamp
-        self.ref = ref
-        self.trans= trans
-        self.data= data
-        self.results= results
+        self.ref = reference
+        self.trans= transcription
+        self.data= modeldata # result data of the model
+        self.results= qualityestimate # Tuple of (qe, qeent, qestd)
         self.dropoutresults= dropoutresults
         self.dropoutdata= dropoutdata
-
 
     def __str__(self):
         return str(self.trans)
     def __repr__(self):
-        return "audiofile: "+str(self.audiofile)+ "\n" + "timestamp: "+str(self.timestamp)+ "\n" + "ref: "+str(self.ref)+ "\n" 
+        return #"audiofile: "+str(self.audiofile)+ "\n" + "timestamp: "+str(self.timestamp)+ "\n" + "ref: "+str(self.ref)+ "\n" 
 
 def getAudios(TEMPDIR):
     print("starting reading from tar")
@@ -75,43 +68,49 @@ def getAudios(TEMPDIR):
 
 
 def TranslationProbability(data):
-        #toptoken= data.generationoutput[i].scores
-        print(len(data.generationoutput.scores[0]))
+        #toptoken= data[i].scores
         prop= 1
-        for j in range(len(data.generationoutput.scores)):
-            toptoken= torch.argmax(torch.nn.functional.softmax(data.generationoutput.scores[j], dim=-1))
-            
-            prop= torch.log(data.generationoutput.scores[j][0][toptoken])+prop
+        for j in range(len(data.scores)):
+            toptoken= torch.argmax(torch.nn.functional.softmax(data.scores[j], dim=-1))
+            toptokenprob = torch.log_softmax(data.scores[j][0])[toptoken]
+            print(toptokenprob)
+            prop= toptokenprob+prop
 
   
 def softmaxEntropy(data):
     #Prediction scores of the language modeling head (scores for each vocabulary token before SoftMax).
-
     prop= 1
-    for j in range(len(data.generationoutput.scores)):
-        prop= torch.sum(torch.nn.functional.log_softmax(data.generationoutput.scores[j], dim=-1)[0]*torch.nn.functional.log_softmax(data.generationoutput.scores[j], dim=-1)[0])+prop
-    qeent= -(1/(len(data.generationoutput.scores[0]))*prop)
+    for j in range(len(data.scores)):
+        prop= torch.sum(torch.nn.functional.log_softmax(data.scores[j], dim=-1)[0]*torch.nn.functional.log_softmax(data.scores[j], dim=-1)[0])+prop
+    qeent= -(1/(len(data.scores[0]))*prop)
     return qeent
 
 def sentStd(data):
     #TODO fix
     #Prediction scores of the language modeling head (scores for each vocabulary token before SoftMax).
-    print(len(data.generationoutput))
+    print(len(data))
 
     sequence = []
     prop= 1
-    for j in range(len(data.generationoutput.scores)):
-        toptoken= torch.argmax(torch.nn.functional.softmax(data.generationoutput.scores[j], dim=-1))
-        prop= torch.log(data.generationoutput.scores[j][0][toptoken])+prop 
+    for j in range(len(data.scores)):
+        toptoken= torch.argmax(torch.nn.functional.softmax(data.scores[j], dim=-1))
+        prop= torch.log(data.scores[j][0][toptoken])+prop 
         sequence.append(prop)
     qestd= np.std(np.array(sequence))
     
     return qestd
 
-def writeCSV(results, path):
-    with open(path, "a", newline='') as f:
-        writer = csv.writer(f, dialect='excel')
-        writer.writerow(results)
+def writeCSV(results, path, refence=None, dropout=False):
+    if dropout:
+        with open(path, "a", newline='') as f:
+            writer = csv.writer(f, dialect='excel')
+            writer.writerow(refence, results)
+    else:
+        with open(path, "w", newline='') as f:
+            writer = csv.writer(f, dialect='excel')
+            writer.writerow(["reference", "transcription"])
+            for i in range(len(results)):
+                writer.writerow([refence, results])
 
 def readCSV(path):
     with open(path, 'r',newline='') as f:
@@ -133,7 +132,7 @@ def lexsim(transhypo):
 
 def getQE(data, dropout=False, dropouttrans=None):
     if dropout:
-        for i in range(len(data.generationoutput)):
+        for i in range(len(data)):
             qe= TranslationProbability(data)
             qevar= variance(data)
             com = combo(qe, qevar)
@@ -142,14 +141,12 @@ def getQE(data, dropout=False, dropouttrans=None):
     else:
         qe= TranslationProbability(data)
         qeent= softmaxEntropy(data)
-        qestd= sentStd(data)
-        res =(qe, qeent, qestd)
+        #qestd= sentStd(data)
+        res =(qe, qeent)
     return res
     
-path = "/home/plantpalfynn/uni/BA/BA-Thesis/code/results/dropoutresult70.pt"
-t = torch.load(path, map_location=torch.device('cpu'))
+
 
 # TranslationProbability(t)
 # softmaxEntropy(t)
 # print(t.transcription)
-print(sentStd(t))
