@@ -25,8 +25,8 @@ def run_inference(rank, world_size, dataset):
     torch.cuda.set_device(rank)
     dist.init_process_group("nccl", rank=rank, world_size=world_size)
     num_samples = 30
-    elemdp = 20
-    low = 50
+    elemdp = 2
+    low = 0
     model.to(rank)
     model.generation_config.forced_decoder_ids = None
     offset = low + rank*elemdp
@@ -68,7 +68,7 @@ def run_inference(rank, world_size, dataset):
                     
                 dropoutresult = getQE(res, dropouttrans = all["transcription"], dropout=True)
                 torch.cuda.empty_cache()
-            writeCSV(all["transcription"], TEMPDIR + "/results/transcriptions"+str(i)+".csv")
+            writeCSV(all["transcription"], TEMPDIR + "/results/transcriptions"+str(i)+".csv", sample["transcript"])
             torch.save(dropoutresult, TEMPDIR + "/results/dropoutresult"+str(i)+".pt")
         del dropoutresult
         del sample
