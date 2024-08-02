@@ -7,17 +7,43 @@ import torch.distributed as dist
 import torch.multiprocessing as mp
 from torch.nn.parallel import DistributedDataParallel as DDP
 from datasets import Dataset, Audio
-import imp
+
 from transformers import (
     WhisperProcessor,
     WhisperForConditionalGeneration,
 )
 import os
-import tarfile
 import torch
-import torchaudio
 from tqdm import tqdm
 from qeLogic import getQE, writeCSV, Result, getAudios
+
+
+
+class Result():
+    audiofile=None
+    timestamp= None
+    runs = None
+    ref = None
+    trans= None
+    data= None # result of the model
+    results= None # Tuple of (qe, qeent, qestd)
+    dropoutdata= None # result of the model for all droutout runs list of tuples
+    dropoutresults= None # list of Tuple of (qe, var, lex-simm)
+
+    def __init__(self, audiofile, timestamp, reference, transcription, modeldata, qualityestimate, dropoutdata=None, dropoutresults = None):
+        self.audiofile = audiofile
+        self.timestamp = timestamp
+        self.ref = reference
+        self.trans= transcription
+        self.data= modeldata # result data of the model
+        self.results= qualityestimate # Tuple of (qe, qeent, qestd)
+        self.dropoutresults= dropoutresults
+        self.dropoutdata= dropoutdata
+
+    def __str__(self):
+        return str(self.trans)
+    def __repr__(self):
+        return #"audiofile: "+str(self.audiofile)+ "\n" + "timestamp: "+str(self.timestamp)+ "\n" + "ref: "+str(self.ref)+ "\n" 
 
 
 def run_inference(rank, world_size, dataset):
@@ -50,7 +76,7 @@ def run_inference(rank, world_size, dataset):
                     # this will return the last layer probabilities of the model
                     input = processor(audio, sampling_rate=16000, return_tensors="pt")
                     input_features = input.input_features.to(rank)
-                    res = model.generate(input_features=input_features, return_dict_in_generate=True, output_scores=True, output_logits=True)
+                    res = model.generate(input_features=input_features, return_dict_in_generate=True, output_scores=True)
                     trans = processor.batch_decode(res["sequences"], skip_special_tokens=True)[0]
                     dpresults.append(res)
                     all["generationoutput"].append(res)

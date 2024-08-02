@@ -32,7 +32,7 @@ def run_inference(rank, world_size, dataset):
             text = sample["transcript"]
             input = processor(audio, sampling_rate=sample_rate, return_tensors="pt")
             input_features = input.input_features.to(rank)
-            res = model.generate(input_features=input_features, return_dict_in_generate=True, output_scores=True, output_logits=True)
+            res = model.generate(input_features=input_features, return_dict_in_generate=True, output_scores=True)
             #############################################
             # Huggingface whisper implementation things #
             #############################################
@@ -48,6 +48,7 @@ def run_inference(rank, world_size, dataset):
             result = Result(sample["audiofile"],sample["timestamp"],sample["transcript"],trans,res,qe)
             torch.save(result, TEMPDIR + "/results/result"+str(i)+".pt")
             torch.cuda.empty_cache()
+
             print(trans, text)
             csv.append([i,text, trans])
     output = [None for _ in range(world_size)]
