@@ -41,8 +41,7 @@ def run_inference(rank, world_size, dataset):
             }
 
             sample = dataset[i]
-            audio = waveform = sample["audiofile"]["array"]
-            sample_rate = sample["audiofile"]["sampling_rate"]  # alternatively set to 16000
+            transcript = sample["transcript"]
             text = sample["tranlate"]
             ####################
             # dropout based shit#
@@ -55,9 +54,9 @@ def run_inference(rank, world_size, dataset):
                 model.train()
                 with torch.no_grad():
                     # this will return the last layer probabilities of the model
-                    input = processor(audio, sampling_rate=16000, return_tensors="pt")
+                    input = processor(transcript, return_tensors="pt")
                     input_features = input.input_features.to(rank)
-                    res = model.generate(input_features=input_features,tgt_lang="deu", return_dict_in_generate=True, output_scores=True, output_logits=True, generate_speech=False)
+                    res = model.generate(input_features=input_features,tgt_lang="deu", return_dict_in_generate=True, output_scores=True, generate_speech=False)
                     logits = model(input_features, decoder_input_ids=res["sequences"]).logits  # gets the last layer probabilities of the model
                     all["logits"].append(logits)
                     all["generationoutput"].append(res)

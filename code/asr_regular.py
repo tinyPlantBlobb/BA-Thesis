@@ -13,7 +13,35 @@ from transformers import (
 import os
 import torch
 from tqdm import tqdm
-from qeLogic import getAudios, getQE, Result, writeCSV
+from qeLogic import getAudios, getQE, writeCSV
+
+class Result():
+    audiofile=None
+    timestamp= None
+    runs = None
+    ref = None
+    trans= None
+    data= None # result of the model
+    results= None # Tuple of (qe, qeent, qestd)
+    dropoutdata= None # result of the model for all droutout runs list of tuples
+    dropoutresults= None # list of Tuple of (qe, var, lex-simm)
+
+    def __init__(self, audiofile, timestamp, reference, transcription, modeldata, qualityestimate, dropoutdata=None, dropoutresults = None):
+        self.audiofile = audiofile
+        self.timestamp = timestamp
+        self.ref = reference
+        self.trans= transcription
+        self.data= modeldata # result data of the model
+        self.results= qualityestimate # Tuple of (qe, qeent, qestd)
+        self.dropoutresults= dropoutresults
+        self.dropoutdata= dropoutdata
+
+    def __str__(self):
+        return str(self.trans)
+    def __repr__(self):
+        return #"audiofile: "+str(self.audiofile)+ "\n" + "timestamp: "+str(self.timestamp)+ "\n" + "ref: "+str(self.ref)+ "\n" 
+
+
 
 def run_inference(rank, world_size, dataset):
     torch.cuda.set_device(rank)
@@ -21,7 +49,7 @@ def run_inference(rank, world_size, dataset):
     model.to(rank)
     model.generation_config.forced_decoder_ids = None
     offset = 0 + rank*((len(dataset))//world_size)
-    num = 3
+    num = (len(dataset))//world_size*2
     csv = []
     with torch.no_grad():
         for i in tqdm(range(offset, offset+num,1)):
@@ -50,7 +78,7 @@ def run_inference(rank, world_size, dataset):
             torch.cuda.empty_cache()
 
             print(trans, text)
-            csv.append([i,text, trans])
+            csv.append([i,text, trans, qe])
     output = [None for _ in range(world_size)]
     dist.gather_object(obj=csv, object_gather_list=output if dist.get_rank() == 0 else None,dst=0)
     if rank == 0:
@@ -59,6 +87,7 @@ def run_inference(rank, world_size, dataset):
                 continue
             csv.extend(output[i])
         writeCSV(csv, TEMPDIR + "/results/fulltranscriptions.csv", dropout=False)
+
 
 BASE = ""
 
