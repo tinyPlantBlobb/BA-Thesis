@@ -81,7 +81,6 @@ if not os.path.exists(respath):
 
 def main():
     dataset = Dataset.from_dict(readCSV(BASE+"results/fullstranscription.csv"))
-    dataloader = torch.utils.data.DataLoader(dataset, batch_size=1, shuffle=False, num_workers=4)
     world_size= torch.cuda.device_count()
     torchrunrank= int(os.environ["LOCAL_RANK"])
     trglrank = int(os.environ["RANK"])
