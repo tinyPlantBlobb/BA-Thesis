@@ -1,3 +1,4 @@
+import csv
 import torch.distributed
 import torch.utils
 import torch.utils.data
@@ -10,9 +11,7 @@ from transformers import (
     WhisperForConditionalGeneration,
 )
 import os
-import yaml
 import torch
-import torchaudio
 from tqdm import tqdm
 from qeLogic import getAudios, getQE, Result, writeCSV
 
@@ -21,25 +20,13 @@ def run_inference(rank, world_size, dataset):
     dist.init_process_group("nccl", rank=rank, world_size=world_size)
     model.to(rank)
     model.generation_config.forced_decoder_ids = None
-
     offset = 0 + rank*((len(dataset))//world_size)
+    num = 3
+    csv = []
     with torch.no_grad():
-        for i in tqdm(range(offset, offset+30,1)):
-            # result = {
-            #     "audiofile": [],
-            #     "timestamp": [],
-            #     "ref": [],
-            #     "generationoutput": [],
-            #     "logits": [],
-            #     "softmax": [],
-            #     "transcription": [],
-            #     "qe": [],
-            #     "qeent": [],
-            # }
+        for i in tqdm(range(offset, offset+num,1)):
             model.eval()
             sample = dataset[i]
-            # for sample in tdqm(dataset):
-            #print(sample["transcript"])
             audio =sample["audiofile"]["array"]
             sample_rate = sample["audiofile"]["sampling_rate"]  # alternatively set to 16000
             text = sample["transcript"]
@@ -56,28 +43,21 @@ def run_inference(rank, world_size, dataset):
                 input_features, decoder_input_ids=res["sequences"]
             ).logits  # gets the last layer probabilities of the model
             trans = processor.batch_decode(res["sequences"], skip_special_tokens=True)[0]
-            # qe = TranslationProbability(res)
-            # qeent = softmaxEntropy(res)
-            # qesent = sentStd(res)
-
-
-            # # # get the frist average log probability of the model for that aucio
-            # result["qe"].append(qe)
-            # result["qeent"].append(qeent)
-            # result["qesent"].append(qesent)
-            # result["audiofile"].append(sample["audiofile"])
-            # result["timestamp"].append(sample["timestamp"])
-            # result["logits"].append(logits)
-            # result["softmax"].append(torch.nn.functional.softmax(logits, dim=-1))
-            # result["generationoutput"].append(res)
-            # result["ref"].append(text)
-            # result["transcription"].append(trans+"\n")
             qe= getQE(res, dropout=False)
             torch.cuda.empty_cache()
             result = Result(sample["audiofile"],sample["timestamp"],sample["transcript"],trans,res,qe)
             torch.save(result, TEMPDIR + "/results/result"+str(i)+".pt")
             torch.cuda.empty_cache()
-            writeCSV(trans, TEMPDIR + "/results/fulltranscriptions.csv", refence=text, dropout=False)
+            print(trans, text)
+            csv.append([i,text, trans])
+    output = [None for _ in range(world_size)]
+    dist.gather_object(obj=csv, object_gather_list=output if dist.get_rank() == 0 else None,dst=0)
+    if rank == 0:
+        for i in range(len(output)):
+            if i == 0:
+                continue
+            csv.extend(output[i])
+        writeCSV(csv, TEMPDIR + "/results/fulltranscriptions.csv", dropout=False)
 
 BASE = ""
 
@@ -98,7 +78,11 @@ def main():
     torchrunrank= int(os.environ["LOCAL_RANK"])
     trglrank = int(os.environ["RANK"])
     print("start rank", torchrunrank, trglrank)
+    smp = mp.get_context('spawn')
+    q   = smp.SimpleQueue()
+    q.put([["sample","reference","reference"]])
     mp.spawn(run_inference, args=(world_size,dataset),nprocs=world_size, join=True)
+
 if __name__ == "__main__":
     main()
 

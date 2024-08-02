@@ -1,5 +1,7 @@
 import os
 import csv
+import re
+from weakref import ref
 import torch.distributed
 import torch.utils
 import torch.utils.data
@@ -72,7 +74,7 @@ def TranslationProbability(data):
         prop= 1
         for j in range(len(data.scores)):
             toptoken= torch.argmax(torch.nn.functional.softmax(data.scores[j], dim=-1))
-            toptokenprob = torch.log_softmax(data.scores[j][0])[toptoken]
+            toptokenprob = torch.log_softmax(data.scores[j][0], dim=-1)[toptoken]
             print(toptokenprob)
             prop= toptokenprob+prop
 
@@ -100,17 +102,18 @@ def sentStd(data):
     
     return qestd
 
-def writeCSV(results, path, refence=None, dropout=False):
+def writeCSV(results, path, dropout=False):
     if dropout:
         with open(path, "a", newline='') as f:
+            
             writer = csv.writer(f, dialect='excel')
-            writer.writerow(refence, results)
+            #writer.writerow(["reference", "transcriptions"])
+            writer.writerows(results)
     else:
         with open(path, "w", newline='') as f:
             writer = csv.writer(f, dialect='excel')
-            writer.writerow(["reference", "transcription"])
-            for i in range(len(results)):
-                writer.writerow([refence, results])
+            #writer.writerow(["reference", "transcription"])
+            writer.writerows(results)
 
 def readCSV(path):
     with open(path, 'r',newline='') as f:
@@ -143,6 +146,7 @@ def getQE(data, dropout=False, dropouttrans=None):
         qeent= softmaxEntropy(data)
         #qestd= sentStd(data)
         res =(qe, qeent)
+    print(res)
     return res
     
 

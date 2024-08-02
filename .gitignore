@@ -8,3 +8,4 @@ result.yaml
 *.pt
 *.tar.gz
 *.tgz
+__pycache__

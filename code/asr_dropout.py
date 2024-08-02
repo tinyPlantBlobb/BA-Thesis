@@ -33,6 +33,7 @@ def run_inference(rank, world_size, dataset):
     with torch.no_grad():
         for i in range(offset, offset+elemdp,1):
             sample = dataset[i]
+            cvs = [["transcription", "reference"]]
             all={
                 "number":[],
                 "transcription": [],
@@ -42,9 +43,6 @@ def run_inference(rank, world_size, dataset):
             }
 
             audio =sample["audiofile"]["array"]
-            f= open(TEMPDIR + "/results/transcriptions"+str(i)+".csv", "w")   
-            f.write("reference: " +sample["ref"]+ "\n")
-            f.close()
             for j in tqdm(range(num_samples)):
                 model.train()
                 dpresults= []
@@ -54,22 +52,15 @@ def run_inference(rank, world_size, dataset):
                     input_features = input.input_features.to(rank)
                     res = model.generate(input_features=input_features, return_dict_in_generate=True, output_scores=True, output_logits=True)
                     trans = processor.batch_decode(res["sequences"], skip_special_tokens=True)[0]
-                    # get the frist average log probability of the model for that aucio
-                    # qe= TranslationProbability(res)
-                    # qeent= softmaxEntropy(res)
-                    # qestd= sentStd(res)
                     dpresults.append(res)
-                    # getQE(res, dropout=True)
-                    # all["qetp"].append(qe)
-                    # all["qe-soft-ent"].append(qeent)
-                    # all["qesent"].append(qestd)
                     all["generationoutput"].append(res)
-                    all["transcription"].append(trans+"\n")
+                    all["transcription"].append(trans)
                     
                 dropoutresult = getQE(res, dropouttrans = all["transcription"], dropout=True)
                 torch.cuda.empty_cache()
-            writeCSV(all["transcription"], TEMPDIR + "/results/transcriptions"+str(i)+".csv", sample["transcript"])
+            cvs.append([sample["ref"]]+all["transcription"])
             torch.save(dropoutresult, TEMPDIR + "/results/dropoutresult"+str(i)+".pt")
+        writeCSV(cvs, TEMPDIR + "/results/transcriptions"+str(i)+".csv", dropout=True)
         del dropoutresult
         del sample
 
