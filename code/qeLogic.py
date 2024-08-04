@@ -1,5 +1,6 @@
 import os
 import csv
+import re
 import torch.distributed
 import torch.utils
 import torch.utils.data
@@ -43,12 +44,12 @@ def getAudios(TEMPDIR):
 
 def TranslationProbability(data):
         #toptoken= data[i].scores
-        prop= 1
-        for j in range(len(data.scores)):
-            toptoken= torch.argmax(torch.nn.functional.softmax(data.scores[j], dim=-1))
-            toptokenprob = torch.log_softmax(data.scores[j][0], dim=-1)[toptoken]
-            print(toptokenprob)
-            prop= toptokenprob+prop
+    prop= 0
+    for j in range(len(data.scores)):
+        toptoken= torch.argmax(torch.nn.functional.softmax(data.scores[j], dim=-1))
+        toptokenprob = torch.log_softmax(data.scores[j][0], dim=-1)[toptoken]
+        prop= toptokenprob+prop
+    return np.divide(prop.numpy(),len(data.scores[0]))
 
   
 def softmaxEntropy(data):
@@ -56,7 +57,7 @@ def softmaxEntropy(data):
     prop= 1
     for j in range(len(data.scores)):
         prop= torch.sum(torch.nn.functional.log_softmax(data.scores[j], dim=-1)[0]*torch.nn.functional.log_softmax(data.scores[j], dim=-1)[0])+prop
-    qeent= -(1/(len(data.scores[0]))*prop)
+    qeent= -np.divide(prop.numpy(), (len(data.scores[0])))
     return qeent
 
 def sentStd(data):
