@@ -9,3 +9,4 @@ result.yaml
 *.tar.gz
 *.tgz
 __pycache__
+*.sync-conflict*
