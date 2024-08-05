@@ -30,8 +30,8 @@ def run_inference(rank, world_size, dataset):
             model.eval()
             sample = dataset[i]
             input = sample["transcript"]
-            sample["audiofile"]["sampling_rate"]  # alternatively set to 16000
-            text = sample["transcript"]
+            # alternatively set to 16000
+            text = sample["reference"]
             input = processor(input,src_lang="eng", return_tensors="pt")
             input_features = input.input_features.to(rank)
             res = model.generate(input_features=input_features, tgt_lang="deu", return_dict_in_generate=True, output_scores=True, output_logits=True)
@@ -59,7 +59,7 @@ def run_inference(rank, world_size, dataset):
             if i == 0:
                 continue
             csv.extend(output[i])
-        writeCSV(csv, TEMPDIR + "/results/fulltranscriptions.csv", dropout=False)
+        writeCSV(csv, TEMPDIR + "/results/seamlessfulltranscriptions.csv", dropout=False)
 
 BASE = ""
 
@@ -70,7 +70,7 @@ if not os.path.exists(respath):
         os.mkdir(respath)
 
 def main():
-    dataset = Dataset.from_dict(readCSV(BASE+"results/fullstranscription.csv"))
+    dataset = Dataset.from_dict(readCSV(TEMPDIR+"results/fullstranscription.csv"))
     world_size= torch.cuda.device_count()
     torchrunrank= int(os.environ["LOCAL_RANK"])
     trglrank = int(os.environ["RANK"])
