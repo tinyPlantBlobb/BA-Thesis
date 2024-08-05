@@ -5,10 +5,10 @@ import torch.utils
 import torch.utils.data
 import numpy as np
 import torch
-import evaluate 
+#import evaluate 
 import yaml
 import torchaudio
-
+import pdb; pdb.set_trace()
 
 def getAudios(TEMPDIR):
     print("starting reading from tar")
@@ -55,10 +55,16 @@ def softmaxEntropy(data):
     #Prediction scores of the language modeling head (scores for each vocabulary token before SoftMax).
     prop= 0
     for j in range(len(data.scores)):
-        softmaxed = torch.nn.functional.softmax(data.scores[j], dim=-1)
+        softmaxed = data.scores[j]
+        
         print("softmax", softmaxed[0], type(softmaxed[0]))
         for i in range(len(data.scores[j])):
-            prop= torch.sum(softmaxed[i]*torch.log(softmaxed[i]))+prop
+            for k in range(len(data.scores[j][i])):
+                #breakpoint()
+                print("softmaxed",softmaxed[i][k].item(), torch.mul(softmaxed[i][k],torch.log(softmaxed[i][k])),type(torch.mul(softmaxed[i][k],torch.log(softmaxed[i][k]))))
+                prop= torch.mul(softmaxed[i][k],torch.log(softmaxed[i][k]))+prop
+                #breakpoint()
+                print("prop",prop)
         print("result",prop, type(prop))
     qeent= -np.divide(prop.cpu().numpy(), (len(data.scores[0])))
     return qeent
@@ -66,14 +72,13 @@ def softmaxEntropy(data):
 def sentStd(data):
     #TODO fix
     #Prediction scores of the language modeling head (scores for each vocabulary token before SoftMax).
-    print(len(data))
-
     sequence = []
     prop= 0
     for j in range(len(data.scores)):
         toptoken= torch.argmax(torch.nn.functional.softmax(data.scores[j], dim=-1))
         prop= torch.log_softmax(data.scores[j][0][toptoken], dim=-1)+prop 
         sequence.append(prop.cpu())
+    print(sequence)
     qestd= np.std(np.array(sequence))
     
     return qestd
@@ -94,7 +99,7 @@ def writeCSV(results, path, dropout=False):
 def readCSV(path):
     with open(path, 'r',newline='') as f:
         reader = csv.reader(f, dialect='excel')
-        data = list(reader)
+        data = {rows[0]:(rows[1], rows[2]) for rows in reader}
     return data
 
 def variance(data):
@@ -104,7 +109,7 @@ def combo(tp, var):
     return (1-np.divide(tp. var))
 
 def lexsim(transhypo):
-    meteor = evaluate.load('meteor')
+    #meteor = evaluate.load('meteor')
     #TODO write code for the simmilarity with the help of meteor 
     
     return 0
