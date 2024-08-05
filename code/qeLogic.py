@@ -1,6 +1,5 @@
 import os
 import csv
-import re
 import torch.distributed
 import torch.utils
 import torch.utils.data
@@ -17,7 +16,7 @@ def getAudios(TEMPDIR):
         data = yaml.load(matched, Loader=yaml.FullLoader)
         matched.close()
     print("closed tar")
-    sample_rate = 16000
+
     resdataset = {
         "audiofile": [],
         "transcript": [],
@@ -31,7 +30,7 @@ def getAudios(TEMPDIR):
         tedwav = t.name.split(".")[0]
         segment= int(t.name.split(".")[1][3:]) 
         seg = data[tedwav+".wav"][segment]
-        waveform, samplerate = torchaudio.load(t.path)
+        torchaudio.load(t.path)
         resdataset["audiofile"].append(t.path)
         resdataset["transcript"].append(seg.get("transcript"))
         resdataset["translation"].append(seg.get("translation"))
@@ -49,15 +48,19 @@ def TranslationProbability(data):
         toptoken= torch.argmax(torch.nn.functional.softmax(data.scores[j], dim=-1))
         toptokenprob = torch.log_softmax(data.scores[j][0], dim=-1)[toptoken]
         prop= toptokenprob+prop
-    return np.divide(prop.numpy(),len(data.scores[0]))
+    return np.divide(prop.cpu().numpy(),len(data.scores[0]))
 
   
 def softmaxEntropy(data):
     #Prediction scores of the language modeling head (scores for each vocabulary token before SoftMax).
-    prop= 1
+    prop= 0
     for j in range(len(data.scores)):
-        prop= torch.sum(torch.nn.functional.log_softmax(data.scores[j], dim=-1)[0]*torch.nn.functional.log_softmax(data.scores[j], dim=-1)[0])+prop
-    qeent= -np.divide(prop.numpy(), (len(data.scores[0])))
+        softmaxed = torch.nn.functional.softmax(data.scores[j], dim=-1)
+        print("softmax", softmaxed[0], type(softmaxed[0]))
+        for i in range(len(data.scores[j])):
+            prop= torch.sum(softmaxed[i]*torch.log(softmaxed[i]))+prop
+        print("result",prop, type(prop))
+    qeent= -np.divide(prop.cpu().numpy(), (len(data.scores[0])))
     return qeent
 
 def sentStd(data):
@@ -66,11 +69,11 @@ def sentStd(data):
     print(len(data))
 
     sequence = []
-    prop= 1
+    prop= 0
     for j in range(len(data.scores)):
         toptoken= torch.argmax(torch.nn.functional.softmax(data.scores[j], dim=-1))
-        prop= torch.log(data.scores[j][0][toptoken])+prop 
-        sequence.append(prop)
+        prop= torch.log_softmax(data.scores[j][0][toptoken], dim=-1)+prop 
+        sequence.append(prop.cpu())
     qestd= np.std(np.array(sequence))
     
     return qestd
@@ -117,8 +120,8 @@ def getQE(data, dropout=False, dropouttrans=None):
     else:
         qe= TranslationProbability(data)
         qeent= softmaxEntropy(data)
-        #qestd= sentStd(data)
-        res =(qe, qeent)
+        qestd= sentStd(data)
+        res = (qe, qeent, qestd)
     print(res)
     return res
     
