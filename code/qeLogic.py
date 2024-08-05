@@ -60,10 +60,9 @@ def softmaxEntropy(data):
         print("softmax", softmaxed[0], type(softmaxed[0]))
         for i in range(len(data.scores[j])):
             for k in range(len(data.scores[j][i])):
-                print("softmaxed",softmaxed[i][k].item(), torch.mul(softmaxed[i][k],torch.log(softmaxed[i][k])),type(torch.mul(softmaxed[i][k],torch.log(softmaxed[i][k]))))
+                #print("softmaxed",softmaxed[i][k].item(), torch.mul(softmaxed[i][k],torch.log(softmaxed[i][k])),type(torch.mul(softmaxed[i][k],torch.log(softmaxed[i][k]))))
                 prop= torch.mul(softmaxed[i][k],torch.log(softmaxed[i][k]))+prop
-                print("prop",prop)
-        print("result",prop, type(prop))
+
     qeent= -np.divide(prop.cpu().numpy(), (len(data.scores[0])))
     return qeent
 
@@ -84,7 +83,6 @@ def sentStd(data):
 def writeCSV(results, path, dropout=False):
     if dropout:
         with open(path, "a", newline='') as f:
-            
             writer = csv.writer(f, dialect='excel')
             #writer.writerow(["reference", "transcriptions"])
             writer.writerows(results)
@@ -112,7 +110,7 @@ def lexsim(transhypo):
     
     return 0
 
-def getQE(data, dropout=False, dropouttrans=None):
+def getQE(data, dropout=False, dropouttrans=None, translation=True):
     if dropout:
         for i in range(len(data)):
             qe= TranslationProbability(data)
@@ -122,8 +120,9 @@ def getQE(data, dropout=False, dropouttrans=None):
         res =(qe, qevar, com)
     else:
         qe= TranslationProbability(data)
-        qeent= softmaxEntropy(data)
-        qestd= sentStd(data)
+        if translation:
+            qeent= softmaxEntropy(data)
+            qestd= sentStd(data)
         res = (qe, qeent, qestd)
     print(res)
     return res
