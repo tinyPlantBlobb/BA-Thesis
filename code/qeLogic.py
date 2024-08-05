@@ -8,7 +8,6 @@ import torch
 #import evaluate 
 import yaml
 import torchaudio
-import pdb; pdb.set_trace()
 
 def getAudios(TEMPDIR):
     print("starting reading from tar")
@@ -60,10 +59,8 @@ def softmaxEntropy(data):
         print("softmax", softmaxed[0], type(softmaxed[0]))
         for i in range(len(data.scores[j])):
             for k in range(len(data.scores[j][i])):
-                #breakpoint()
                 print("softmaxed",softmaxed[i][k].item(), torch.mul(softmaxed[i][k],torch.log(softmaxed[i][k])),type(torch.mul(softmaxed[i][k],torch.log(softmaxed[i][k]))))
                 prop= torch.mul(softmaxed[i][k],torch.log(softmaxed[i][k]))+prop
-                #breakpoint()
                 print("prop",prop)
         print("result",prop, type(prop))
     qeent= -np.divide(prop.cpu().numpy(), (len(data.scores[0])))
