@@ -9,6 +9,7 @@ import torch
 import yaml
 import torchaudio
 
+
 def getAudios(TEMPDIR):
     print("starting reading from tar")
     with open(TEMPDIR+"/data/IWSLT.TED.tst2023.en-de.matched.yaml") as matched:
@@ -95,8 +96,8 @@ def writeCSV(results, path, dropout=False):
 
 def readCSV(path):
     with open(path, 'r',newline='') as f:
-        reader = csv.reader(f, dialect='excel')
-        data = {rows[0]:(rows[1], rows[2]) for rows in reader}
+        reader = csv.DictReader(f, dialect='excel', fieldnames=["row", "transcript", "reference", "qe"])
+        data = list(reader)
     return data
 
 def variance(data):
