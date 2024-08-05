@@ -30,30 +30,28 @@ def run_inference(rank, world_size, dataset):
             model.eval()
             sample = dataset[i]
             input = sample["transcript"]
-            sample_rate = sample["audiofile"]["sampling_rate"]  # alternatively set to 16000
+            sample["audiofile"]["sampling_rate"]  # alternatively set to 16000
             text = sample["transcript"]
-            input = processor(input, return_tensors="pt")
+            input = processor(input,src_lang="eng", return_tensors="pt")
             input_features = input.input_features.to(rank)
-            res = model.generate(input_features=input_features, return_dict_in_generate=True, output_scores=True, output_logits=True)
+            res = model.generate(input_features=input_features, tgt_lang="deu", return_dict_in_generate=True, output_scores=True, output_logits=True)
             #############################################
             # Huggingface whisper implementation things #
             #############################################
 
             # this will return the last layer probabilities of the model
 
-            logits = model(
-                input_features, decoder_input_ids=res["sequences"]
-            ).logits  # gets the last layer probabilities of the model
+            model(input_features, decoder_input_ids=res["sequences"]).logits  # gets the last layer probabilities of the model
             trans = processor.batch_decode(res["sequences"], skip_special_tokens=True)[0]
             qe= getQE(res, dropout=False)
             torch.cuda.empty_cache()
             result = None
            # result = Result(sample["audiofile"],sample["timestamp"],sample["transcript"],trans,res,qe)
-            torch.save(result, TEMPDIR + "/results/result"+str(i)+".pt")
+            torch.save(result, TEMPDIR + "/results/seamless_result"+str(i)+".pt")
             torch.cuda.empty_cache()
             
             print(trans, text)
-            csv.append([i,text, trans])
+            csv.append([i,text, trans, qe])
     output = [None for _ in range(world_size)]
     dist.gather_object(obj=csv, object_gather_list=output if dist.get_rank() == 0 else None,dst=0)
     if rank == 0:
