@@ -90,7 +90,7 @@ def run_inference(rank, world_size, dataset):
             trans = processor.batch_decode(res["sequences"], skip_special_tokens=True)[
                 0
             ]
-            qe = getQE(res, dropout=False)
+            qe = getQE(res, dropout=False, translation=False)
             torch.cuda.empty_cache()
             result = Result(
                 sample["audiofile"],
