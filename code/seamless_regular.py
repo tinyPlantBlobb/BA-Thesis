@@ -27,21 +27,22 @@ def run_inference(rank, world_size, dataset):
     with torch.no_grad():
         for i in tqdm(range(offset, offset+num,1)):
             model.eval()
-            print(type(dataset))
-            sample = next(iter(dataset))
+            sample = dataset["train"][i]
             input = sample["transcription"]
             # alternatively set to 16000
             text = sample["reference"]
-            input = processor(text=input,src_lang="eng", return_tensors="pt")
-            input_features = input.input_features.to(rank)
-            res = model.generate(input_features=input_features, tgt_lang="deu", return_dict_in_generate=True, output_scores=True, output_logits=True)
+            text_input = processor(text=input,src_lang="eng", return_tensors="pt")
+            
+            text_input = text_input.to(rank)
+            res = model.generate(**text_input, tgt_lang="deu", return_dict_in_generate=True, output_scores=True, output_logits=True)
+
             #############################################
             # Huggingface whisper implementation things #
             #############################################
 
             # this will return the last layer probabilities of the model
 
-            model(input_features, decoder_input_ids=res["sequences"]).logits  # gets the last layer probabilities of the model
+            #model(input_features, decoder_input_ids=res["sequences"]).logits  # gets the last layer probabilities of the model
             trans = processor.batch_decode(res["sequences"], skip_special_tokens=True)[0]
             qe= getQE(res, dropout=False)
             torch.cuda.empty_cache()
@@ -71,7 +72,7 @@ if not os.path.exists(respath):
 
 def main():
     print(TEMPDIR + "/results/fulltranscriptions.csv")
-    dataset = load_dataset("csv",data_files=TEMPDIR + "/results/fulltranscriptions.csv", streaming=True)
+    dataset = load_dataset("csv",data_files=TEMPDIR + "/results/fulltranscriptions.csv")
     world_size= torch.cuda.device_count()
     torchrunrank= int(os.environ["LOCAL_RANK"])
     trglrank = int(os.environ["RANK"])
