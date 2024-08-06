@@ -1,3 +1,4 @@
+from requests import get
 import torch.distributed
 import torch.utils
 import torch.utils.data
@@ -9,7 +10,7 @@ from transformers import SeamlessM4Tv2ForTextToText,  AutoProcessor as SeamlessP
 import os
 import torch
 from tqdm import tqdm
-from qeLogic import TranslationProbability, softmaxEntropy, sentStd, readCSV
+from qeLogic import getQE, readCSV
 
 # dropout would be 0.1 as done in the paper in the experiment for evaluating the translation
 model = SeamlessM4Tv2ForTextToText.from_pretrained("facebook/seamless-m4t-v2-large")
@@ -60,6 +61,7 @@ def run_inference(rank, world_size, dataset):
                     all["generationoutput"].append(res)
                     dropoutresult= Result(audiofile=sample["audiofile"], timestamp=sample["timestamp"], runs=all,ref=text)
                 torch.cuda.empty_cache()
+            getQE(dropoutresult, dropout=True)
             # with open(TEMPDIR + "/results/dropresult"+str(i)+".txt", "w") as file:
             #     file.write(str(dropoutresult["all"]["tranlateion"]))
             #     file.close()

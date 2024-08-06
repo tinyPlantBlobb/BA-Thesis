@@ -82,9 +82,11 @@ def run_inference(rank, world_size, dataset):
                     all["generationoutput"].append(res)
                     all["transcription"].append(trans)
                     
-                dropoutresult = getQE(res, dropouttrans = all["transcription"], dropout=True)
+            
                 torch.cuda.empty_cache()
+            dropoutresult = getQE(res, dropouttrans = all["transcription"], dropout=True)
             cvs.append([sample["ref"]]+all["transcription"])
+
             torch.save(dropoutresult, TEMPDIR + "/results/dropoutresult"+str(i)+".pt")
         writeCSV(cvs, TEMPDIR + "/results/transcriptions"+str(i)+".csv", dropout=True)
         del dropoutresult
