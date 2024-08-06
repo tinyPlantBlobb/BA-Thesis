@@ -4,17 +4,15 @@ import torch.utils.data
 import torch.distributed as dist
 import torch.multiprocessing as mp
 from torch.nn.parallel import DistributedDataParallel as DDP
-from datasets import Dataset, Audio
-from transformers import SeamlessM4TForTextToText,  AutoProcessor as SeamlessProcessor
+from datasets import Dataset
+from transformers import SeamlessM4Tv2ForTextToText,  AutoProcessor as SeamlessProcessor
 import os
-import yaml
 import torch
-import torchaudio
 from tqdm import tqdm
 from qeLogic import getQE,writeCSV, readCSV
 # dropout would be 0.1 as done in the paper in the experiment for evaluating the translation
-model = SeamlessM4TForTextToText.from_pretrained("facebook/hf-seamless-m4t-medium")
-processor = SeamlessProcessor.from_pretrained("facebook/seamless-m4t-v2-medium")
+model = SeamlessM4Tv2ForTextToText.from_pretrained("facebook/seamless-m4t-v2-large")
+processor = SeamlessProcessor.from_pretrained("facebook/seamless-m4t-v2-large")
 
 
 def run_inference(rank, world_size, dataset):
@@ -32,7 +30,7 @@ def run_inference(rank, world_size, dataset):
             input = sample["transcript"]
             # alternatively set to 16000
             text = sample["reference"]
-            input = processor(input,src_lang="eng", return_tensors="pt")
+            input = processor(text=input,src_lang="eng", return_tensors="pt")
             input_features = input.input_features.to(rank)
             res = model.generate(input_features=input_features, tgt_lang="deu", return_dict_in_generate=True, output_scores=True, output_logits=True)
             #############################################
@@ -70,7 +68,7 @@ if not os.path.exists(respath):
         os.mkdir(respath)
 
 def main():
-    dataset = Dataset.from_dict(readCSV(TEMPDIR+"results/fullstranscription.csv"))
+    dataset = Dataset.from_dict(readCSV(TEMPDIR+"/results/fullstranscription.csv"))
     world_size= torch.cuda.device_count()
     torchrunrank= int(os.environ["LOCAL_RANK"])
     trglrank = int(os.environ["RANK"])

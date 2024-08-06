@@ -4,18 +4,16 @@ import torch.utils.data
 import torch.distributed as dist
 import torch.multiprocessing as mp
 from torch.nn.parallel import DistributedDataParallel as DDP
-from datasets import Dataset, Audio
-from transformers import SeamlessM4TForTextToText,  AutoProcessor as SeamlessProcessor
+from datasets import Dataset
+from transformers import SeamlessM4Tv2ForTextToText,  AutoProcessor as SeamlessProcessor
 import os
-import yaml
 import torch
-import torchaudio
 from tqdm import tqdm
-from qeLogic import TranslationProbability, softmaxEntropy, sentStd, Result, readCSV
+from qeLogic import TranslationProbability, softmaxEntropy, sentStd, readCSV
 
 # dropout would be 0.1 as done in the paper in the experiment for evaluating the translation
-model = SeamlessM4TForTextToText.from_pretrained("facebook/hf-seamless-m4t-medium")
-processor = SeamlessProcessor.from_pretrained("facebook/seamless-m4t-v2-medium")
+model = SeamlessM4Tv2ForTextToText.from_pretrained("facebook/seamless-m4t-v2-large")
+processor = SeamlessProcessor.from_pretrained("facebook/seamless-m4t-v2-v2-large")
 
     
 

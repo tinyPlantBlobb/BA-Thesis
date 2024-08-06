@@ -19,10 +19,12 @@ mkdir -p $TMPDIR/data
 tar -C $TMPDIR/data -vxzf $(ws_find iswslt-dataset)/segments_IWSLT-23.en-de.tar.gz
 source qe-whitebox/bin/activate
 
-pip install transformers
-pip install datasets
-pip install evaluate
-pip install librosa
+pip install transformers --upgrade
+pip install datasets --upgrade
+pip install evaluate --upgrade
+pip install librosa --upgrade
+pip install sentencepiece 
+pip install protobuf 
 
 srun torchrun --nnodes 1 --nproc_per_node 1 asr_regular.py
 srun torchrun --nnodes 1 --nproc_per_node 1 seamless_regular.py

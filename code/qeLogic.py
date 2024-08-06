@@ -123,7 +123,9 @@ def getQE(data, dropout=False, dropouttrans=None, translation=True):
         if translation:
             qeent= softmaxEntropy(data)
             qestd= sentStd(data)
-        res = (qe, qeent, qestd)
+            res = (qe, qeent, qestd)
+        else:
+            res = (qe)
     print(res)
     return res
     
