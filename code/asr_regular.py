@@ -115,6 +115,7 @@ def run_inference(rank, world_size, dataset):
                 continue
             csv.extend(output[i])
         writeCSV(csv, TEMPDIR + "/results/fulltranscriptions.csv", dropout=False)
+        print(TEMPDIR + "/results/fulltranscriptions.csv")
 
 
 BASE = ""

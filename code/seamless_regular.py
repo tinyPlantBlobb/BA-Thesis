@@ -4,7 +4,7 @@ import torch.utils.data
 import torch.distributed as dist
 import torch.multiprocessing as mp
 from torch.nn.parallel import DistributedDataParallel as DDP
-from datasets import Dataset
+from datasets import Dataset, load_dataset
 from transformers import SeamlessM4Tv2ForTextToText,  AutoProcessor as SeamlessProcessor
 import os
 import torch
@@ -23,11 +23,13 @@ def run_inference(rank, world_size, dataset):
     offset = 0 + rank*((len(dataset))//world_size)
     num = 3
     csv = []
+    print("starting seamless regular")
     with torch.no_grad():
         for i in tqdm(range(offset, offset+num,1)):
             model.eval()
-            sample = dataset[i]
-            input = sample["transcript"]
+            print(type(dataset))
+            sample = next(iter(dataset))
+            input = sample["transcription"]
             # alternatively set to 16000
             text = sample["reference"]
             input = processor(text=input,src_lang="eng", return_tensors="pt")
@@ -68,7 +70,8 @@ if not os.path.exists(respath):
         os.mkdir(respath)
 
 def main():
-    dataset = Dataset.from_dict(readCSV(TEMPDIR+"/results/fullstranscription.csv"))
+    print(TEMPDIR + "/results/fulltranscriptions.csv")
+    dataset = load_dataset("csv",data_files=TEMPDIR + "/results/fulltranscriptions.csv", streaming=True)
     world_size= torch.cuda.device_count()
     torchrunrank= int(os.environ["LOCAL_RANK"])
     trglrank = int(os.environ["RANK"])

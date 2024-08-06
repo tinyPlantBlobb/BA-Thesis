@@ -82,20 +82,26 @@ def sentStd(data):
 
 def writeCSV(results, path, dropout=False):
     if dropout:
-        with open(path, "a", newline='') as f:
+        with open(path, "w", newline='') as f:
             writer = csv.writer(f, dialect='excel')
+            writer.writerow(["row","reference", "transcription", "qe"])
             #writer.writerow(["reference", "transcriptions"])
             writer.writerows(results)
     else:
         with open(path, "w", newline='') as f:
             writer = csv.writer(f, dialect='excel')
+            writer.writerow(["row", "reference", "transcription", "qe"])
             #writer.writerow(["reference", "transcription"])
             writer.writerows(results)
 
 def readCSV(path):
     with open(path, 'r',newline='') as f:
         reader = csv.DictReader(f, dialect='excel', fieldnames=["row", "transcript", "reference", "qe"])
-        data = list(reader)
+        data = {"transcript": [], "reference": [], "qe": []}
+        for row in reader:
+            data["transcript"].append(row["transcript"])
+            data["reference"].append(row["reference"])
+            data["qe"].append(row["qe"])
     return data
 
 def variance(data):
