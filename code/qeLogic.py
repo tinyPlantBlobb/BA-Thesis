@@ -50,7 +50,22 @@ def TranslationProbability(data):
         prop= toptokenprob+prop
     return np.divide(prop.cpu().numpy(),len(data.scores[0]))
 
-  
+def TranscriptionProbability(data):
+    prop= 0
+    for j in range(len(data.scores)):
+        toptoken= torch.argmax(torch.nn.functional.softmax(data.scores[j], dim=-1))
+        toptokenprob = torch.log_softmax(data.scores[j][0], dim=-1)[toptoken]
+        prop= toptokenprob+prop
+    return prop.cpu().numpy()
+
+def TranscriptionMean(data):
+    prop= 0
+    for j in range(len(data.scores)):
+        toptoken= torch.argmax(torch.nn.functional.softmax(data.scores[j], dim=-1))
+        toptokenprob = torch.log_softmax(data.scores[j][0], dim=-1)[toptoken]
+        prop= toptokenprob+prop
+    return np.divide(prop.cpu().numpy(),len(data.scores[0]))
+
 def softmaxEntropy(data):
     #Prediction scores of the language modeling head (scores for each vocabulary token before SoftMax).
     prop= 0
@@ -125,13 +140,16 @@ def getQE(data, dropout=False, dropouttrans=None, translation=True):
             lex = lexsim(dropouttrans)
         res =(qe, qevar, com)
     else:
-        qe= TranslationProbability(data)
+        
         if translation:
+            qe= TranslationProbability(data)
             qeent= softmaxEntropy(data)
             qestd= sentStd(data)
             res = (qe, qeent, qestd)
         else:
-            res = (qe)
+            qe = TranscriptionProbability(data)
+            qemean = TranscriptionMean(data)
+            res = (qe, qemean)
     print(res)
     return res
     
