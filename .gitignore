@@ -10,3 +10,4 @@ result.yaml
 *.tgz
 __pycache__
 *.sync-conflict*
+results/
