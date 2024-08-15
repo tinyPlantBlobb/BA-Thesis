@@ -32,6 +32,5 @@ srun torchrun --nnodes 1 --nproc_per_node 1 seamless_regular.py
 
 # Before job completes save results on a workspace
 rsync -av $TMPDIR/results/fulltranscriptions.csv $(ws_find iswslt-dataset)/results-${SLURM_JOB_ID}/
-tar -cvzf $TMPDIR/results-${SLURM_JOB_ID}.tar.gz $TMPDIR/results
-rsync -av $TMPDIR/results-${SLURM_JOB_ID}.tar.gz $(ws_find iswslt-dataset)/results-${SLURM_JOB_ID}/
+rsync -av $TMPDIR/results $(ws_find iswslt-dataset)/results-${SLURM_JOB_ID}/
 

@@ -24,7 +24,7 @@ def run_inference(rank, world_size, dataset):
     #num=3
     num = (len(dataset))//(world_size)
     csv = []
-    print("starting seamless regular")
+    print("starting seamless regular on", num)
     with torch.no_grad():
         for i in tqdm(range(offset, offset+num,1)):
             model.eval()
