@@ -34,7 +34,7 @@ srun torchrun --nnodes 1 --nproc_per_node 1 seamless_regular.py
 # TODO output file angeben
 #srun fairseq-generate $(ws_find iswslt-dataset)/data-bin/ \
 #    --path $(ws_find iswslt-dataset)/checkpoints/deltalm-large.pt \
-#    --batch-size 128 --beam 5 --remove-bpe | tee $TMPDIR/results/fulltranscriptions.csv
+#    --batch-size 128 --beam 5 --remove-bpe --resluts-path $/ws_find iswslt-dataset)/results-${SLURM_JOB_ID}| tee $TMPDIR/results/fulltranscriptions.csv
 
 # Before job completes save results on a workspace
 rsync -av $TMPDIR/results/fulltranscriptions.csv $(ws_find iswslt-dataset)/results-${SLURM_JOB_ID}/
