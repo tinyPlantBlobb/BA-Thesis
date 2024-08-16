@@ -30,8 +30,10 @@ srun torchrun --nnodes 1 --nproc_per_node 1 asr_regular.py
 srun torchrun --nnodes 1 --nproc_per_node 1 seamless_regular.py
 #srun torchrun --nnodes 1 --nproc_per_node 1 mnt_part.py
 
+# 1. param = path to the dir that contains the dataset in the deltalm split format
+# TODO output file angeben
 #srun fairseq-generate $(ws_find iswslt-dataset)/data-bin/ \
-#    --path $(ws_find iswslt-dataset)/checkpoints/checkpoint_best.pt \
+#    --path $(ws_find iswslt-dataset)/checkpoints/deltalm-large.pt \
 #    --batch-size 128 --beam 5 --remove-bpe | tee $TMPDIR/results/fulltranscriptions.csv
 
 # Before job completes save results on a workspace
