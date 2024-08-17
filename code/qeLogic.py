@@ -71,12 +71,13 @@ def softmaxEntropy(data):
     prop= 0
     for j in range(len(data.scores)):
         softmaxed = data.scores[j]
-        
-        print("softmax", softmaxed[0], type(softmaxed[0]))
-        for i in range(len(data.scores[j])):
-            for k in range(len(data.scores[j][i])):
-                #print("softmaxed",softmaxed[i][k].item(), torch.mul(softmaxed[i][k],torch.log(softmaxed[i][k])),type(torch.mul(softmaxed[i][k],torch.log(softmaxed[i][k]))))
-                prop= torch.mul(softmaxed[i][k],torch.log(softmaxed[i][k]))+prop
+        mask = softmaxed != 0
+        prop = torch.sum(mask *torch.mul(softmaxed, torch.log(softmaxed)), dim=-1)
+        # print("softmax", softmaxed[0], type(softmaxed[0]))
+        # for i in range(len(data.scores[j])):
+        #     for k in range(len(data.scores[j][i])):
+        #         #print("softmaxed",softmaxed[i][k].item(), torch.mul(softmaxed[i][k],torch.log(softmaxed[i][k])),type(torch.mul(softmaxed[i][k],torch.log(softmaxed[i][k]))))
+        #         prop= torch.mul(softmaxed[i][k],torch.log(softmaxed[i][k]))+prop
 
     qeent= -np.divide(prop.cpu().numpy(), (len(data.scores[0])))
     return qeent
