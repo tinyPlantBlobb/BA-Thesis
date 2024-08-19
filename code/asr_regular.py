@@ -1,4 +1,3 @@
-import csv
 import torch.distributed
 import torch.utils
 import torch.utils.data
@@ -23,7 +22,7 @@ class Result:
     ref = None
     trans = None
     data = None  # result of the model
-    results = None  # Tuple of (qe, qeent, qestd)
+    results = None  # Tuple of (qe, qeent, qestd*mask)
     dropoutdata = None  # result of the model for all droutout runs list of tuples
     dropoutresults = None  # list of Tuple of (qe, var, lex-simm)
 
@@ -60,7 +59,8 @@ def run_inference(rank, world_size, dataset):
     model.to(rank)
     model.generation_config.forced_decoder_ids = None
     offset = 0 + rank * ((len(dataset)) // world_size)
-    num = (len(dataset)) // (world_size * 2)
+    num = 3
+    # num = (len(dataset)) // (world_size * 2)
     csv = []
     with torch.no_grad():
         for i in tqdm(range(offset, offset + num, 1)):
@@ -104,7 +104,7 @@ def run_inference(rank, world_size, dataset):
             torch.cuda.empty_cache()
 
             print(trans, text)
-            csv.append([i, text, trans, qe])
+            csv.append([i, text, trans, sample["translation"], qe])
     output = [None for _ in range(world_size)]
     dist.gather_object(
         obj=csv, object_gather_list=output if dist.get_rank() == 0 else None, dst=0
