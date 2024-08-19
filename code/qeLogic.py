@@ -5,14 +5,15 @@ import torch.utils
 import torch.utils.data
 import numpy as np
 import torch
-#import evaluate 
+
+import evaluate
 import yaml
 import torchaudio
 
 
 def getAudios(TEMPDIR):
     print("starting reading from tar")
-    with open(TEMPDIR+"/data/IWSLT.TED.tst2023.en-de.matched.yaml") as matched:
+    with open(TEMPDIR + "/data/IWSLT.TED.tst2023.en-de.matched.yaml") as matched:
         data = yaml.load(matched, Loader=yaml.FullLoader)
         matched.close()
     print("closed tar")
@@ -24,12 +25,12 @@ def getAudios(TEMPDIR):
         "timestamp": [],
     }
     print("starting iterating over tar elements")
-    for t in os.scandir(TEMPDIR+"/data"):
+    for t in os.scandir(TEMPDIR + "/data"):
         if t.name == "IWSLT.TED.tst2023.en-de.matched.yaml":
             continue
         tedwav = t.name.split(".")[0]
-        segment= int(t.name.split(".")[1][3:]) 
-        seg = data[tedwav+".wav"][segment]
+        segment = int(t.name.split(".")[1][3:])
+        seg = data[tedwav + ".wav"][segment]
         torchaudio.load(t.path)
         resdataset["audiofile"].append(t.path)
         resdataset["transcript"].append(seg.get("transcript"))
@@ -42,77 +43,90 @@ def getAudios(TEMPDIR):
 
 
 def TranslationProbability(data):
-        #toptoken= data[i].scores
-    prop= 0
+    # toptoken= data[i].scores
+    prop = 0
     for j in range(len(data.scores)):
-        toptoken= torch.argmax(torch.nn.functional.softmax(data.scores[j], dim=-1))
+        toptoken = torch.argmax(torch.nn.functional.softmax(data.scores[j], dim=-1))
         toptokenprob = torch.log_softmax(data.scores[j][0], dim=-1)[toptoken]
-        prop= toptokenprob+prop
-    return np.divide(prop.cpu().numpy(),len(data.scores[0]))
+        prop = toptokenprob + prop
+    return np.divide(prop.cpu().numpy(), len(data.scores))
+
 
 def TranscriptionProbability(data):
-    prop= 0
+    prop = 0
     for j in range(len(data.scores)):
-        toptoken= torch.argmax(torch.nn.functional.softmax(data.scores[j], dim=-1))
+        toptoken = torch.argmax(torch.nn.functional.softmax(data.scores[j], dim=-1))
         toptokenprob = torch.log_softmax(data.scores[j][0], dim=-1)[toptoken]
-        prop= toptokenprob+prop
+        prop = toptokenprob + prop
     return prop.cpu().numpy()
 
+
 def TranscriptionMean(data):
-    prop= 0
+    prop = 0
     for j in range(len(data.scores)):
-        toptoken= torch.argmax(torch.nn.functional.softmax(data.scores[j], dim=-1))
+        toptoken = torch.argmax(torch.nn.functional.softmax(data.scores[j], dim=-1))
         toptokenprob = torch.log_softmax(data.scores[j][0], dim=-1)[toptoken]
-        prop= toptokenprob+prop
-    return np.divide(prop.cpu().numpy(),len(data.scores[0]))
+        prop = toptokenprob + prop
+    return np.divide(prop.cpu().numpy(), len(data.scores))
+
 
 def softmaxEntropy(data):
-    #Prediction scores of the language modeling head (scores for each vocabulary token before SoftMax).
-    prop= 0
+    # Prediction scores of the language modeling head (scores for each vocabulary token before SoftMax).
+    prop = 0
     for j in range(len(data.scores)):
         softmaxed = data.scores[j]
         mask = softmaxed != 0
-        prop = torch.sum(mask *torch.mul(softmaxed, torch.log(softmaxed)), dim=-1)
+        prop = torch.sum(torch.mul(softmaxed, torch.log(softmaxed * mask)), dim=-1)
         # print("softmax", softmaxed[0], type(softmaxed[0]))
         # for i in range(len(data.scores[j])):
         #     for k in range(len(data.scores[j][i])):
         #         #print("softmaxed",softmaxed[i][k].item(), torch.mul(softmaxed[i][k],torch.log(softmaxed[i][k])),type(torch.mul(softmaxed[i][k],torch.log(softmaxed[i][k]))))
         #         prop= torch.mul(softmaxed[i][k],torch.log(softmaxed[i][k]))+prop
 
-    qeent= -np.divide(prop.cpu().numpy(), (len(data.scores[0])))
+    qeent = -np.divide(prop.cpu().numpy(), (len(data.scores)))
     return qeent
 
+
 def sentStd(data):
-    #TODO fix
-    #Prediction scores of the language modeling head (scores for each vocabulary token before SoftMax).
+    # TODO fix
+    # Prediction scores of the language modeling head (scores for each vocabulary token before SoftMax).
     sequence = []
-    prop= 0
+    prop = 0
     for j in range(len(data.scores)):
-        toptoken= torch.argmax(torch.nn.functional.softmax(data.scores[j], dim=-1))
-        prop= torch.log_softmax(data.scores[j][0][toptoken], dim=-1)+prop 
-        sequence.append(prop.cpu())
+        toptoken = torch.argmax(torch.nn.functional.softmax(data.scores[j], dim=-1))
+        proba = torch.sum(
+            torch.max(torch.log_softmax(data.scores, dim=-1), dim=1).values
+        )
+        prop = torch.log_softmax(data.scores[j][0][toptoken], dim=-1) + prop
+        sequence.append((prop.cpu(), proba.cpu()))
     print(sequence)
-    qestd= np.std(np.array(sequence))
-    
+    qestd = np.std(np.array(sequence))
+
     return qestd
+
 
 def writeCSV(results, path, dropout=False):
     if dropout:
-        with open(path, "w", newline='') as f:
-            writer = csv.writer(f, dialect='excel')
-            writer.writerow(["row","reference", "transcription", "qe"])
-            #writer.writerow(["reference", "transcriptions"])
+        with open(path, "w", newline="") as f:
+            writer = csv.writer(f, dialect="excel")
+            writer.writerow(["row", "reference", "transcription", "translation", "qe"])
+            # writer.writerow(["reference", "transcriptions"])
             writer.writerows(results)
     else:
-        with open(path, "w", newline='') as f:
-            writer = csv.writer(f, dialect='excel')
-            writer.writerow(["row", "reference", "transcription", "qe"])
-            #writer.writerow(["reference", "transcription"])
+        with open(path, "w", newline="") as f:
+            writer = csv.writer(f, dialect="excel")
+            writer.writerow(["row", "reference", "transcription", "translation", "qe"])
+            # writer.writerow(["reference", "transcription"])
             writer.writerows(results)
 
+
 def readCSV(path):
-    with open(path, 'r',newline='') as f:
-        reader = csv.DictReader(f, dialect='excel', fieldnames=["row", "transcript", "reference", "qe"])
+    with open(path, "r", newline="") as f:
+        reader = csv.DictReader(
+            f,
+            dialect="excel",
+            fieldnames=["row", "transcript", "reference", "translation", "qe"],
+        )
         data = {"transcript": [], "reference": [], "qe": []}
         for row in reader:
             data["transcript"].append(row["transcript"])
@@ -120,40 +134,58 @@ def readCSV(path):
             data["qe"].append(row["qe"])
     return data
 
+
 def variance(data):
     return np.var(data)
 
+
 def combo(tp, var):
-    return (1-np.divide(tp. var))
+    return 1 - np.divide(tp, var)
+
 
 def lexsim(transhypo):
-    #meteor = evaluate.load('meteor')
-    #TODO write code for the simmilarity with the help of meteor 
-    
+    meteor = evaluate.load("meteor")
+    for i in range(len(transhypo) - 1):
+        meteor.compute(predictions=transhypo[i], reference=transhypo[i + 1])
+    # TODO write code for the simmilarity with the help of meteor
+
     return 0
+
 
 def getQE(data, dropout=False, dropouttrans=None, translation=True):
     if dropout:
+        qe = qevar = lex = []
+        com = lex = 0
         for i in range(len(data)):
-            qe= TranslationProbability(data)
-            qevar= variance(data)
-            com = combo(qe, qevar)
-            lex = lexsim(dropouttrans)
-        res =(qe, qevar, com)
+            if translation:
+                qe.append(TranslationProbability(data))
+                qevar.append(variance(data))
+                com = combo(qe, qevar)
+                lex = lexsim(dropouttrans)
+
+            else:
+                qe.append(TranscriptionProbability)
+        res = (qe, qevar, com, lex)
     else:
-        
         if translation:
-            qe= TranslationProbability(data)
-            qeent= softmaxEntropy(data)
-            qestd= sentStd(data)
-            res = (qe, qeent, qestd)
+            qe = TranslationProbability(data)
+            qeent = softmaxEntropy(data)
+            qestd = sentStd(data)
+            res = (qe, qeent, qestd, ref)
         else:
             qe = TranscriptionProbability(data)
             qemean = TranscriptionMean(data)
             res = (qe, qemean)
     print(res)
     return res
-    
+
+
+def cometscore(source, prediction, reference):
+    comet_metric = load("comet")
+    comet_score = comet_metric.compute(
+        predictions=prediction, references=reference, sources=source
+    )
+    print(comet_score)
 
 
 # TranslationProbability(t)
