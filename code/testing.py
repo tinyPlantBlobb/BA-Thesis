@@ -51,6 +51,6 @@ with open(
     )
 
     # Load data from file
-    print(type(data[0]))
+    # print(type(data[0]))
     generationdata = data[0]
     qeres = getQE(generationdata, translation=True, dropout=False)
