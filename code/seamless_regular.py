@@ -1,4 +1,3 @@
-from weakref import ref
 import torch.distributed
 import torch.utils
 import torch.utils.data
@@ -24,12 +23,15 @@ def run_inference(rank, world_size, dataset):
     model.generation_config.forced_decoder_ids = None
     offset = 0 + rank * ((len(dataset)) // world_size)
     num = 3
+    # num = 280
     # num = (len(dataset)) // (world_size)
-    print(len(dataset), world_size)
+    # print(len(dataset), world_size)
     csv = []
     print("starting seamless regular on", num)
+
     with torch.no_grad():
         for i in tqdm(range(offset, offset + num, 1)):
+            refscore = 0
             model.eval()
             sample = dataset["train"][i]
             input = sample["transcription"]
@@ -57,13 +59,14 @@ def run_inference(rank, world_size, dataset):
                 0
             ]
             print(trans, text)
-            qe = getQE(res, dropout=False)
+            refscore = cometscore([text], [trans], [sample["translation"]])
+            qe = getQE(res, dropout=False, ref=refscore)
             torch.cuda.empty_cache()
-            result = (res, input, text)
+            result = (res, input, text, refscore)
             # result = Result(sample["audiofile"],sample["timestamp"],sample["transcript"],trans,res,qe)
             torch.save(result, TEMPDIR + "/results/seamless_result" + str(i) + ".pt")
             torch.cuda.empty_cache()
-            refscore = cometscore(text, trans, sample["translation"])
+
             csv.append([i, text, trans, sample["translation"], qe, refscore])
     output = [None for _ in range(world_size)]
     dist.gather_object(

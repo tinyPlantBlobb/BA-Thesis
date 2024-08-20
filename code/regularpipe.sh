@@ -25,6 +25,7 @@ pip install evaluate --upgrade
 pip install librosa --upgrade
 pip install sentencepiece
 pip install protobuf
+pip install unbabel-comet
 
 srun torchrun --nnodes 1 --nproc_per_node 1 asr_regular.py
 srun torchrun --nnodes 1 --nproc_per_node 1 seamless_regular.py

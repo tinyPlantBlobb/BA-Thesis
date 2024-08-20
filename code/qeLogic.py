@@ -76,7 +76,9 @@ def softmaxEntropy(data):
     for j in range(len(data.scores)):
         softmaxed = data.scores[j]
         mask = softmaxed != 0
-        prop = torch.sum(torch.mul(softmaxed, torch.log(softmaxed * mask)), dim=-1)
+        # logged[mask] = torch.log(softmaxed[mask])
+        prop = torch.sum(torch.mul(softmaxed[mask], torch.log(softmaxed[mask])), dim=-1)
+        print(prop)
         # print("softmax", softmaxed[0], type(softmaxed[0]))
         # for i in range(len(data.scores[j])):
         #     for k in range(len(data.scores[j][i])):
@@ -95,7 +97,7 @@ def sentStd(data):
     for j in range(len(data.scores)):
         toptoken = torch.argmax(torch.nn.functional.softmax(data.scores[j], dim=-1))
         proba = torch.sum(
-            torch.max(torch.log_softmax(data.scores, dim=-1), dim=1).values
+            torch.max(torch.log_softmax(data.scores[j], dim=-1), dim=1).values
         )
         prop = torch.log_softmax(data.scores[j][0][toptoken], dim=-1) + prop
         sequence.append((prop.cpu(), proba.cpu()))
@@ -136,7 +138,9 @@ def readCSV(path):
 
 
 def variance(data):
-    return np.var(data)
+    print(type(data), type(data[0]))
+    data = data[0]
+    return torch.var(data, dim=1)
 
 
 def combo(tp, var):
@@ -152,7 +156,7 @@ def lexsim(transhypo):
     return 0
 
 
-def getQE(data, dropout=False, dropouttrans=None, translation=True):
+def getQE(data, dropout=False, dropouttrans=None, translation=True, ref=0):
     if dropout:
         qe = qevar = lex = []
         com = lex = 0
@@ -171,17 +175,29 @@ def getQE(data, dropout=False, dropouttrans=None, translation=True):
             qe = TranslationProbability(data)
             qeent = softmaxEntropy(data)
             qestd = sentStd(data)
+
             res = (qe, qeent, qestd, ref)
+            print(
+                "TP",
+                res[0],
+                "softmaxEntropy",
+                res[1],
+                "standard deviation",
+                res[2],
+                "ref",
+                res[3],
+            )
+
         else:
             qe = TranscriptionProbability(data)
             qemean = TranscriptionMean(data)
             res = (qe, qemean)
-    print(res)
-    return res
+        print(res)
+        return res
 
 
 def cometscore(source, prediction, reference):
-    comet_metric = load("comet")
+    comet_metric = evaluate.load("comet")
     comet_score = comet_metric.compute(
         predictions=prediction, references=reference, sources=source
     )
