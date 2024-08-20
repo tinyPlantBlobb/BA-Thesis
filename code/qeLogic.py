@@ -73,19 +73,23 @@ def TranscriptionMean(data):
 def softmaxEntropy(data):
     # Prediction scores of the language modeling head (scores for each vocabulary token before SoftMax).
     prop = 0
+    resprop = 0
     for j in range(len(data.scores)):
-        softmaxed = data.scores[j]
+        softmaxed = torch.softmax(data.scores[j], dim=-1)
+
         mask = softmaxed != 0
         # logged[mask] = torch.log(softmaxed[mask])
         prop = torch.sum(torch.mul(softmaxed[mask], torch.log(softmaxed[mask])), dim=-1)
-        print(prop)
+        # print("prob", prop, "masked", softmaxed[mask])
         # print("softmax", softmaxed[0], type(softmaxed[0]))
-        # for i in range(len(data.scores[j])):
-        #     for k in range(len(data.scores[j][i])):
-        #         #print("softmaxed",softmaxed[i][k].item(), torch.mul(softmaxed[i][k],torch.log(softmaxed[i][k])),type(torch.mul(softmaxed[i][k],torch.log(softmaxed[i][k]))))
-        #         prop= torch.mul(softmaxed[i][k],torch.log(softmaxed[i][k]))+prop
+        resprop += prop
+        # print(prop)
+    qeent = -torch.div(
+        resprop, torch.tensor(len(data.scores)).to(torch.distributed.get_rank())
+    )
 
-    qeent = -np.divide(prop.cpu().numpy(), (len(data.scores)))
+    # qeent = -np.divide(resprop.cpu().numpy(), (len(data.scores)))
+    # print("torch", qeee, "np", qeent)
     return qeent
 
 
@@ -101,7 +105,7 @@ def sentStd(data):
         )
         prop = torch.log_softmax(data.scores[j][0][toptoken], dim=-1) + prop
         sequence.append((prop.cpu(), proba.cpu()))
-    print(sequence)
+    # print(sequence)
     qestd = np.std(np.array(sequence))
 
     return qestd
