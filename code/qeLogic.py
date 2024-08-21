@@ -180,7 +180,7 @@ def getQE(data, dropout=False, dropouttrans=None, translation=True, ref=0):
             qeent = softmaxEntropy(data)
             qestd = sentStd(data)
 
-            res = (qe, qeent, qestd, ref)
+            res = (qe, qeent, qestd)
             print(
                 "TP",
                 res[0],
@@ -188,8 +188,6 @@ def getQE(data, dropout=False, dropouttrans=None, translation=True, ref=0):
                 res[1],
                 "standard deviation",
                 res[2],
-                "ref",
-                res[3],
             )
 
         else:
@@ -206,6 +204,12 @@ def cometscore(source, prediction, reference):
         predictions=prediction, references=reference, sources=source
     )
     print(comet_score)
+
+
+def pearsoncorr(prediction, reference):
+    pearson_met = evaluate.load("pearsonr")
+    result = pearson_met.compute(predictions=prediction, references=reference)
+    return result
 
 
 # TranslationProbability(t)
