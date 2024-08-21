@@ -59,7 +59,7 @@ def run_inference(rank, world_size, dataset):
                 0
             ]
             print(trans, text)
-            refscore = cometscore([text], [trans], [sample["translation"]])
+            # refscore = cometscore([text], [trans], [sample["translation"]])
             qe = getQE(res, dropout=False, ref=refscore)
             torch.cuda.empty_cache()
             result = (res, input, text, refscore)
@@ -67,7 +67,7 @@ def run_inference(rank, world_size, dataset):
             torch.save(result, TEMPDIR + "/results/seamless_result" + str(i) + ".pt")
             torch.cuda.empty_cache()
 
-            csv.append([i, text, trans, sample["translation"], qe, refscore])
+            csv.append([i, text, trans, sample["translation"], qe])
     output = [None for _ in range(world_size)]
     dist.gather_object(
         obj=csv, object_gather_list=output if dist.get_rank() == 0 else None, dst=0
