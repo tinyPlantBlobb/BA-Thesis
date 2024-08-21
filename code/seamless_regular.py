@@ -21,9 +21,9 @@ def run_inference(rank, world_size, dataset):
     dist.init_process_group("nccl", rank=rank, world_size=world_size)
     model.to(rank)
     model.generation_config.forced_decoder_ids = None
-    offset = 0 + rank * ((len(dataset)) // world_size)
-    # num = 3
     num = 280
+    offset = 0 + rank * (num)
+    # num = 3
     # num = (len(dataset)) // (world_size)
     # print(len(dataset), world_size)
     csv = []
@@ -60,9 +60,10 @@ def run_inference(rank, world_size, dataset):
             ]
             print(trans, text)
             # refscore = cometscore([text], [trans], [sample["translation"]])
-            qe = getQE(res, dropout=False, ref=refscore)
+            qe = getQE(res, dropout=False)
+            print(qe)
             torch.cuda.empty_cache()
-            result = (res, input, text, refscore)
+            result = (res, input, text)
             # result = Result(sample["audiofile"],sample["timestamp"],sample["transcript"],trans,res,qe)
             torch.save(result, TEMPDIR + "/results/seamless_result" + str(i) + ".pt")
             torch.cuda.empty_cache()
