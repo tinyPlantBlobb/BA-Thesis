@@ -90,7 +90,7 @@ def softmaxEntropy(data):
 
     # qeent = -np.divide(resprop.cpu().numpy(), (len(data.scores)))
     # print("torch", qeee, "np", qeent)
-    return qeent
+    return qeent.cpu().numpy()
 
 
 def sentStd(data):
