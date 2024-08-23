@@ -1,5 +1,6 @@
 import os
 import csv
+from re import I
 import torch.distributed
 import torch.utils
 import torch.utils.data
@@ -204,6 +205,7 @@ def cometscore(source, prediction, reference):
         predictions=prediction, references=reference, sources=source
     )
     print(comet_score)
+    return comet_score
 
 
 def pearsoncorr(prediction, reference):
