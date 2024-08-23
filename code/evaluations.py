@@ -23,8 +23,8 @@ with open(TMPDIR + "/results/seamlessfulltranscriptions.csv", "r", newline="") a
             tpscore = r["qe"][0]
             softmaxent = r["qe"][1]
             stddiv = r["qe"][2]
-    refscore = cometscore(trans, translation, reference)
-
+    refscores = cometscore(trans, translation, reference)
+    refscore = refscores["scores"]
     print(len(trans), len(translation), len(reference))
     tpresult = pearsoncorr(tpscore, refscore)
     softres = pearsoncorr(softmaxent, refscore)
