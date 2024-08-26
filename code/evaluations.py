@@ -20,9 +20,9 @@ with open(TMPDIR + "/results/seamlessfulltranscriptions.csv", "r", newline="") a
         print(r["qe"])
         qe = r["qe"]
         if qe != "qe":
-            tpscore = r["qe"][0]
-            softmaxent = r["qe"][1]
-            stddiv = r["qe"][2]
+            tpscore.append(r["qe"][0])
+            softmaxent.append(r["qe"][1])
+            stddiv.append(r["qe"][2])
     refscores = cometscore(trans, translation, reference)
     refscore = refscores["scores"]
     print(len(trans), len(translation), len(reference))
