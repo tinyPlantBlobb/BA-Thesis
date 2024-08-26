@@ -33,13 +33,15 @@ srun torchrun --nnodes 1 --nproc_per_node 1 seamless_regular.py
 
 # 1. param = path to the dir that contains the dataset in the deltalm split format
 # TODO output file angeben
+# PRETRAINEDMODEL = /project/OML/dliu/iwslt2023/model/mt/deltalm-large.tune.bilingual.de.diversify.adapt.TEDonly.clean/checkpoint_avg_last5.pt
 #srun fairseq-generate $(ws_find iswslt-dataset)/data-bin/ \
-#    --path $(ws_find iswslt-dataset)/checkpoints/deltalm-large.pt \
+#    --path /project/OML/dliu/iwslt2023/model/mt/deltalm-large.tune.bilingual.de.diversify.adapt.TEDonly.clean/checkpoint_avg_last5.pt \
 #    --batch-size 128 --beam 5 --remove-bpe --resluts-path $/ws_find iswslt-dataset)/results-${SLURM_JOB_ID}| tee $TMPDIR/results/fulltranscriptions.csv
 
 srun python evaluations.py
 
 # Before job completes save results on a workspace
+rsync -av $TMPDIR/results/resultscore.csv $(ws_find iswslt-dataset)/results-${SLURM_JOB_ID}/
 rsync -av $TMPDIR/results/scores.txt $(ws_find iswslt-dataset)/results-${SLURM_JOB_ID}/
 
 rsync -av $TMPDIR/results/fulltranscriptions.csv $(ws_find iswslt-dataset)/results-${SLURM_JOB_ID}/
