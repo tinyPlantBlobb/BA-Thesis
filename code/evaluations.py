@@ -1,3 +1,4 @@
+import re
 from datasets.features import translation
 from qeLogic import cometscore, pearsoncorr
 import os
@@ -25,6 +26,13 @@ with open(TMPDIR + "/results/seamlessfulltranscriptions.csv", "r", newline="") a
             stddiv.append(r["qe"][2])
     refscores = cometscore(trans, translation, reference)
     refscore = refscores["scores"]
+    with open(TMPDIR + "/results/resultscore.csv", "w") as resscorefile:
+        reswriter = csv.writer(resscorefile, dialect="excel")
+        reswriter.writerow(["row", "transcript", "reference", "translation", "qe tp", "qe softent", "qe stddiv", "refscore"])
+        for i in range(len(translation)):
+            reswriter.writerow([i,trans[i], reference[i], translation[i], tpscore[i], softmaxent[i], stddiv[i], refscore[i]])
+
+    print(type(refscore))
     print(len(trans), len(translation), len(reference))
     tpresult = pearsoncorr(tpscore, refscore)
     softres = pearsoncorr(softmaxent, refscore)
