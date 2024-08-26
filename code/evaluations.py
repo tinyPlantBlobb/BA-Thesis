@@ -12,7 +12,12 @@ with open(TMPDIR + "/results/seamlessfulltranscriptions.csv", "r", newline="") a
         dialect="excel",
         fieldnames=["row", "transcript", "reference", "translation", "qe"],
     )
-    trans = translation = reference = tpscore = softmaxent = stddiv = []
+    trans = []
+    translation = []
+    reference = []
+    tpscore = []
+    softmaxent = []
+    stddiv = []
 
     for r in reader:
         trans.append(r["transcript"])
@@ -21,17 +26,39 @@ with open(TMPDIR + "/results/seamlessfulltranscriptions.csv", "r", newline="") a
         print(r["qe"])
         qe = r["qe"]
         if qe != "qe":
-            tpscore.append(r["qe"][0])
-            softmaxent.append(r["qe"][1])
-            stddiv.append(r["qe"][2])
+            tpscore.append(qe[0])
+            softmaxent.append(qe[1])
+            stddiv.append(qe[2])
     refscores = cometscore(trans, translation, reference)
     refscore = refscores["scores"]
-    with open(TMPDIR + "/results/resultscore.csv", "w") as resscorefile:
+    with open(TMPDIR + "/resultscore.csv", "w") as resscorefile:
         reswriter = csv.writer(resscorefile, dialect="excel")
-        reswriter.writerow(["row", "transcript", "reference", "translation", "qe tp", "qe softent", "qe stddiv", "refscore"])
+        reswriter.writerow(
+            [
+                "row",
+                "transcript",
+                "reference",
+                "translation",
+                "qe tp",
+                "qe softent",
+                "qe stddiv",
+                "refscore",
+            ]
+        )
         for i in range(len(translation)):
-            reswriter.writerow([i,trans[i], reference[i], translation[i], tpscore[i], softmaxent[i], stddiv[i], refscore[i]])
-
+            reswriter.writerow(
+                [
+                    i,
+                    trans[i],
+                    reference[i],
+                    translation[i],
+                    tpscore[i],
+                    softmaxent[i],
+                    stddiv[i],
+                    refscore[i],
+                ]
+            )
+        resscorefile.close()
     print(type(refscore))
     print(len(trans), len(translation), len(reference))
     tpresult = pearsoncorr(tpscore, refscore)
