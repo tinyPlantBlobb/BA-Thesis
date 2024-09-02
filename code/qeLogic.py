@@ -116,13 +116,13 @@ def writeCSV(results, path, dropout=False):
     if dropout:
         with open(path, "w", newline="") as f:
             writer = csv.writer(f, dialect="excel")
-            writer.writerow(["row", "reference", "transcription", "translation", "qe"])
+            #writer.writerow(["row", "reference", "transcription", "translation", "qe"])
             # writer.writerow(["reference", "transcriptions"])
             writer.writerows(results)
     else:
         with open(path, "w", newline="") as f:
             writer = csv.writer(f, dialect="excel")
-            writer.writerow(["row", "reference", "transcription", "translation", "qe"])
+            writer.writerow(["row", "reference transcript", "reference translation", "transcription", "translation", "transcript prob", "transcript mean","qe"])
             # writer.writerow(["reference", "transcription"])
             writer.writerows(results)
 
@@ -132,7 +132,7 @@ def readCSV(path):
         reader = csv.DictReader(
             f,
             dialect="excel",
-            fieldnames=["row", "transcript", "reference", "translation", "qe"],
+            fieldnames=["row", "reference transcript", "reference translation", "transcription", "translation", "transcript prob", "transcript mean","qe"],
         )
         data = {"transcript": [], "reference": [], "qe": []}
         for row in reader:

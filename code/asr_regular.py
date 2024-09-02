@@ -70,7 +70,7 @@ def run_inference(rank, world_size, dataset):
             sample_rate = sample["audiofile"][
                 "sampling_rate"
             ]  # alternatively set to 16000
-            text = sample["transcript"]
+            transcript_reference = sample["transcript"]
             input = processor(audio, sampling_rate=sample_rate, return_tensors="pt")
             input_features = input.input_features.to(rank)
             res = model.generate(
@@ -83,11 +83,8 @@ def run_inference(rank, world_size, dataset):
             #############################################
 
             # this will return the last layer probabilities of the model
-
-            logits = model(
-                input_features, decoder_input_ids=res["sequences"]
-            ).logits  # gets the last layer probabilities of the model
-            trans = processor.batch_decode(res["sequences"], skip_special_tokens=True)[
+            # gets the last layer probabilities of the model
+            generated_transcript = processor.batch_decode(res["sequences"], skip_special_tokens=True)[
                 0
             ]
             qe = getQE(res, dropout=False, translation=False)
@@ -96,15 +93,15 @@ def run_inference(rank, world_size, dataset):
                 sample["audiofile"],
                 sample["timestamp"],
                 sample["transcript"],
-                trans,
+                generated_transcript,
                 res,
                 qe,
             )
             torch.save(result, TEMPDIR + "/results/result" + str(i) + ".pt")
             torch.cuda.empty_cache()
 
-            print(trans, text)
-            csv.append([i, text, trans, sample["translation"], qe])
+            print(generated_transcript, transcript_reference)
+            csv.append([i, transcript_reference, generated_transcript, sample["translation"], qe[0],qe[1]])
     output = [None for _ in range(world_size)]
     dist.gather_object(
         obj=csv, object_gather_list=output if dist.get_rank() == 0 else None, dst=0
@@ -114,6 +111,8 @@ def run_inference(rank, world_size, dataset):
             if i == 0:
                 continue
             csv.extend(output[i])
+        csv = [["row", "reference transcript", "reference translation", "transcription", "transcript prob", "transcript mean"]].extend(csv)
+
         writeCSV(csv, TEMPDIR + "/results/fulltranscriptions.csv", dropout=False)
         print(TEMPDIR + "/results/fulltranscriptions.csv")
 

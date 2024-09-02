@@ -34,10 +34,11 @@ def run_inference(rank, world_size, dataset):
             refscore = 0
             model.eval()
             sample = dataset["train"][i]
-            input = sample["transcription"]
+            model_transctiption = sample["transcription"]
             # alternatively set to 16000
-            text = sample["reference"]
-            text_input = processor(text=input, src_lang="eng", return_tensors="pt")
+            # reference transctiption
+            reference_transctipt = sample["reference"]
+            text_input = processor(text=model_transctiption, src_lang="eng", return_tensors="pt")
 
             text_input = text_input.to(rank)
             res = model.generate(
@@ -55,20 +56,21 @@ def run_inference(rank, world_size, dataset):
             # this will return the last layer probabilities of the model
 
             # model(input_features, decoder_input_ids=res["sequences"]).logits  # gets the last layer probabilities of the model
-            trans = processor.batch_decode(res["sequences"], skip_special_tokens=True)[
+            model_translation = processor.batch_decode(res["sequences"], skip_special_tokens=True)[
                 0
             ]
-            print(trans, text)
+            print(model_translation, reference_transctipt)
             # refscore = cometscore([text], [trans], [sample["translation"]])
             qe = getQE(res, dropout=False)
             print(qe)
             torch.cuda.empty_cache()
-            result = (res, input, text)
+            result = (res, model_transctiption, reference_transctipt)
             # result = Result(sample["audiofile"],sample["timestamp"],sample["transcript"],trans,res,qe)
             torch.save(result, TEMPDIR + "/results/seamless_result" + str(i) + ".pt")
             torch.cuda.empty_cache()
-
-            csv.append([i, text, trans, sample["translation"], qe])
+            # csv overview: row, model transcript transcripttion reference , modeltranslation, translation reference, qe  
+            
+            csv.append([i, model_transctiption, reference_transctipt, model_translation, sample["translation"], sample["qe"], qe])
     output = [None for _ in range(world_size)]
     dist.gather_object(
         obj=csv, object_gather_list=output if dist.get_rank() == 0 else None, dst=0
@@ -78,6 +80,7 @@ def run_inference(rank, world_size, dataset):
             if i == 0:
                 continue
             csv.extend(output[i])
+        csv = [["row", "reference transcript", "reference translation", "transcription", "translation", "transcript prob", "transcript mean","qe"]].extend(csv)
         writeCSV(
             csv, TEMPDIR + "/results/seamlessfulltranscriptions.csv", dropout=False
         )
@@ -101,9 +104,9 @@ def main():
     torchrunrank = int(os.environ["LOCAL_RANK"])
     trglrank = int(os.environ["RANK"])
     print("start rank", torchrunrank, trglrank)
-    smp = mp.get_context("spawn")
-    q = smp.SimpleQueue()
-    q.put([["sample", "reference", "reference"]])
+    # smp = mp.get_context("spawn")
+    # q = smp.SimpleQueue()
+    # q.put([["sample", "reference", "reference"]])
     mp.spawn(run_inference, args=(world_size, dataset), nprocs=world_size, join=True)
 
 
