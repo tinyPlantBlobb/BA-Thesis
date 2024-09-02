@@ -8,6 +8,7 @@ result.yaml
 *.pt
 *.tar.gz
 *.tgz
+*.csv
 __pycache__
 *.sync-conflict*
 results/
