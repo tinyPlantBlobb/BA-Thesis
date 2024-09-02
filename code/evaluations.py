@@ -1,16 +1,10 @@
 import re
 from datasets.features import translation
-from qeLogic import cometscore, pearsoncorr
+from qeLogic import cometscore, pearsoncorr, worderror
 import os
 import csv
 
 TMPDIR = os.environ["TMPDIR"]
-with open(TMPDIR + "/results/fulltranscriptions.csv", "r", newline="") as transfile:
-    reader = csv.DictReader(
-        transfile,
-        dialect="excel",
-        fieldnames=["row", "transcript", "reference", "translation"],
-    )
 
 with open(TMPDIR + "/results/seamlessfulltranscriptions.csv", "r", newline="") as file:
     reader = csv.DictReader(
@@ -18,25 +12,30 @@ with open(TMPDIR + "/results/seamlessfulltranscriptions.csv", "r", newline="") a
         dialect="excel",
         fieldnames=["row", "reference transcript", "reference translation", "transcription", "translation", "transcript prob", "transcript mean","qe"],
     )
-    trans = []
+    transcripts = []
     translation = []
-    reference = []
+    reference_translation = []
+    reference_trancsript = []
+    transcriptionprob= []
+    transcriptmean = []
     tpscore = []
     softmaxent = []
     stddiv = []
 
     for r in reader:
         if r["qe"] != "qe":
-            trans.append(r["transcript"])
+            transcripts.append(r["transcript"])
             translation.append(r["translation"])
-            reference.append(r["reference"])
+            reference_translation.append(r["reference translation"])
+            reference_trancsript.append(r["reference transcript"])
             print(r["qe"][1:-1].split(", "))
             qe = r["qe"][1:-1].split(", ")
-
+            transcriptionprob.append(r["transcript prob"])
+            transcriptmean.append(r["transcript mean"])
             tpscore.append(qe[0])
             softmaxent.append(qe[1])
             stddiv.append(qe[2])
-    refscores = cometscore(trans, translation, reference)
+    refscores = cometscore(transcripts, translation, reference_translation)
 
     refscore = refscores["scores"]
     # with open(TMPDIR + "/resultscore.csv", "w") as resscorefile:
@@ -70,7 +69,10 @@ with open(TMPDIR + "/results/seamlessfulltranscriptions.csv", "r", newline="") a
     #    resscorefile.close()
     # print(tpscore)
     # print(refscore)
-    print(len(trans), len(translation), len(reference))
+    wer = worderror(transcripts, reference_trancsript)
+
+    transcriptresult = pearsoncorr(transcriptionprob, wer)
+    meanresult = pearsoncorr(transcriptmean, wer)
     tpresult = pearsoncorr(tpscore, refscore)
     softres = pearsoncorr(softmaxent, refscore)
     stdres = pearsoncorr(stddiv, refscore)
