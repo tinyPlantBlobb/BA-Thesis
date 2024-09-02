@@ -1,6 +1,5 @@
 import os
 import csv
-from re import I
 import torch.distributed
 import torch.utils
 import torch.utils.data
@@ -42,6 +41,10 @@ def getAudios(TEMPDIR):
     print("finished iterating over elements")
     return resdataset
 
+def worderror(hypothesis, references):
+    wer = evaluate.load("wer")
+    wer_score = wer.compute(predictions=hypothesis, references=references)
+    return wer_score
 
 def TranslationProbability(data):
     # toptoken= data[i].scores
