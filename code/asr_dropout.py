@@ -1,5 +1,3 @@
-from ast import List, Tuple
-import csv
 import torch.distributed
 import torch.utils
 import torch.utils.data
@@ -7,7 +5,6 @@ import torch.distributed as dist
 import torch.multiprocessing as mp
 from torch.nn.parallel import DistributedDataParallel as DDP
 from datasets import Dataset, Audio
-
 from transformers import (
     WhisperProcessor,
     WhisperForConditionalGeneration,
@@ -15,103 +12,104 @@ from transformers import (
 import os
 import torch
 from tqdm import tqdm
-from qeLogic import getQE, writeCSV, Result, getAudios
-
-
-
-class Result():
-    audiofile=None
-    timestamp= None
-    runs = None
-    ref = None
-    trans= None
-    data= None # result of the model
-    results= None # Tuple of (qe, qeent, qestd)
-    dropoutdata= None # result of the model for all droutout runs list of tuples
-    dropoutresults= None # list of Tuple of (qe, var, lex-simm)
-
-    def __init__(self, audiofile, timestamp, reference, transcription, modeldata, qualityestimate, dropoutdata=None, dropoutresults = None):
-        self.audiofile = audiofile
-        self.timestamp = timestamp
-        self.ref = reference
-        self.trans= transcription
-        self.data= modeldata # result data of the model
-        self.results= qualityestimate # Tuple of (qe, qeent, qestd)
-        self.dropoutresults= dropoutresults
-        self.dropoutdata= dropoutdata
-
-    def __str__(self):
-        return str(self.trans)
-    def __repr__(self):
-        return #"audiofile: "+str(self.audiofile)+ "\n" + "timestamp: "+str(self.timestamp)+ "\n" + "ref: "+str(self.ref)+ "\n" 
-
+from qeLogic import getAudios, getQE, writeCSV
 
 def run_inference(rank, world_size, dataset):
-    # TODO make it work with the distributed data on the different gpus, aka figure out which rank to use and make it work
     torch.cuda.set_device(rank)
     dist.init_process_group("nccl", rank=rank, world_size=world_size)
-    num_samples = 30
-    elemdp = 2
-    low = 0
     model.to(rank)
     model.generation_config.forced_decoder_ids = None
-    offset = low + rank*elemdp
+    num_runs = 30
+    offset = 0 + rank * ((len(dataset)) // world_size)
+    # num = 3
+    num = (len(dataset)) // (world_size * 2)
+    csv = []
     with torch.no_grad():
-        for i in range(offset, offset+elemdp,1):
+
+        for i in tqdm(range(offset, offset + num, 1)):
             sample = dataset[i]
-            cvs = [["transcription", "reference"]]
-            all={
-                "number":[],
-                "transcription": [],
-                "qetp": [],
-                "qe-soft-ent"
-                "generationoutput": [],
-            }
-
-            audio =sample["audiofile"]["array"]
-            for j in tqdm(range(num_samples)):
+            audio = sample["audiofile"]["array"]
+            sample_rate = sample["audiofile"][
+                "sampling_rate"
+            ]  # alternatively set to 16000
+            transcript_reference = sample["transcript"]
+            input = processor(audio, sampling_rate=sample_rate, return_tensors="pt")
+            input_features = input.input_features.to(rank)
+            generated_transcripts = []
+            for _ in range(num_runs):
                 model.train()
-                dpresults= []
-                with torch.no_grad():
-                    # this will return the last layer probabilities of the model
-                    input = processor(audio, sampling_rate=16000, return_tensors="pt")
-                    input_features = input.input_features.to(rank)
-                    res = model.generate(input_features=input_features, return_dict_in_generate=True, output_scores=True)
-                    trans = processor.batch_decode(res["sequences"], skip_special_tokens=True)[0]
-                    dpresults.append(res)
-                    all["generationoutput"].append(res)
-                    all["transcription"].append(trans)
-                    
-            
-                torch.cuda.empty_cache()
-            dropoutresult = getQE(res, dropouttrans = all["transcription"], dropout=True)
-            cvs.append([sample["ref"]]+all["transcription"])
+                res = model.generate(
+                    input_features=input_features,
+                    return_dict_in_generate=True,
+                    output_scores=True,
+                )
+                #############################################
+                # Huggingface whisper implementation things #
+                #############################################
 
-            torch.save(dropoutresult, TEMPDIR + "/results/dropoutresult"+str(i)+".pt")
-        writeCSV(cvs, TEMPDIR + "/results/transcriptions"+str(i)+".csv", dropout=True)
-        del dropoutresult
-        del sample
+                # this will return the last layer probabilities of the model
+                # gets the last layer probabilities of the model
+                generated_transcript = processor.batch_decode(res["sequences"], skip_special_tokens=True)[
+                    0
+                ]
+                qe = getQE(res, dropout=False, translation=False)
+                
+                # result = Result(
+                #     sample["audiofile"],
+                #     sample["timestamp"],
+                #     sample["transcript"],
+                #     generated_transcript,
+                #     res,
+                #     qe,
+                # )
+                # torch.save(result, TEMPDIR + "/results/result" + str(i) + ".pt")
+                torch.cuda.empty_cache()
+                generated_transcripts.append(generated_transcript)
+                print(generated_transcript, transcript_reference)
+            getQE(generated_transcripts, dropout=True, translation=False)
+            csv.append([i, transcript_reference, generated_transcripts, sample["translation"], qe[0],qe[1]])
+            torch.cuda.empty_cache()
+    output = [None for _ in range(world_size)]
+    dist.gather_object(
+        obj=csv, object_gather_list=output if dist.get_rank() == 0 else None, dst=0
+    )
+    
+    if rank == 0:
+        csv.insert(0, ["row", "reference transcript", "reference translation", "transcription", "transcript prob", "transcript mean"])
+        for i in range(len(output)):
+            if i == 0:
+                continue
+            csv.extend(output)
+
+        writeCSV(csv, TEMPDIR + "/results/dropoutfulltranscriptions.csv", dropout=False)
+        print(TEMPDIR + "/results/fulltranscriptions.csv")
+
 
 BASE = ""
 
-
-#dropout set to 0.1 based on the paper that uses the same dropout as during training
-model = WhisperForConditionalGeneration.from_pretrained("openai/whisper-medium.en", dropout=0.1)
+# Whisper  from the huggingface whisper implementation
 processor = WhisperProcessor.from_pretrained("openai/whisper-medium.en")
+# feature_extractor = WhisperFeatureExtractor.from_pretrained("openai/whisper-small")
+model = WhisperForConditionalGeneration.from_pretrained("openai/whisper-medium.en")
+
 TEMPDIR = os.environ["TMPDIR"]
 respath = os.path.join(TEMPDIR, "results")
-BASE = TEMPDIR +"/"
+BASE = TEMPDIR + "/"
 if not os.path.exists(respath):
-        os.mkdir(respath)
+    os.mkdir(respath)
+
 
 def main():
-    dataset = Dataset.from_dict(getAudios(TEMPDIR)).cast_column("audiofile", Audio())
-    
-    world_size= torch.cuda.device_count()
-    torchrunrank= int(os.environ["LOCAL_RANK"])
+    dataset = Dataset.from_dict(getAudios(BASE)).cast_column("audiofile", Audio())
+    world_size = torch.cuda.device_count()
+    torchrunrank = int(os.environ["LOCAL_RANK"])
     trglrank = int(os.environ["RANK"])
     print("start rank", torchrunrank, trglrank)
-    mp.spawn(run_inference, args=(world_size,dataset),nprocs=world_size, join=True)
+    smp = mp.get_context("spawn")
+    q = smp.SimpleQueue()
+    q.put([["sample", "reference", "reference"]])
+    mp.spawn(run_inference, args=(world_size, dataset), nprocs=world_size, join=True)
+
+
 if __name__ == "__main__":
     main()
-
