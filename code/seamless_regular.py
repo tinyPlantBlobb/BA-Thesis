@@ -22,8 +22,8 @@ def run_inference(rank, world_size, dataset):
     model.to(rank)
     model.generation_config.forced_decoder_ids = None
     num = 280
-    offset = 0 + rank * (num)
     # num = 3
+    offset = 0 + rank * (num)
     # num = (len(dataset)) // (world_size)
     # print(len(dataset), world_size)
     csv = []
@@ -37,8 +37,10 @@ def run_inference(rank, world_size, dataset):
             model_transctiption = sample["transcription"]
             # alternatively set to 16000
             # reference transctiption
-            reference_transctipt = sample["reference"]
-            text_input = processor(text=model_transctiption, src_lang="eng", return_tensors="pt")
+            reference_transctipt = sample["reference transctipt"]
+            text_input = processor(
+                text=model_transctiption, src_lang="eng", return_tensors="pt"
+            )
 
             text_input = text_input.to(rank)
             res = model.generate(
@@ -56,21 +58,31 @@ def run_inference(rank, world_size, dataset):
             # this will return the last layer probabilities of the model
 
             # model(input_features, decoder_input_ids=res["sequences"]).logits  # gets the last layer probabilities of the model
-            model_translation = processor.batch_decode(res["sequences"], skip_special_tokens=True)[
-                0
-            ]
-            print(model_translation, reference_transctipt)
+            model_translation = processor.batch_decode(
+                res["sequences"], skip_special_tokens=True
+            )[0]
             # refscore = cometscore([text], [trans], [sample["translation"]])
             qe = getQE(res, dropout=False)
-            print(qe)
+            print(model_translation, reference_transctipt, qe)
+            # torch.cuda.empty_cache()
+            # result = (res, model_transctiption, reference_transctipt)
+            ## result = Result(sample["audiofile"],sample["timestamp"],sample["transcript"],trans,res,qe)
+            # torch.save(result, TEMPDIR + "/results/seamless_result" + str(i) + ".pt")
             torch.cuda.empty_cache()
-            result = (res, model_transctiption, reference_transctipt)
-            # result = Result(sample["audiofile"],sample["timestamp"],sample["transcript"],trans,res,qe)
-            torch.save(result, TEMPDIR + "/results/seamless_result" + str(i) + ".pt")
-            torch.cuda.empty_cache()
-            # csv overview: row, model transcript transcripttion reference , modeltranslation, translation reference, qe  
-            
-            csv.append([i, model_transctiption, reference_transctipt, model_translation, sample["translation"], sample["qe"], qe])
+            # csv overview: row, model transcript transcripttion reference , modeltranslation, translation reference, qe
+
+            csv.append(
+                [
+                    i,
+                    model_transctiption,
+                    reference_transctipt,
+                    model_translation,
+                    sample["reference translation"],
+                    sample["transcript prob"],
+                    sample["transcript mean"],
+                    qe,
+                ]
+            )
     output = [None for _ in range(world_size)]
     dist.gather_object(
         obj=csv, object_gather_list=output if dist.get_rank() == 0 else None, dst=0
@@ -80,7 +92,19 @@ def run_inference(rank, world_size, dataset):
             if i == 0:
                 continue
             csv.extend(output[i])
-        csv = [["row", "reference transcript", "reference translation", "transcription", "translation", "transcript prob", "transcript mean","qe"]].extend(csv)
+        csv.insert(
+            0,
+            [
+                "row",
+                "reference transcript",
+                "reference translation",
+                "transcription",
+                "translation",
+                "transcript prob",
+                "transcript mean",
+                "qe",
+            ],
+        )
         writeCSV(
             csv, TEMPDIR + "/results/seamlessfulltranscriptions.csv", dropout=False
         )

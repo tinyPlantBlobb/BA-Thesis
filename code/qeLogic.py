@@ -41,10 +41,12 @@ def getAudios(TEMPDIR):
     print("finished iterating over elements")
     return resdataset
 
+
 def worderror(hypothesis, references):
     wer = evaluate.load("wer")
     wer_score = wer.compute(predictions=hypothesis, references=references)
     return wer_score
+
 
 def TranslationProbability(data):
     # toptoken= data[i].scores
@@ -119,13 +121,24 @@ def writeCSV(results, path, dropout=False):
     if dropout:
         with open(path, "w", newline="") as f:
             writer = csv.writer(f, dialect="excel")
-            #writer.writerow(["row", "reference", "transcription", "translation", "qe"])
+            # writer.writerow(["row", "reference", "transcription", "translation", "qe"])
             # writer.writerow(["reference", "transcriptions"])
             writer.writerows(results)
     else:
         with open(path, "w", newline="") as f:
             writer = csv.writer(f, dialect="excel")
-            writer.writerow(["row", "reference transcript", "reference translation", "transcription", "translation", "transcript prob", "transcript mean","qe"])
+            writer.writerow(
+                [
+                    "row",
+                    "reference transcript",
+                    "reference translation",
+                    "transcription",
+                    "translation",
+                    "transcript prob",
+                    "transcript mean",
+                    "qe",
+                ]
+            )
             # writer.writerow(["reference", "transcription"])
             writer.writerows(results)
 
@@ -135,7 +148,16 @@ def readCSV(path):
         reader = csv.DictReader(
             f,
             dialect="excel",
-            fieldnames=["row", "reference transcript", "reference translation", "transcription", "translation", "transcript prob", "transcript mean","qe"],
+            fieldnames=[
+                "row",
+                "reference transcript",
+                "reference translation",
+                "transcription",
+                "translation",
+                "transcript prob",
+                "transcript mean",
+                "qe",
+            ],
         )
         data = {"transcript": [], "reference": [], "qe": []}
         for row in reader:
@@ -147,8 +169,7 @@ def readCSV(path):
 
 def variance(data):
     print(type(data), type(data[0]))
-    data = data[0]
-    return torch.var(data, dim=1)
+    return torch.var(data, dim=1).cpu().numpy()
 
 
 def combo(tp, var):
@@ -156,28 +177,33 @@ def combo(tp, var):
 
 
 def lexsim(transhypo):
+    res = []
     meteor = evaluate.load("meteor")
-    for i in range(len(transhypo) - 1):
-        meteor.compute(predictions=transhypo[i], reference=transhypo[i + 1])
+    for j in range(len(transhypo)-1):
+        for i in range(len(transhypo) - 1):
+            if i == j:
+                continue
+            res.append(meteor.compute(predictions=transhypo[i], reference=transhypo[i + 1]))
     # TODO write code for the simmilarity with the help of meteor
+    return torch.mul(torch.div(1,torch.div(1,2)* len(transhypo)*(len(transhypo)-1)),torch.sum(res))
 
-    return 0
 
-
-def getQE(data, dropout=False, dropouttrans=None, translation=True, ref=0):
+def getQE(data, dropout=False, dropouttrans=None, translation=True):
     if dropout:
         qe = qevar = lex = []
         com = lex = 0
-        for i in range(len(data)):
-            if translation:
-                qe.append(TranslationProbability(data))
-                qevar.append(variance(data))
-                com = combo(qe, qevar)
-                lex = lexsim(dropouttrans)
-
-            else:
-                qe.append(TranscriptionProbability)
-        res = (qe, qevar, com, lex)
+        if translation:
+            for i in range(len(data)):
+                qe.append(TranslationProbability(data[i]))
+                #lex = lexsim(dropouttrans)
+            qevar.append(variance(qe))
+            com = combo(qe, qevar)
+            res = (qe, qevar, com, lex)
+        else:
+            for i in range(len(data)):
+                qe.append(TranscriptionProbability(data))
+            qevar.append(variance(qe))
+            res = (qe, qevar)
     else:
         if translation:
             qe = TranslationProbability(data)
