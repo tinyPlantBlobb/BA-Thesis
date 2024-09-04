@@ -121,7 +121,7 @@ def writeCSV(results, path, dropout=False):
     if dropout:
         with open(path, "w", newline="") as f:
             writer = csv.writer(f, dialect="excel")
-            # writer.writerow(["row", "reference", "transcription", "translation", "qe"])
+            # writer.writerow(["row", "reference transcription", "reference translation", "translations"*30, "qe"])
             # writer.writerow(["reference", "transcriptions"])
             writer.writerows(results)
     else:
@@ -179,13 +179,18 @@ def combo(tp, var):
 def lexsim(transhypo):
     res = []
     meteor = evaluate.load("meteor")
-    for j in range(len(transhypo)-1):
+    for j in range(len(transhypo) - 1):
         for i in range(len(transhypo) - 1):
             if i == j:
                 continue
-            res.append(meteor.compute(predictions=transhypo[i], reference=transhypo[i + 1]))
+            res.append(
+                meteor.compute(predictions=transhypo[i], reference=transhypo[i + 1])
+            )
     # TODO write code for the simmilarity with the help of meteor
-    return torch.mul(torch.div(1,torch.div(1,2)* len(transhypo)*(len(transhypo)-1)),torch.sum(res))
+    return torch.mul(
+        torch.div(1, torch.div(1, 2) * len(transhypo) * (len(transhypo) - 1)),
+        torch.sum(res),
+    )
 
 
 def getQE(data, dropout=False, dropouttrans=None, translation=True):
@@ -195,7 +200,7 @@ def getQE(data, dropout=False, dropouttrans=None, translation=True):
         if translation:
             for i in range(len(data)):
                 qe.append(TranslationProbability(data[i]))
-                #lex = lexsim(dropouttrans)
+                # lex = lexsim(dropouttrans)
             qevar.append(variance(qe))
             com = combo(qe, qevar)
             res = (qe, qevar, com, lex)
@@ -219,7 +224,6 @@ def getQE(data, dropout=False, dropouttrans=None, translation=True):
                 "standard deviation",
                 res[2],
             )
-
         else:
             qe = TranscriptionProbability(data)
             qemean = TranscriptionMean(data)
