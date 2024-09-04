@@ -10,13 +10,22 @@ with open(TMPDIR + "/results/seamlessfulltranscriptions.csv", "r", newline="") a
     reader = csv.DictReader(
         file,
         dialect="excel",
-        fieldnames=["row", "reference transcript", "reference translation", "transcription", "translation", "transcript prob", "transcript mean","qe"],
+        fieldnames=[
+            "row",
+            "reference transcript",
+            "reference translation",
+            "transcription",
+            "translation",
+            "transcript prob",
+            "transcript mean",
+            "qe",
+        ],
     )
     transcripts = []
     translation = []
     reference_translation = []
     reference_trancsript = []
-    transcriptionprob= []
+    transcriptionprob = []
     transcriptmean = []
     tpscore = []
     softmaxent = []
@@ -24,7 +33,7 @@ with open(TMPDIR + "/results/seamlessfulltranscriptions.csv", "r", newline="") a
 
     for r in reader:
         if r["qe"] != "qe":
-            transcripts.append(r["transcript"])
+            transcripts.append(r["transcription"])
             translation.append(r["translation"])
             reference_translation.append(r["reference translation"])
             reference_trancsript.append(r["reference transcript"])
