@@ -104,8 +104,8 @@ def run_inference(rank, world_size, dataset):
                 [
                     i,
                     transcript_reference,
-                    generated_transcript,
                     sample["translation"],
+                    generated_transcript,
                     qe[0],
                     qe[1],
                 ]
@@ -115,17 +115,17 @@ def run_inference(rank, world_size, dataset):
         obj=csv, object_gather_list=output if dist.get_rank() == 0 else None, dst=0
     )
     if rank == 0:
-        csv.insert(
-            0,
-            [
-                "row",
-                "reference transcript",
-                "reference translation",
-                "transcription",
-                "transcript prob",
-                "transcript mean",
-            ],
-        )
+        # csv.insert(
+        #    0,
+        #    [
+        #        "row",
+        #        "reference transcript",
+        #        "reference translation",
+        #        "transcription",
+        #        "transcript prob",
+        #        "transcript mean",
+        #    ],
+        # )
         for i in range(len(output)):
             if i == 0:
                 continue
