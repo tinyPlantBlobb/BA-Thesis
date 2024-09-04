@@ -22,6 +22,8 @@ def run_inference(rank, world_size, dataset):
     model.to(rank)
     model.generation_config.forced_decoder_ids = None
     num = 280
+    num = dataset.num_rows["train"] // world_size
+    print(num)
     # num = 3
     offset = 0 + rank * (num)
     # num = (len(dataset)) // (world_size)
@@ -37,7 +39,7 @@ def run_inference(rank, world_size, dataset):
             model_transctiption = sample["transcription"]
             # alternatively set to 16000
             # reference transctiption
-            reference_transctipt = sample["reference transctipt"]
+            reference_transctipt = sample["reference transcript"]
             text_input = processor(
                 text=model_transctiption, src_lang="eng", return_tensors="pt"
             )
