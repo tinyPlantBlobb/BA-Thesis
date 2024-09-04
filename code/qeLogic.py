@@ -161,9 +161,9 @@ def readCSV(path):
         )
         data = {"transcript": [], "reference": [], "qe": []}
         for row in reader:
-            data["transcript"].append(row["transcript"])
-            data["reference"].append(row["reference"])
-            data["qe"].append(row["qe"])
+            data["transcript"].append(row["transcription"])
+            data["reference"].append(row["reference translation"])
+            data["qe"].append((row["transcript prob"], row["Transcript mean"]))
     return data
 
 
