@@ -14,6 +14,7 @@ import torch
 from tqdm import tqdm
 from qeLogic import getAudios, getQE, writeCSV
 
+
 def run_inference(rank, world_size, dataset):
     torch.cuda.set_device(rank)
     dist.init_process_group("nccl", rank=rank, world_size=world_size)
@@ -25,7 +26,6 @@ def run_inference(rank, world_size, dataset):
     num = (len(dataset)) // (world_size * 2)
     csv = []
     with torch.no_grad():
-
         for i in tqdm(range(offset, offset + num, 1)):
             sample = dataset[i]
             audio = sample["audiofile"]["array"]
@@ -49,11 +49,11 @@ def run_inference(rank, world_size, dataset):
 
                 # this will return the last layer probabilities of the model
                 # gets the last layer probabilities of the model
-                generated_transcript = processor.batch_decode(res["sequences"], skip_special_tokens=True)[
-                    0
-                ]
+                generated_transcript = processor.batch_decode(
+                    res["sequences"], skip_special_tokens=True
+                )[0]
                 qe = getQE(res, dropout=False, translation=False)
-                
+
                 # result = Result(
                 #     sample["audiofile"],
                 #     sample["timestamp"],
@@ -67,15 +67,34 @@ def run_inference(rank, world_size, dataset):
                 generated_transcripts.append(generated_transcript)
                 print(generated_transcript, transcript_reference)
             getQE(generated_transcripts, dropout=True, translation=False)
-            csv.append([i, transcript_reference, generated_transcripts, sample["translation"], qe[0],qe[1]])
+            csv.append(
+                [
+                    i,
+                    transcript_reference,
+                    sample["translation"],
+                    generated_transcripts,
+                    qe[0],
+                    qe[1],
+                ]
+            )
             torch.cuda.empty_cache()
     output = [None for _ in range(world_size)]
     dist.gather_object(
         obj=csv, object_gather_list=output if dist.get_rank() == 0 else None, dst=0
     )
-    
+
     if rank == 0:
-        csv.insert(0, ["row", "reference transcript", "reference translation", "transcription", "transcript prob", "transcript mean"])
+        #        csv.insert(
+        #    0,
+        #    [
+        #        "row",
+        #        "reference transcript",
+        #        "reference translation",
+        #        "transcription",
+        #        "transcript prob",
+        #        "transcript mean",
+        #    ],
+        # )
         for i in range(len(output)):
             if i == 0:
                 continue
