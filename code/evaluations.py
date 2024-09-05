@@ -47,44 +47,18 @@ with open(TMPDIR + "/results/seamlessfulltranscriptions.csv", "r", newline="") a
     refscores = cometscore(transcripts, translation, reference_translation)
 
     refscore = refscores["scores"]
-    # with open(TMPDIR + "/resultscore.csv", "w") as resscorefile:
-    #    reswriter = csv.writer(resscorefile, dialect="excel")
-    #    reswriter.writerow(
-    #        [
-    #            "row",
-    #            "transcript",
-    #            "reference",
-    #            "translation",
-    #            "qe tp",
-    #            "qe softent",
-    #            "qe stddiv",
-    #            "refscore",
-    #        ]
-    #    )
-    #    for i in range(len(translation) - 1):
-    #        print(i)
-    #        reswriter.writerow(
-    #            [
-    #                i,
-    #                trans[i],
-    #                reference[i],
-    #                translation[i],
-    #                tpscore[i],
-    #                softmaxent[i],
-    #                stddiv[i],
-    #                refscore[i],
-    #            ]
-    #        )
-    #    resscorefile.close()
-    # print(tpscore)
-    # print(refscore)
-    wer = worderror(transcripts, reference_trancsript)
+
+    wer = [
+        worderror([transcripts[i]], [reference_trancsript[i]])
+        for i in range(len(transcripts))
+    ]
 
     transcriptresult = pearsoncorr(transcriptionprob, wer)
     meanresult = pearsoncorr(transcriptmean, wer)
     tpresult = pearsoncorr(tpscore, refscore)
     softres = pearsoncorr(softmaxent, refscore)
     stdres = pearsoncorr(stddiv, refscore)
+    print(transcriptresult, meanresult, tpresult, softres, stdres)
     with open(TMPDIR + "/results/scores.txt", "w") as resfile:
         # resfile.write("reference scores\n")
         # resfile.write(str(refscore))
