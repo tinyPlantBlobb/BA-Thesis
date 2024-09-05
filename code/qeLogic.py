@@ -12,11 +12,11 @@ import torchaudio
 
 
 def getAudios(TEMPDIR):
-    print("starting reading from tar")
+    # print("starting reading from tar")
     with open(TEMPDIR + "/data/IWSLT.TED.tst2023.en-de.matched.yaml") as matched:
         data = yaml.load(matched, Loader=yaml.FullLoader)
         matched.close()
-    print("closed tar")
+    # print("closed tar")
 
     resdataset = {
         "audiofile": [],
@@ -24,7 +24,7 @@ def getAudios(TEMPDIR):
         "translation": [],
         "timestamp": [],
     }
-    print("starting iterating over tar elements")
+    # print("starting iterating over tar elements")
     for t in os.scandir(TEMPDIR + "/data"):
         if t.name == "IWSLT.TED.tst2023.en-de.matched.yaml":
             continue
@@ -38,7 +38,7 @@ def getAudios(TEMPDIR):
         resdataset["timestamp"].append(
             (seg.get("offset"), seg.get("offset") + seg.get("duration"))
         )  # falls man noch die xmls rein matchen will: , "transcript":seg.get("text"), "translation":seg.get("translation")
-    print("finished iterating over elements")
+    # print("finished iterating over elements")
     return resdataset
 
 
@@ -216,14 +216,14 @@ def getQE(data, dropout=False, dropouttrans=None, translation=True):
             qestd = sentStd(data)
 
             res = (qe, qeent, qestd)
-            print(
-                "TP",
-                res[0],
-                "softmaxEntropy",
-                res[1],
-                "standard deviation",
-                res[2],
-            )
+            # print(
+            #    "TP",
+            #    res[0],
+            #    "softmaxEntropy",
+            #    res[1],
+            #    "standard deviation",
+            #    res[2],
+            # )
         else:
             qe = TranscriptionProbability(data)
             qemean = TranscriptionMean(data)
