@@ -32,16 +32,16 @@ with open(TMPDIR + "/results/seamlessfulltranscriptions.csv", "r", newline="") a
     stddiv = []
 
     for r in reader:
-        print(r)
+        # print(r)
         if r["qe"] != "qe":
             transcripts.append(r["transcription"])
             translation.append(r["translation"])
             reference_translation.append(r["reference translation"])
             reference_trancsript.append(r["reference transcript"])
-            print(r["qe"][1:-1].split(", "))
+            # print(r["qe"][1:-1].split(", "))
             qe = r["qe"][1:-1].split(", ")
             transcriptionprob.append(r["transcript prob"])
-            print(r["transcript mean"], r["transcript prob"])
+            print(r["transcript mean"], " probability  ", r["transcript prob"])
             transcriptmean.append(r["transcript mean"])
             tpscore.append(qe[0])
             softmaxent.append(qe[1])
@@ -56,12 +56,12 @@ with open(TMPDIR + "/results/seamlessfulltranscriptions.csv", "r", newline="") a
     ]
     print(wer, len(wer), len(transcriptmean))
     print(transcriptmean)
-    meanresult = pearsoncorr(transcriptmean, wer)
+    # meanresult = pearsoncorr(transcriptmean, wer)
     tpresult = pearsoncorr(tpscore, refscore)
     softres = pearsoncorr(softmaxent, refscore)
     stdres = pearsoncorr(stddiv, refscore)
     transcriptresult = pearsoncorr(transcriptionprob, wer)
-    print(transcriptresult, meanresult, tpresult, softres, stdres)
+    print(transcriptresult, tpresult, softres, stdres)
     with open(TMPDIR + "/results/scores.txt", "w") as resfile:
         # resfile.write("reference scores\n")
         # resfile.write(str(refscore))

@@ -64,7 +64,7 @@ def TranscriptionProbability(data):
         toptoken = torch.argmax(torch.nn.functional.softmax(data.scores[j], dim=-1))
         toptokenprob = torch.log_softmax(data.scores[j][0], dim=-1)[toptoken]
         prop = toptokenprob + prop
-    return prop.cpu().numpy()
+    return prop.cpu().numpy().astype(float).item()
 
 
 def TranscriptionMean(data):
