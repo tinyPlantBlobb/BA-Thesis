@@ -76,10 +76,10 @@ def run_inference(rank, world_size, dataset):
             csv.append(
                 [
                     i,
-                    model_transctiption,
                     reference_transctipt,
-                    model_translation,
                     sample["reference translation"],
+                    model_transctiption,
+                    model_translation,
                     sample["transcript prob"],
                     sample["transcript mean"],
                     qe,
