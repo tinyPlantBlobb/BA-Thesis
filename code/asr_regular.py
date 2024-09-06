@@ -99,7 +99,7 @@ def run_inference(rank, world_size, dataset):
             # torch.save(result, TEMPDIR + "/results/result" + str(i) + ".pt")
             torch.cuda.empty_cache()
 
-            print(generated_transcript, transcript_reference)
+            print(qe, generated_transcript, transcript_reference)
             csv.append(
                 [
                     i,
@@ -108,6 +108,7 @@ def run_inference(rank, world_size, dataset):
                     generated_transcript,
                     qe[0],
                     qe[1],
+                    "",
                 ]
             )
     output = [None for _ in range(world_size)]
