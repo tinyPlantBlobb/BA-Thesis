@@ -106,6 +106,7 @@ def run_inference(rank, world_size, dataset):
                     transcript_reference,
                     sample["translation"],
                     generated_transcript,
+                    "",
                     qe[0],
                     qe[1],
                     "",
