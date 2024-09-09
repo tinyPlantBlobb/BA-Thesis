@@ -51,12 +51,12 @@ with open(TMPDIR + "/results/seamlessfulltranscriptions.csv", "r", newline="") a
     refscore = refscores["scores"]
 
     wer = [
-        worderror([transcripts[i]], [reference_trancsript[i]])
+        worderror([transcripts[i].lower()], [reference_trancsript[i].lower()])
         for i in range(len(transcripts))
     ]
-    print(wer, len(wer), len(transcriptmean))
-    print(transcriptmean)
-    # meanresult = pearsoncorr(transcriptmean, wer)
+    # print(wer, len(wer), len(transcriptmean))
+    # print(transcriptmean)
+    meanresult = pearsoncorr(transcriptmean, wer)
     tpresult = pearsoncorr(tpscore, refscore)
     softres = pearsoncorr(softmaxent, refscore)
     stdres = pearsoncorr(stddiv, refscore)
@@ -66,13 +66,15 @@ with open(TMPDIR + "/results/seamlessfulltranscriptions.csv", "r", newline="") a
         # resfile.write("reference scores\n")
         # resfile.write(str(refscore))
         resfile.write("\n\n\n pearsoncorr of the translation probability")
-        resfile.write(str(tpresult))
+        resfile.write(str(tpresult["pearsonr"]))
         resfile.write("\nsoftmax correlation\n")
-        resfile.write(str(softres))
+        resfile.write(str(softres["pearsonr"]))
         resfile.write("\n standart div\n")
-        resfile.write(str(stdres))
-        resfile.write("\n tp \n")
-        resfile.write(str(transcriptresult))
+        resfile.write(str(stdres["pearsonr"]))
+        resfile.write("\n transcription result \n")
+        resfile.write(str(transcriptresult["pearsonr"]))
+        resfile.write("\n trasncript mean\n")
+        resfile.write(str(meanresult["pearsonr"]))
         resfile.close()
     # for row in reader:
     #    score = cometscore(row["transcript"], row["translation"], row["reference"])
