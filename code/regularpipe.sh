@@ -1,11 +1,11 @@
 #!/bin/bash
-#SBATCH --job-name=whisper-eval
+#SBATCH --job-name=evaluations
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
 #SBATCH --mail-type=END,BEGIN,FAIL
 #SBATCH --gres=gpu:4
 #SBATCH --time=130:00
-#SBATCH --output=whispereval.txt
+#SBATCH --output=baseeval.txt
 
 nodes=($(scontrol show hostnames $SLURM_JOB_NODELIST))
 nodes_array=($nodes)
@@ -31,13 +31,15 @@ pip install jiwer
 srun torchrun --nnodes 1 --nproc_per_node 1 asr_regular.py
 #srun torchrun --nnodes 1 --nproc_per_node 1 seamless_regular.py
 #srun torchrun --nnodes 1 --nproc_per_node 1 mnt_part.py
-cp $TMPDIR/results/fulltranscriptions.csv $(ws_find iswslt-dataset)/data-bin/
+cp $TMPDIR/data-bin/* $(ws_find iswslt-dataset)/data-bin/
 # 1. param = path to the dir that contains the dataset in the deltalm split format
 # TODO output file angeben
 PRETRAINEDMODEL=/project/OML/dliu/iwslt2023/model/mt/deltalm-large.tune.bilingual.de.diversify.adapt.TEDonly.clean/checkpoint_avg_last5.pt
+srun
 srun fairseq-generate $(ws_find iswslt-dataset)/data-bin/ \
   --path /project/OML/dliu/iwslt2023/model/mt/deltalm-large.tune.bilingual.de.diversify.adapt.TEDonly.clean/checkpoint_avg_last5.pt \
-  --batch-size 128 --beam 5 --remove-bpe --resluts-path $(ws_find iswslt-dataset)/results-${SLURM_JOB_ID} | tee $TMPDIR/results/fulltranscriptions.csv
+  --source-lang eng --target-lang deu \
+  --batch-size 128 --beam 5 --remove-bpe --results-path $(ws_find iswslt-dataset)/results-${SLURM_JOB_ID} | tee $TMPDIR/results/dlmtranscriptions.csv
 
 srun python evaluations.py
 

@@ -134,9 +134,10 @@ def run_inference(rank, world_size, dataset):
 
         writeCSV(csv, TEMPDIR + "/results/fulltranscriptions.csv", dropout=False)
         writedict(
-            generated_transcript=[csv[i][3] for i in csv],
-            transcription_reference=[csv[i][1] for i in csv],
-            translation_reference=[csv[i][2] for i in csv],
+            TEMPDIR,
+            generated_transcript=[csv[i][3] for i in range(len(csv))],
+            transcription_reference=[csv[i][1] for i in range(len(csv))],
+            translation_reference=[csv[i][2] for i in range(len(csv))],
         )
         print(TEMPDIR + "/results/fulltranscriptions.csv")
 
