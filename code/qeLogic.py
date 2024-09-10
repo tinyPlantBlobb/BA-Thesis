@@ -206,7 +206,7 @@ def getQE(data, dropout=False, dropouttrans=None, translation=True):
             res = (qe, qevar, com, lex)
         else:
             for i in range(len(data)):
-                qe.append(TranscriptionProbability(data))
+                qe.append(TranscriptionProbability(data[i]))
             qevar.append(variance(qe))
             res = (qe, qevar)
     else:
@@ -245,6 +245,24 @@ def pearsoncorr(prediction, reference):
     pearson_met = evaluate.load("pearsonr")
     result = pearson_met.compute(predictions=prediction, references=reference)
     return result
+
+
+def writedict(
+    TEMPDIR, generated_transcript, transcription_reference, translation_reference
+):
+    with open(
+        "/pfs/work7/workspace/scratch/utqma-iswslt-dataset/data-bin/dict.eng.txt", "w"
+    ) as src:
+        for i in range(len(generated_transcript)):
+            src.write(generated_transcript[i])
+            src.write("\n")
+        src.close()
+    with open(
+        "/pfs/work7/workspace/scratch/utqma-iswslt-dataset/data-bin/dict.de.txt", "w"
+    ) as tgt:
+        for i in range(len(translation_reference)):
+            tgt.write(translation_reference[i])
+            tgt.write("\n")
 
 
 # TranslationProbability(t)

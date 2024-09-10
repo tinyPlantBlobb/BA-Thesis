@@ -10,11 +10,11 @@ from transformers import SeamlessM4Tv2ForTextToText, AutoProcessor as SeamlessPr
 import os
 import torch
 from tqdm import tqdm
-from qeLogic import getQE, readCSV, writeCSV
+from qeLogic import getQE, readCSV, writeCS
 
 # dropout would be 0.1 as done in the paper in the experiment for evaluating the translation
 model = SeamlessM4Tv2ForTextToText.from_pretrained("facebook/seamless-m4t-v2-large")
-processor = SeamlessProcessor.from_pretrained("facebook/seamless-m4t-v2-v2-large")
+processor = SeamlessProcessor.from_pretrained("facebook/seamless-m4t-v2-large")
 
 
 def run_inference(rank, world_size, dataset):

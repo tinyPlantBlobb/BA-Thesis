@@ -66,7 +66,7 @@ def run_inference(rank, world_size, dataset):
             # refscore = cometscore([text], [trans], [sample["translation"]])
             qe = getQE(res, dropout=False)
             # print(model_translation, reference_transctipt, qe)
-            print(sample["transcript prob"], sample["transcript mean"])
+            # print(sample["transcript prob"], sample["transcript mean"])
             # torch.cuda.empty_cache()
             # result = (res, model_transctiption, reference_transctipt)
             ## result = Result(sample["audiofile"],sample["timestamp"],sample["transcript"],trans,res,qe)
