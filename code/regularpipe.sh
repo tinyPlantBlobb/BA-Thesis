@@ -35,7 +35,9 @@ cp $TMPDIR/data-bin/* $(ws_find iswslt-dataset)/data-bin/
 # 1. param = path to the dir that contains the dataset in the deltalm split format
 # TODO output file angeben
 PRETRAINEDMODEL=/project/OML/dliu/iwslt2023/model/mt/deltalm-large.tune.bilingual.de.diversify.adapt.TEDonly.clean/checkpoint_avg_last5.pt
-srun
+#SPMMODEL=
+srun spm_encode --model=$SPMMODEL --output_format=piece <test.de >test.spm.de
+srun spm_encode --model=$SPMMODEL --output_format=piece <test.en >test.spm.en
 srun fairseq-generate $(ws_find iswslt-dataset)/data-bin/ \
   --path /project/OML/dliu/iwslt2023/model/mt/deltalm-large.tune.bilingual.de.diversify.adapt.TEDonly.clean/checkpoint_avg_last5.pt \
   --source-lang eng --target-lang deu \
