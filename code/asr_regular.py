@@ -12,7 +12,7 @@ from transformers import (
 import os
 import torch
 from tqdm import tqdm
-from qeLogic import getAudios, getQE, writeCSV
+from qeLogic import getAudios, getQE, writeCSV, writedict
 
 # class Result:
 #    audiofile = None
@@ -98,7 +98,7 @@ def run_inference(rank, world_size, dataset):
             # )
             # torch.save(result, TEMPDIR + "/results/result" + str(i) + ".pt")
             torch.cuda.empty_cache()
-            print(qe, generated_transcript, transcript_reference)
+            # print(qe, generated_transcript, transcript_reference)
             csv.append(
                 [
                     i,
@@ -133,6 +133,11 @@ def run_inference(rank, world_size, dataset):
             csv.extend(output[i])
 
         writeCSV(csv, TEMPDIR + "/results/fulltranscriptions.csv", dropout=False)
+        writedict(
+            generated_transcript=[csv[i][3] for i in csv],
+            transcription_reference=[csv[i][1] for i in csv],
+            translation_reference=[csv[i][2] for i in csv],
+        )
         print(TEMPDIR + "/results/fulltranscriptions.csv")
 
 
