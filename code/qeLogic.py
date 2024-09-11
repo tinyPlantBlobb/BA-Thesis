@@ -169,7 +169,7 @@ def readCSV(path):
 
 def variance(data):
     print(type(data), type(data[0]))
-    return torch.var(data, dim=1).cpu().numpy()
+    return torch.var(torch.as_tensor(data), dim=-1).cpu().numpy()
 
 
 def combo(tp, var):
@@ -195,7 +195,7 @@ def lexsim(transhypo):
 
 def getQE(data, dropout=False, dropouttrans=None, translation=True):
     if dropout:
-        qe = qevar = lex = []
+        qe = qevar = lex = qemean = []
         com = lex = 0
         if translation:
             for i in range(len(data)):
@@ -206,9 +206,11 @@ def getQE(data, dropout=False, dropouttrans=None, translation=True):
             res = (qe, qevar, com, lex)
         else:
             for i in range(len(data)):
+                # print(type(data[i]), data[i], type(data))
                 qe.append(TranscriptionProbability(data[i]))
+                qemean.append(TranscriptionMean(data[i]))
             qevar.append(variance(qe))
-            res = (qe, qevar)
+            res = (qe, qemean, qevar)
     else:
         if translation:
             qe = TranslationProbability(data)
@@ -251,14 +253,14 @@ def writedict(
     TEMPDIR, generated_transcript, transcription_reference, translation_reference
 ):
     with open(
-        "/pfs/work7/workspace/scratch/utqma-iswslt-dataset/data-bin/dict.eng.txt", "w"
+        "/pfs/work7/workspace/scratch/utqma-iswslt-dataset/data-bin/test.eng", "w"
     ) as src:
         for i in range(len(generated_transcript)):
             src.write(generated_transcript[i])
             src.write("\n")
         src.close()
     with open(
-        "/pfs/work7/workspace/scratch/utqma-iswslt-dataset/data-bin/dict.de.txt", "w"
+        "/pfs/work7/workspace/scratch/utqma-iswslt-dataset/data-bin/test.de", "w"
     ) as tgt:
         for i in range(len(translation_reference)):
             tgt.write(translation_reference[i])
