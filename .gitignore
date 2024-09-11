@@ -12,3 +12,4 @@ result.yaml
 __pycache__
 *.sync-conflict*
 results/
+spm.model
