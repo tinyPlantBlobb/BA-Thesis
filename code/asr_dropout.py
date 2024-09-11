@@ -36,6 +36,8 @@ def run_inference(rank, world_size, dataset):
             input = processor(audio, sampling_rate=sample_rate, return_tensors="pt")
             input_features = input.input_features.to(rank)
             generated_transcripts = []
+            generations = []
+            qelist = []
             for _ in range(num_runs):
                 model.train()
                 res = model.generate(
@@ -64,17 +66,19 @@ def run_inference(rank, world_size, dataset):
                 # )
                 # torch.save(result, TEMPDIR + "/results/result" + str(i) + ".pt")
                 torch.cuda.empty_cache()
+                generations.append(res)
+                qelist.append(qe)
                 generated_transcripts.append(generated_transcript)
-                print(generated_transcript, transcript_reference)
-            qe = getQE(generated_transcripts, dropout=True, translation=False)
+                # print(generated_transcript, transcript_reference)
+            qe = getQE(generations, dropout=True, translation=False)
             csv.append(
                 [
                     i,
                     transcript_reference,
                     sample["translation"],
                     ##generated_transcripts,
-                    qe[0],
-                    qe[1],
+                    qe,
+                    qelist,
                 ].extend(generated_transcripts)
             )
             torch.cuda.empty_cache()
