@@ -71,16 +71,16 @@ def run_inference(rank, world_size, dataset):
                 generated_transcripts.append(generated_transcript)
                 # print(generated_transcript, transcript_reference)
             qe = getQE(generations, dropout=True, translation=False)
-            csv.append(
-                [
-                    i,
-                    transcript_reference,
-                    sample["translation"],
-                    ##generated_transcripts,
-                    qe,
-                    qelist,
-                ].extend(generated_transcripts)
-            )
+            row = [
+                i,
+                transcript_reference,
+                sample["translation"],
+                ##generated_transcripts,
+                qe,
+            ]
+            row.extend(qelist)
+            row.extend(generated_transcripts)
+            csv.append(row)
             torch.cuda.empty_cache()
     output = [None for _ in range(world_size)]
     dist.gather_object(
