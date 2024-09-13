@@ -22,7 +22,7 @@ def run_inference(rank, world_size, dataset):
     torch.cuda.set_device(rank)
     dist.init_process_group("nccl", rank=rank, world_size=world_size)
     num_samples = 30
-    elemdp = dataset.num_rows["train"] // world_size
+    elemdp = dataset.num_rows // world_size
     model.to(rank)
     model.generation_config.forced_decoder_ids = None
     offset = 0 + rank * elemdp
