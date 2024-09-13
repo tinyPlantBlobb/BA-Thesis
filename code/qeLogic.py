@@ -172,7 +172,7 @@ def readCSV(path):
         for row in reader:
             data["transcript"].append(row["transcription"])
             data["reference"].append(row["reference translation"])
-            data["qe"].append((row["transcript prob"], row["Transcript mean"]))
+            data["qe"].append((row["transcript prob"], row["transcript mean"]))
     return data
 
 
