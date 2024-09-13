@@ -10,7 +10,7 @@ from transformers import SeamlessM4Tv2ForTextToText, AutoProcessor as SeamlessPr
 import os
 import torch
 from tqdm import tqdm
-from qeLogic import getQE, readCSV, writeCS
+from qeLogic import getQE, readCSV, writeCSV
 
 # dropout would be 0.1 as done in the paper in the experiment for evaluating the translation
 model = SeamlessM4Tv2ForTextToText.from_pretrained("facebook/seamless-m4t-v2-large")
@@ -87,7 +87,7 @@ if not os.path.exists(respath):
 
 
 def main():
-    dataset = Dataset.from_dict(readCSV(BASE + "results/fulltranscription.csv"))
+    dataset = Dataset.from_dict(readCSV(BASE + "results/dropoutfulltranscriptions.csv"))
     world_size = torch.cuda.device_count()
     torchrunrank = int(os.environ["LOCAL_RANK"])
     trglrank = int(os.environ["RANK"])
