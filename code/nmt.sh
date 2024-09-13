@@ -1,9 +1,9 @@
 SPMMODEL=$(ws_find iswslt-dataset)/spm.model
 source qe-whitebox/bin/activate
+#export SPMMODEL
 ws=$(ws_find iswslt-dataset)
-srun sentencepiece.py data-bin/test.de data-bin/test.spm.de
-srun sentencepiece.py data-bin/test.en data-bin/test.spm.en
-
+srun python spm.py $ws/data-bin/test.de $ws/data-bin/test.spm.de $SPMMODEL
+srun python spm.py $ws/data-bin/test.eng $ws/data-bin/test.spm.en $SPMMODEL
 fairseq-preprocess \
   --source-lang en --target-lang de \
   --trainpref data-bin/train --validpref data-bin/valid --testpref data-bin/test \

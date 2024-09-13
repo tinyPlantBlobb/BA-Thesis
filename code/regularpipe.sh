@@ -29,7 +29,7 @@ pip install unbabel-comet
 pip install jiwer
 
 srun torchrun --nnodes 1 --nproc_per_node 1 asr_regular.py
-#srun torchrun --nnodes 1 --nproc_per_node 1 seamless_regular.py
+srun torchrun --nnodes 1 --nproc_per_node 1 seamless_regular.py
 #srun torchrun --nnodes 1 --nproc_per_node 1 mnt_part.py
 cp $TMPDIR/data-bin/* $(ws_find iswslt-dataset)/data-bin/
 # 1. param = path to the dir that contains the dataset in the deltalm split format
@@ -37,21 +37,21 @@ cp $TMPDIR/data-bin/* $(ws_find iswslt-dataset)/data-bin/
 PRETRAINEDMODEL=/project/OML/dliu/iwslt2023/model/mt/deltalm-large.tune.bilingual.de.diversify.adapt.TEDonly.clean/checkpoint_avg_last5.pt
 SPMMODEL=$(ws_find iswslt-dataset)/spm.model
 
-srun spm_encode --model=$SPMMODEL --output_format=piece <data-bin/test.de >data-bin/test.spm.de
-srun spm_encode --model=$SPMMODEL --output_format=piece <data-bin/test.en >data-bin/test.spm.en
-
-fairseq-preprocess \
-  --source-lang en --target-lang de \
-  --trainpref data-bin/train --validpref data-bin/valid --testpref data-bin/test \
-  --destdir data-bin/data \
-  --workers 20 \
-  --srcdict spm.model --tgtdict spm.model
-
-srun fairseq-generate $(ws_find iswslt-dataset)/data-bin/data \
-  --path /project/OML/dliu/iwslt2023/model/mt/deltalm-large.tune.bilingual.de.diversify.adapt.TEDonly.clean/checkpoint_avg_last5.pt \
-  --source-lang eng --target-lang deu \
-  --batch-size 128 --beam 5 --remove-bpe --results-path $(ws_find iswslt-dataset)/results-${SLURM_JOB_ID} | tee $TMPDIR/results/dlmtranscriptions.csv
-
+#srun python spm.py $(ws_find iswslt-dataset)/data-bin/test.de $(ws_find iswslt-dataset)/data-bin/test.spm.de
+#srun python spm.py $(ws_find iswslt-dataset)/data-bin/test.en $(ws_find iswslt-dataset)/data-bin/test.spm.en
+#
+#fairseq-preprocess \
+#  --source-lang en --target-lang de \
+#  --trainpref data-bin/train --validpref data-bin/valid --testpref data-bin/test \
+#  --destdir data-bin/data \
+#  --workers 20 \
+#  --srcdict spm.model --tgtdict spm.model
+#
+#srun fairseq-generate $(ws_find iswslt-dataset)/data-bin/data \
+#  --path /project/OML/dliu/iwslt2023/model/mt/deltalm-large.tune.bilingual.de.diversify.adapt.TEDonly.clean/checkpoint_avg_last5.pt \
+#  --source-lang eng --target-lang deu \
+#  --batch-size 128 --beam 5 --remove-bpe --results-path $(ws_find iswslt-dataset)/results-${SLURM_JOB_ID} | tee $TMPDIR/results/dlmtranscriptions.csv
+#
 srun python evaluations.py
 
 # Before job completes save results on a workspace
