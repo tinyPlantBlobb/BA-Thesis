@@ -38,6 +38,7 @@ def run_inference(rank, world_size, dataset):
             generated_transcripts = []
             generations = []
             qelist = []
+            row = []
             for _ in range(num_runs):
                 model.train()
                 res = model.generate(
@@ -104,7 +105,7 @@ def run_inference(rank, world_size, dataset):
                 continue
             csv.extend(output)
 
-        writeCSV(csv, TEMPDIR + "/results/dropoutfulltranscriptions.csv", dropout=False)
+        writeCSV(csv, TEMPDIR + "/results/dropoutfulltranscriptions.csv", dropout=True)
         print(TEMPDIR + "/results/dropoutfulltranscriptions.csv")
 
 
