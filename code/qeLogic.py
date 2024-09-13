@@ -121,7 +121,16 @@ def writeCSV(results, path, dropout=False):
     if dropout:
         with open(path, "w", newline="") as f:
             writer = csv.writer(f, dialect="excel")
-            # writer.writerow(["row", "reference transcription", "reference translation", "translations"*30, "qe"])
+            row = [
+                "row",
+                "reference transcript",
+                "reference translation",
+                "qe",
+            ]
+            row.extend(["transcript probability " + str(i) for i in range(30)])
+            row.extend(["transcript " + str(i) for i in range(30)])
+
+            writer.writerow(row)
             # writer.writerow(["reference", "transcriptions"])
             writer.writerows(results)
     else:
@@ -265,6 +274,14 @@ def writedict(
         for i in range(len(translation_reference)):
             tgt.write(translation_reference[i])
             tgt.write("\n")
+        src.close()
+    with open(
+        "/pfs/work7/workspace/scratch/utqma-iswslt-dataset/data-bin/ref.de", "w"
+    ) as ref:
+        for i in range(len(translation_reference)):
+            ref.write(translation_reference[i])
+            ref.write("\n")
+        ref.close()
 
 
 # TranslationProbability(t)

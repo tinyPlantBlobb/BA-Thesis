@@ -30,7 +30,12 @@ def run_inference(rank, world_size, dataset):
     with torch.no_grad():
         for i in range(offset, offset + elemdp, 1):
             sample = dataset["train"][i]
-            transcript = sample["transcript"]
+            qetranscript = [
+                float(sample["transcript probability " + str(i)]) for i in range(30)
+            ]
+            maxqe = qetranscript.index(max(qetranscript))
+            transcript = sample["transcript " + str(maxqe)]
+
             text = sample["tranlation reference"]
             ####################
             # dropout based shit#
