@@ -262,7 +262,7 @@ def writedict(
     TEMPDIR, generated_transcript, transcription_reference, translation_reference
 ):
     with open(
-        "/pfs/work7/workspace/scratch/utqma-iswslt-dataset/data-bin/test.eng", "w"
+        "/pfs/work7/workspace/scratch/utqma-iswslt-dataset/data-bin/test.en", "w"
     ) as src:
         for i in range(len(generated_transcript)):
             src.write(generated_transcript[i])
@@ -282,8 +282,3 @@ def writedict(
             ref.write(translation_reference[i])
             ref.write("\n")
         ref.close()
-
-
-# TranslationProbability(t)
-# softmaxEntropy(t)
-# print(t.transcription)
