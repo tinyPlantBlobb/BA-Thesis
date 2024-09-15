@@ -154,25 +154,29 @@ def writeCSV(results, path, dropout=False):
 
 def readCSV(path):
     with open(path, "r", newline="") as f:
+        row = [
+            "row",
+            "reference transcript",
+            "reference translation",
+            "qe",
+        ]
+        row.extend(["transcript probability " + str(i) for i in range(30)])
+        row.extend(["transcript " + str(i) for i in range(30)])
+
         reader = csv.DictReader(
             f,
             dialect="excel",
-            fieldnames=[
-                "row",
-                "reference transcript",
-                "reference translation",
-                "transcription",
-                "translation",
-                "transcript prob",
-                "transcript mean",
-                "qe",
-            ],
+            fieldnames=row,
         )
         data = {"transcript": [], "reference": [], "qe": []}
         for row in reader:
-            data["transcript"].append(row["transcription"])
+            data["transcript"].append(row["transcript 0"])
             data["reference"].append(row["reference translation"])
-            data["qe"].append((row["transcript prob"], row["transcript mean"]))
+            data["qe"].append(
+                [row["transcript probability " + str(i)] for i in range(30)]
+            )
+            print(data["qe"])
+            # data["qe"].append((row["transcript probability"], row["transcript mean"]))
     return data
 
 

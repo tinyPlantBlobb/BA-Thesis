@@ -27,6 +27,7 @@ def run_inference(rank, world_size, dataset):
     model.generation_config.forced_decoder_ids = None
     offset = 0 + rank * elemdp
     csv = []
+    print(sample)
     with torch.no_grad():
         for i in range(offset, offset + elemdp, 1):
             sample = dataset["train"][i]
