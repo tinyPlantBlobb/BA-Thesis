@@ -14,5 +14,5 @@ with open(inputpath) as input:
     lines = input.read().split("\n")
     tokens = sp.encode(lines, out_type=str)
     with open(outputpath, "a") as tokenized:
-        tokenized.write(str(tokens))
+        tokenized.write(tokens)
         tokenized.write("\n")
