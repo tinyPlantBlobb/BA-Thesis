@@ -4,6 +4,7 @@ source qe-whitebox/bin/activate
 ws=$(ws_find iswslt-dataset)
 srun python spm.py $ws/data-bin/test.de $ws/data-bin/test.spm.de $SPMMODEL
 srun python spm.py $ws/data-bin/test.en $ws/data-bin/test.spm.en $SPMMODEL
+
 fairseq-preprocess \
   --source-lang en --target-lang de \
   --trainpref data-bin/train --validpref data-bin/valid --testpref data-bin/test \
