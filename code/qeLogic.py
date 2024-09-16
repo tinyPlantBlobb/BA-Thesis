@@ -174,7 +174,7 @@ def readCSV(path):
                 continue
             data["transcript"].append(row["transcript 0"])
             data["reference"].append(row["reference translation"])
-            print(row["transcript probability 0"])
+            # print(row["transcript probability 0"])
             data["qe"].append(
                 [
                     (
@@ -188,7 +188,7 @@ def readCSV(path):
                     for i in range(30)
                 ]
             )
-            print(type(data["qe"][0][0]), "\n")
+            # print(type(data["qe"][0][0]), "\n")
             # data["qe"].append((row["transcript probability"], row["transcript mean"]))
     return data
 
