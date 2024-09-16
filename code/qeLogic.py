@@ -170,12 +170,25 @@ def readCSV(path):
         )
         data = {"transcript": [], "reference": [], "qe": []}
         for row in reader:
+            if row["row"] == "row":
+                continue
             data["transcript"].append(row["transcript 0"])
             data["reference"].append(row["reference translation"])
+            print(row["transcript probability 0"])
             data["qe"].append(
-                [row["transcript probability " + str(i)] for i in range(30)]
+                [
+                    (
+                        float(
+                            row["transcript probability " + str(i)].split(",")[0][1:]
+                        ),
+                        float(
+                            row["transcript probability " + str(i)].split(",")[1][:-1]
+                        ),
+                    )
+                    for i in range(30)
+                ]
             )
-            print(data["qe"])
+            print(type(data["qe"][0][0]), "\n")
             # data["qe"].append((row["transcript probability"], row["transcript mean"]))
     return data
 
