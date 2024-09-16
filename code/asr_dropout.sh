@@ -34,5 +34,5 @@ srun torchrun --nnodes 1 --nproc_per_node 1 seamless.py
 srun python evaluations.py
 rsync -av $TMPDIR/results/scores.txt $(ws_find iswslt-dataset)/results-${SLURM_JOB_ID}/
 
-rsync -av $TMPDIR/results/fulltranscriptions.csv $(ws_find iswslt-dataset)/results-${SLURM_JOB_ID}/
+rsync -av $TMPDIR/results/dropoutfulltranscriptions.csv $(ws_find iswslt-dataset)/results-${SLURM_JOB_ID}/
 rsync -av $TMPDIR/results/ $(ws_find iswslt-dataset)/results-${SLURM_JOB_ID}/
