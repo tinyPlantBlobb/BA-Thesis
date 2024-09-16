@@ -29,7 +29,7 @@ def run_inference(rank, world_size, dataset):
     csv = []
     with torch.no_grad():
         for i in range(offset, offset + elemdp, 1):
-            sample = dataset["train"][i]
+            sample = dataset[i]
             qetranscript = [sample["qe"][i][j] for j in range(30)]
             maxqe = qetranscript.index(max(qetranscript, key=(lambda x: x[0])))
             transcript = sample["transcript " + str(maxqe)]
