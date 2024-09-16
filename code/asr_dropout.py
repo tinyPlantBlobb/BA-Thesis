@@ -25,6 +25,7 @@ def run_inference(rank, world_size, dataset):
     # num = 3
     num = (len(dataset)) // (world_size * 2)
     csv = []
+    model.train()
     with torch.no_grad():
         for i in tqdm(range(offset, offset + num, 1)):
             sample = dataset[i]
@@ -40,7 +41,6 @@ def run_inference(rank, world_size, dataset):
             qelist = []
             row = []
             for _ in range(num_runs):
-                model.train()
                 res = model.generate(
                     input_features=input_features,
                     return_dict_in_generate=True,
