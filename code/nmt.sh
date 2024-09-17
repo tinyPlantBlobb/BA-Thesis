@@ -9,12 +9,12 @@ echo "building done"
 
 fairseq-preprocess \
   --source-lang en --target-lang de \
-  --trainpref data-bin/train --validpref data-bin/valid --testpref data-bin/test \
-  --destdir data-bin/data \
+  --testpref $ws/data-bin/test \
+  --destdir $ws/data-bin/data \
   --workers 20 \
   --srcdict $ws/data-bin/dict.txt --tgtdict $ws/data-bin/dict.txt
-
-srun fairseq-generate $(ws_find iswslt-dataset)/data-bin/ \
+# todo fix path for model checkpoint (ask danni)
+srun fairseq-generate $(ws_find iswslt-dataset)/data-bin/data/ \
   --path /project/OML/dliu/iwslt2023/model/mt/deltalm-large.tune.bilingual.de.diversify.adapt.TEDonly.clean/checkpoint_avg_last5.pt \
   --source-lang en --target-lang de \
-  --batch-size 128 --beam 5 --remove-bpe --results-path qe-whitebox/bin/activate $(ws_find iswslt-dataset)/results-${SLURM_JOB_ID} | tee $TMPDIR/results/dlmtranscriptions.csv
+  --batch-size 128 --beam 5 --remove-bpe --results-path $(ws_find iswslt-dataset)/results-${SLURM_JOB_ID} | tee $TMPDIR/results/dlmtranscriptions.csv
