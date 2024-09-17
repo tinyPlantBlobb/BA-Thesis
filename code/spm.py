@@ -12,7 +12,7 @@ print(inputpath, outputpath)
 sp = spm.SentencePieceProcessor(model_file=spmmodel)
 with open(inputpath) as input:
     lines = input.read().split("\n")
-    tokens = sp.EncodeAsPieces(lines, out_type=str)
+    tokens = sp.EncodeAsPieces(lines)
     with open(outputpath, "a") as tokenized:
         for i in range(len(tokens)):
             for j in range(len(tokens[i])):
