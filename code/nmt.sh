@@ -13,6 +13,8 @@ fairseq-preprocess \
   --destdir $ws/data-bin/data \
   --workers 20 \
   --srcdict $ws/data-bin/dict.txt --tgtdict $ws/data-bin/dict.txt
+
+echo "preprocessing done"
 # todo fix path for model checkpoint (ask danni)
 srun fairseq-generate $(ws_find iswslt-dataset)/data-bin/data/ \
   --path /project/OML/dliu/iwslt2023/model/mt/deltalm-large.tune.bilingual.de.diversify.adapt.TEDonly.clean/checkpoint_avg_last5.pt \
