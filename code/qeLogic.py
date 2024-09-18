@@ -162,7 +162,7 @@ def readCSV(path):
         ]
         row.extend(["transcript probability " + str(i) for i in range(30)])
         row.extend(["transcript " + str(i) for i in range(30)])
-
+        probabilities = ["transcript probability " + str(i) for i in range(30)]
         reader = csv.DictReader(
             f,
             dialect="excel",
@@ -174,18 +174,15 @@ def readCSV(path):
                 continue
             data["transcript"].append(row["transcript 0"])
             data["reference"].append(row["reference translation"])
-            # print(row["transcript probability 0"])
+
+            print("probabilities 0", probabilities[0], row[probabilities[0]])
             data["qe"].append(
                 [
                     (
-                        float(
-                            row["transcript probability " + str(i)].split(",")[0][1:]
-                        ),
-                        float(
-                            row["transcript probability " + str(i)].split(",")[1][:-1]
-                        ),
+                        float(row[i].split(",")[0][1:]),
+                        float(row[i].split(",")[1][:-1]),
                     )
-                    for i in range(30)
+                    for i in probabilities
                 ]
             )
             # print(type(data["qe"][0][0]), "\n")
@@ -194,7 +191,7 @@ def readCSV(path):
 
 
 def variance(data):
-    print(type(data), type(data[0]))
+    # print(type(data), type(data[0]))
     return torch.var(torch.as_tensor(data), dim=-1).cpu().numpy()
 
 
