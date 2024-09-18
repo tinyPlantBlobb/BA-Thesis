@@ -127,9 +127,10 @@ def writeCSV(results, path, dropout=False):
                 "reference translation",
                 "qe",
             ]
+
             row.extend(["transcript probability " + str(i) for i in range(30)])
             row.extend(["transcript " + str(i) for i in range(30)])
-
+            print(type(results), results)
             writer.writerow(row)
             # writer.writerow(["reference", "transcriptions"])
             writer.writerows(results)
@@ -163,19 +164,27 @@ def readCSV(path):
         row.extend(["transcript probability " + str(i) for i in range(30)])
         row.extend(["transcript " + str(i) for i in range(30)])
         probabilities = ["transcript probability " + str(i) for i in range(30)]
+        transcpipts = ["transcript " + str(i) for i in range(30)]
         reader = csv.DictReader(
             f,
             dialect="excel",
             fieldnames=row,
         )
-        data = {"transcript": [], "reference": [], "qe": []}
+        data = {
+            "transcript": [],
+            # "translation reference": [],
+            "qe": [],
+            "reference": [],
+        }
         for row in reader:
             if row["row"] == "row":
                 continue
-            data["transcript"].append(row["transcript 0"])
-            data["reference"].append(row["reference translation"])
-
-            print("probabilities 0", probabilities[0], row[probabilities[0]])
+            data["transcript"].append([row[i] for i in transcpipts])
+            data["reference"].append(
+                (row["reference transcript"], row["reference translation"])
+            )
+            # data["transcription reference"].append(row["reference transcript"])
+            # print("probabilities 0", probabilities[0], row[probabilities[0]])
             data["qe"].append(
                 [
                     (

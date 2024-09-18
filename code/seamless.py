@@ -30,11 +30,12 @@ def run_inference(rank, world_size, dataset):
     with torch.no_grad():
         for i in range(offset, offset + elemdp, 1):
             sample = dataset[i]
-            qetranscript = [sample["qe"][i][j] for j in range(30)]
-            maxqe = qetranscript.index(max(qetranscript, key=(lambda x: x[0])))
-            transcript = sample["transcript " + str(maxqe)]
+            qetranscript = [sample["qe"][j] for j in range(30)]
+            maxqe = qetranscript.index(max(qetranscript, key=(lambda x: x[1])))
 
-            text = sample["tranlation reference"]
+            transcript = sample["transcript"][maxqe]
+            print(transcript, sample["reference"])
+            # text = sample["reference"]
             ####################
             # dropout based shit#
             #####################
@@ -46,14 +47,17 @@ def run_inference(rank, world_size, dataset):
                 model.train()
                 with torch.no_grad():
                     # this will return the last layer probabilities of the model
-                    input = processor(transcript, return_tensors="pt")
-                    input_features = input.input_features.to(rank)
+                    input = processor(
+                        text=transcript, src_lang="eng", return_tensors="pt"
+                    )
+                    # print(input)
+                    input_features = input.to(rank)
                     res = model.generate(
-                        input_features=input_features,
+                        **input_features,
                         tgt_lang="deu",
                         return_dict_in_generate=True,
                         output_scores=True,
-                        generate_speech=False,
+                        output_logits=True,
                     )
                     dropoutdata.append(res)
                 torch.cuda.empty_cache()
@@ -62,20 +66,29 @@ def run_inference(rank, world_size, dataset):
             #     file.write(str(dropoutresult["all"]["tranlateion"]))
             #     file.close()
             # torch.save(dropoutdata, TEMPDIR + "/results/dropoutresult" + str(i) + ".pt")
-            csv.append(
-                [
-                    i,
-                    sample["transcription reference"],
-                    sample["translation reference"],
-                    qe,
-                ].extend(dropoutdata)
-            )
-        writeCSV(csv, "results/dropouttranslationfull.csv", dropout=True)
-        del sample
+            currrow = [
+                i,
+                sample["reference"][0],
+                sample["reference"][1],
+                qe,
+            ]
+            currrow.extend(dropoutdata)
+            csv.append(currrow)
+            torch.cuda.empty_cache()
+        output = [None for _ in range(world_size)]
+        dist.gather_object(
+            obj=csv, object_gather_list=output if dist.get_rank() == 0 else None, dst=0
+        )
+        if rank == 0:
+            for i in range(len(output)):
+                if i == 0:
+                    continue
+                csv.extend(output[i])
+
+            writeCSV(csv, TEMPDIR + "/results/dropouttranslationfull.csv", dropout=True)
 
 
 BASE = ""
-
 
 TEMPDIR = os.environ["TMPDIR"]
 respath = os.path.join(TEMPDIR, "results")

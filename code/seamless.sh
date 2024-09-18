@@ -26,8 +26,9 @@ pip install librosa --upgrade
 pip install sentencepiece
 pip install protobuf
 
-cp ~/fulltranscription.csv $TMPDIR/results/fulltranscription.csv
-srun torchrun --nnodes 1 --nproc_per_node 1 seamless_regular.py
+mkdir $TMPDIR/results
+cp ~/dropoutfulltranscriptions.csv $TMPDIR/results/dropoutfulltranscriptions.csv
+srun torchrun --nnodes 1 --nproc_per_node 1 seamless.py
 #srun torchrun --nnodes 1 --nproc_per_node 1 mnt_part.py
 
 # 1. param = path to the dir that contains the dataset in the deltalm split format

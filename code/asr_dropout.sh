@@ -30,7 +30,7 @@ pip install jiwer
 
 srun torchrun --nnodes 1 --nproc_per_node 1 asr_dropout.py
 echo "\n dropout done \n"
-#srun torchrun --nnodes 1 --nproc_per_node 1 seamless.py
+srun torchrun --nnodes 1 --nproc_per_node 1 seamless.py
 echo "seamless done"
 #srun python evaluations.py
 rsync -av $TMPDIR/results/scores.txt $(ws_find iswslt-dataset)/results-${SLURM_JOB_ID}/
