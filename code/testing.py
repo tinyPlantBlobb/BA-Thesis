@@ -8,7 +8,7 @@ BASE = "/home/plantpalfynn/uni/BA/BA-Thesis/code/"
 # dataset1 = load_dataset(
 #    "csv", data_files=BASE + "results/dropoutfulltranscriptions.csv"
 # )
-dataset = Dataset.from_dict(readCSV(BASE + "results/dropoutfixed.csv"))
+dataset = Dataset.from_dict(readCSV(BASE + "results/dropoutfulltranscriptions.csv"))
 print(dataset)
 
 
