@@ -29,9 +29,10 @@ pip install unbabel-comet
 pip install jiwer
 
 srun torchrun --nnodes 1 --nproc_per_node 1 asr_dropout.py
-srun torchrun --nnodes 1 --nproc_per_node 1 seamless.py
-
-srun python evaluations.py
+echo "\n dropout done \n"
+#srun torchrun --nnodes 1 --nproc_per_node 1 seamless.py
+echo "seamless done"
+#srun python evaluations.py
 rsync -av $TMPDIR/results/scores.txt $(ws_find iswslt-dataset)/results-${SLURM_JOB_ID}/
 
 rsync -av $TMPDIR/results/dropoutfulltranscriptions.csv $(ws_find iswslt-dataset)/results-${SLURM_JOB_ID}/

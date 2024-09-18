@@ -57,26 +57,18 @@ def run_inference(rank, world_size, dataset):
                 )[0]
                 qe = getQE(res, dropout=False, translation=False)
 
-                # result = Result(
-                #     sample["audiofile"],
-                #     sample["timestamp"],
-                #     sample["transcript"],
-                #     generated_transcript,
-                #     res,
-                #     qe,
-                # )
-                # torch.save(result, TEMPDIR + "/results/result" + str(i) + ".pt")
                 torch.cuda.empty_cache()
                 generations.append(res)
                 qelist.append(qe)
                 generated_transcripts.append(generated_transcript)
+
                 # print(generated_transcript, transcript_reference)
+
             qe = getQE(generations, dropout=True, translation=False)
             row = [
                 i,
                 transcript_reference,
                 sample["translation"],
-                ##generated_transcripts,
                 qe,
             ]
             row.extend(qelist)
@@ -103,7 +95,7 @@ def run_inference(rank, world_size, dataset):
         for i in range(len(output)):
             if i == 0:
                 continue
-            csv.extend(output)
+            csv.extend(output[i])
 
         writeCSV(csv, TEMPDIR + "/results/dropoutfulltranscriptions.csv", dropout=True)
         print(TEMPDIR + "/results/dropoutfulltranscriptions.csv")
@@ -114,7 +106,9 @@ BASE = ""
 # Whisper  from the huggingface whisper implementation
 processor = WhisperProcessor.from_pretrained("openai/whisper-medium.en")
 # feature_extractor = WhisperFeatureExtractor.from_pretrained("openai/whisper-small")
-model = WhisperForConditionalGeneration.from_pretrained("openai/whisper-medium.en")
+model = WhisperForConditionalGeneration.from_pretrained(
+    "openai/whisper-medium.en", dropout=0.1
+)
 
 TEMPDIR = os.environ["TMPDIR"]
 respath = os.path.join(TEMPDIR, "results")
@@ -129,9 +123,9 @@ def main():
     torchrunrank = int(os.environ["LOCAL_RANK"])
     trglrank = int(os.environ["RANK"])
     print("start rank", torchrunrank, trglrank)
-    smp = mp.get_context("spawn")
-    q = smp.SimpleQueue()
-    q.put([["sample", "reference", "reference"]])
+    # smp = mp.get_context("spawn")
+    # q = smp.SimpleQueue()
+    # q.put([["sample", "reference", "reference"]])
     mp.spawn(run_inference, args=(world_size, dataset), nprocs=world_size, join=True)
 
 
