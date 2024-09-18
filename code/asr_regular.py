@@ -14,43 +14,6 @@ import torch
 from tqdm import tqdm
 from qeLogic import getAudios, getQE, writeCSV, writedict
 
-# class Result:
-#    audiofile = None
-#    timestamp = None
-#    runs = None
-#    ref = None
-#    trans = None
-#    data = None  # result of the model
-#    results = None  # Tuple of (qe, qeent, qestd*mask)
-#    dropoutdata = None  # result of the model for all droutout runs list of tuples
-#    dropoutresults = None  # list of Tuple of (qe, var, lex-simm)
-#
-#    def __init__(
-#        self,
-#        audiofile,
-#        timestamp,
-#        reference,
-#        transcription,
-#        modeldata,
-#        qualityestimate,
-#        dropoutdata=None,
-#        dropoutresults=None,
-#    ):
-#        self.audiofile = audiofile
-#        self.timestamp = timestamp
-#        self.ref = reference
-#        self.trans = transcription
-#        self.data = modeldata  # result data of the model
-#        self.results = qualityestimate  # Tuple of (qe, qeent, qestd)
-#        self.dropoutresults = dropoutresults
-#        self.dropoutdata = dropoutdata
-#
-#    def __str__(self):
-#        return str(self.trans)
-#
-#    def __repr__(self):
-#        return  # "audiofile: "+str(self.audiofile)+ "\n" + "timestamp: "+str(self.timestamp)+ "\n" + "ref: "+str(self.ref)+ "\n"
-
 
 def run_inference(rank, world_size, dataset):
     torch.cuda.set_device(rank)
@@ -87,16 +50,6 @@ def run_inference(rank, world_size, dataset):
                 res["sequences"], skip_special_tokens=True
             )[0]
             qe = getQE(res, dropout=False, translation=False)
-            # torch.cuda.empty_cache()
-            # result = Result(
-            #    sample["audiofile"],
-            #    sample["timestamp"],
-            #    sample["transcript"],
-            #    generated_transcript,
-            #    res,
-            #    qe,
-            # )
-            # torch.save(result, TEMPDIR + "/results/result" + str(i) + ".pt")
             torch.cuda.empty_cache()
             # print(qe, generated_transcript, transcript_reference)
             csv.append(
