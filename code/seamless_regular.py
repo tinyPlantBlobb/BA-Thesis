@@ -123,7 +123,7 @@ if not os.path.exists(respath):
 
 
 def main():
-print(TEMPDIR + "/results/fulltranscriptions.csv")
+    print(TEMPDIR + "/results/fulltranscriptions.csv")
     dataset = load_dataset(
         "csv", data_files=TEMPDIR + "/results/fulltranscriptions.csv"
     )
