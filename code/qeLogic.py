@@ -130,6 +130,8 @@ def writeCSV(results, path, dropout=False):
 
             row.extend(["transcript probability " + str(i) for i in range(30)])
             row.extend(["transcript " + str(i) for i in range(30)])
+            row.extend(["translation" + str(i) for i in range(30)])
+
             # print(type(results), results)
             writer.writerow(row)
             # writer.writerow(["reference", "transcriptions"])
