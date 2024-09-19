@@ -19,7 +19,7 @@ from qeLogic import getQE, readCSV, writeCSV
 
 # dropout would be 0.1 as done in the paper in the experiment for evaluating the translation
 model = SeamlessM4Tv2ForTextToText.from_pretrained(
-    "facebook/seamless-m4t-v2-large", dropout=0.1, use_cache=False
+    "facebook/seamless-m4t-v2-large", dropout=0.1, use_cache=False, num_beams=5
 )
 processor = SeamlessProcessor.from_pretrained(
     "facebook/seamless-m4t-v2-large", use_cache=False
@@ -88,6 +88,8 @@ def run_inference(rank, world_size, dataset):
                 sample["reference"][1],
                 qe,
             ]
+            currrow.extend(sample["qe"])
+            currrow.extend(sample["transcript"])
             currrow.extend(qelist)
             currrow.extend(translation)
             # currrow.extend(dropoutdata)
