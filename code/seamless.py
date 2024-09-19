@@ -1,5 +1,7 @@
+from datasets.features import translation
 from requests import get
 import torch.distributed
+from torch.nn.functional import dropout
 import torch.utils
 import torch.utils.data
 import torch.distributed as dist
@@ -10,11 +12,18 @@ from transformers import SeamlessM4Tv2ForTextToText, AutoProcessor as SeamlessPr
 import os
 import torch
 from tqdm import tqdm
+from transformers.models.deprecated.trajectory_transformer import (
+    configuration_trajectory_transformer,
+)
 from qeLogic import getQE, readCSV, writeCSV
 
 # dropout would be 0.1 as done in the paper in the experiment for evaluating the translation
-model = SeamlessM4Tv2ForTextToText.from_pretrained("facebook/seamless-m4t-v2-large")
-processor = SeamlessProcessor.from_pretrained("facebook/seamless-m4t-v2-large")
+model = SeamlessM4Tv2ForTextToText.from_pretrained(
+    "facebook/seamless-m4t-v2-large", dropout=0.1, use_cache=False
+)
+processor = SeamlessProcessor.from_pretrained(
+    "facebook/seamless-m4t-v2-large", use_cache=False
+)
 
 
 def run_inference(rank, world_size, dataset):
@@ -34,12 +43,14 @@ def run_inference(rank, world_size, dataset):
             maxqe = qetranscript.index(max(qetranscript, key=(lambda x: x[1])))
 
             transcript = sample["transcript"][maxqe]
-            print(transcript, sample["reference"])
+            # print(transcript, sample["reference"])
             # text = sample["reference"]
             ####################
             # dropout based shit#
             #####################
             dropoutdata = []
+            translation = []
+            qelist = []
             for j in tqdm(range(num_samples)):
                 #############################################
                 # Huggingface whisper implementation things #
@@ -60,6 +71,11 @@ def run_inference(rank, world_size, dataset):
                         output_logits=True,
                     )
                     dropoutdata.append(res)
+                    currtranslation = processor.batch_decode(
+                        res["sequences"], skip_special_tokens=True
+                    )[0]
+                    qelist.append(getQE(res, dropout=False, translation=True))
+                    translation.append(currtranslation)
                 torch.cuda.empty_cache()
             qe = getQE(dropoutdata, dropout=True)
             # with open(TEMPDIR + "/results/dropresult"+str(i)+".txt", "w") as file:
@@ -72,20 +88,31 @@ def run_inference(rank, world_size, dataset):
                 sample["reference"][1],
                 qe,
             ]
-            currrow.extend(dropoutdata)
+            currrow.extend(qelist)
+            currrow.extend(translation)
+            # currrow.extend(dropoutdata)
             csv.append(currrow)
             torch.cuda.empty_cache()
-        output = [None for _ in range(world_size)]
-        dist.gather_object(
-            obj=csv, object_gather_list=output if dist.get_rank() == 0 else None, dst=0
-        )
-        if rank == 0:
-            for i in range(len(output)):
-                if i == 0:
-                    continue
-                csv.extend(output[i])
+            output = [None for _ in range(world_size)]
+            dist.gather_object(
+                obj=csv,
+                object_gather_list=output if dist.get_rank() == 0 else None,
+                dst=0,
+            )
+            if rank == 0:
+                for i in range(len(output)):
+                    if i == 0:
+                        continue
+                    csv.extend(output[i])
 
-            writeCSV(csv, TEMPDIR + "/results/dropouttranslationfull.csv", dropout=True)
+                writeCSV(
+                    csv,
+                    TEMPDIR
+                    + "/results/dropouttranslationfulldropped"
+                    + str(rank)
+                    + ".csv",
+                    dropout=True,
+                )
 
 
 BASE = ""
