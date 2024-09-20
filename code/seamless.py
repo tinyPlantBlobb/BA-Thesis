@@ -19,7 +19,7 @@ from qeLogic import getQE, readCSV, writeCSV
 
 # dropout would be 0.1 as done in the paper in the experiment for evaluating the translation
 model = SeamlessM4Tv2ForTextToText.from_pretrained(
-    "facebook/seamless-m4t-v2-large", dropout=0.1, use_cache=False, num_beams=5
+    "facebook/seamless-m4t-v2-large", dropout=0.1, use_cache=False
 )
 processor = SeamlessProcessor.from_pretrained(
     "facebook/seamless-m4t-v2-large", use_cache=False
@@ -72,12 +72,12 @@ def run_inference(rank, world_size, dataset):
                     )
                     dropoutdata.append(res)
                     currtranslation = processor.batch_decode(
-                        res["sequences"], skip_special_tokens=True
+                        res["sequences"][0], skip_special_tokens=True
                     )[0]
                     qelist.append(getQE(res, dropout=False, translation=True))
                     translation.append(currtranslation)
                 torch.cuda.empty_cache()
-            qe = getQE(dropoutdata, dropout=True)
+            qe = getQE(dropoutdata, dropout=True, translation=True)
             # with open(TEMPDIR + "/results/dropresult"+str(i)+".txt", "w") as file:
             #     file.write(str(dropoutresult["all"]["tranlateion"]))
             #     file.close()

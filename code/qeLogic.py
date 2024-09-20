@@ -207,7 +207,9 @@ def variance(data):
 
 
 def combo(tp, var):
-    return 1 - np.divide(tp, var)
+    if var == 0:
+        return 0
+    return 1 - torch.div(tp, var).cpu().numpy()
 
 
 def lexsim(transhypo):
@@ -235,8 +237,9 @@ def getQE(data, dropout=False, dropouttrans=None, translation=True):
             for i in range(len(data)):
                 qe.append(TranslationProbability(data[i]))
                 # lex = lexsim(dropouttrans)
-            qevar.append(variance(qe))
-            com = combo(qe, qevar)
+            tpdropout = torch.div(torch.sum(torch.as_tensor(qe)), 30)
+            qevar = variance(qe)
+            com = combo(tpdropout, qevar)
             res = (qe, qevar, com, lex)
         else:
             for i in range(len(data)):
@@ -264,7 +267,7 @@ def getQE(data, dropout=False, dropouttrans=None, translation=True):
             qe = TranscriptionProbability(data)
             qemean = TranscriptionMean(data)
             res = (qe, qemean)
-        # print(res)
+        print(res)
         return res
 
 
