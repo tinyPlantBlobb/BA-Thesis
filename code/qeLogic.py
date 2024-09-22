@@ -203,7 +203,7 @@ def readCSV(path):
 
 def variance(data):
     # print(type(data), type(data[0]))
-    return torch.var(torch.as_tensor(data), dim=-1).cpu().numpy()
+    return torch.var(torch.as_tensor(data), dim=-1)
 
 
 def combo(tp, var):
