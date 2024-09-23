@@ -22,7 +22,7 @@ def run_inference(rank, world_size, dataset):
     model.generation_config.forced_decoder_ids = None
     offset = 0 + rank * ((len(dataset)) // world_size)
     # num = 3
-    num = (len(dataset)) // (world_size * 2)
+    num = (len(dataset)) // (world_size)
     csv = []
     with torch.no_grad():
         for i in tqdm(range(offset, offset + num, 1)):
