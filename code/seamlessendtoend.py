@@ -1,10 +1,11 @@
 import torch.distributed
+from torch.nn.functional import dropout
 import torch.utils
 import torch.utils.data
 import torch.distributed as dist
 import torch.multiprocessing as mp
 from torch.nn.parallel import DistributedDataParallel as DDP
-from datasets import Dataset, load_dataset
+from datasets import Dataset, Audio
 from transformers import (
     SeamlessM4Tv2ForSpeechToText,
     AutoProcessor as SeamlessProcessor,
@@ -15,8 +16,12 @@ from tqdm import tqdm
 from qeLogic import getAudios, getQE, writeCSV
 
 # dropout would be 0.1 as done in the paper in the experiment for evaluating the translation
-model = SeamlessM4Tv2ForSpeechToText.from_pretrained("facebook/seamless-m4t-v2-large")
-processor = SeamlessProcessor.from_pretrained("facebook/seamless-m4t-v2-large")
+model = SeamlessM4Tv2ForSpeechToText.from_pretrained(
+    "facebook/seamless-m4t-v2-large", dropout=0.1, use_cache=False
+)
+processor = SeamlessProcessor.from_pretrained(
+    "facebook/seamless-m4t-v2-large", use_cache=False
+)
 
 
 def run_inference(rank, world_size, dataset):
@@ -25,7 +30,7 @@ def run_inference(rank, world_size, dataset):
     model.to(rank)
     model.generation_config.forced_decoder_ids = None
     num = 280
-    num = dataset.num_rows["train"] // world_size
+    num = len(dataset) // world_size
     print(num)
     # num = 3
     offset = 0 + rank * (num)
@@ -41,10 +46,8 @@ def run_inference(rank, world_size, dataset):
             sample = dataset[i]
             model_transctiption = sample["audiofile"]["array"]
             # alternatively set to 16000
-            # reference transctiption
-            reference_transctipt = sample
             text_input = processor(
-                text=model_transctiption,
+                audios=model_transctiption,
                 src_lang="eng",
                 tgt_lang="deu",
                 return_tensors="pt",
@@ -78,20 +81,51 @@ def run_inference(rank, world_size, dataset):
             ## result = Result(sample["audiofile"],sample["timestamp"],sample["transcript"],trans,res,qe)
             # torch.save(result, TEMPDIR + "/results/seamless_result" + str(i) + ".pt")
             torch.cuda.empty_cache()
-            # csv overview: row, model transcript transcripttion reference , modeltranslation, translation reference, qe
+            dpresults = dropoutres = []
+            for i in range(30):
+                model.train()
+                dropout_input = processor(
+                    audios=model_transctiption,
+                    src_lang="eng",
+                    tgt_lang="deu",
+                    return_tensors="pt",
+                    sampling_rate=16000,
+                )
 
-            csv.append(
-                [
-                    i,
-                    reference_transctipt,
-                    sample["reference translation"],
-                    model_transctiption,
-                    model_translation,
-                    sample["transcript prob"],
-                    sample["transcript mean"],
-                    qe,
-                ]
-            )
+                dropout_input = dropout_input.to(rank)
+                res = model.generate(
+                    **dropout_input,
+                    tgt_lang="deu",
+                    return_dict_in_generate=True,
+                    output_scores=True,
+                    output_logits=True,
+                )
+
+                #############################################
+                # Huggingface whisper implementation things #
+                #############################################
+
+                # this will return the last layer probabilities of the model
+
+                # model(input_features, decoder_input_ids=res["sequences"]).logits  # gets the last layer probabilities of the model
+                dropout_translation = processor.batch_decode(
+                    res["sequences"], skip_special_tokens=True
+                )[0]
+                # refscore = cometscore([text], [trans], [sample["translation"]])
+                dqe = getQE(res, dropout=False, translation=True)
+                dpresults.append(res)
+                dropoutres.append((dropout_translation, dqe))
+            # csv overview: row, model transcript transcripttion reference , modeltranslation, translation reference, qe
+            dropoutqe = getQE(dpresults, dropout=True, translation=True)
+            row = [
+                i,
+                sample["translation"],
+                model_translation,
+                qe,
+                dropoutqe,
+            ]
+            row.extend(dropoutres)
+            csv.append(row)
     output = [None for _ in range(world_size)]
     dist.gather_object(
         obj=csv, object_gather_list=output if dist.get_rank() == 0 else None, dst=0
