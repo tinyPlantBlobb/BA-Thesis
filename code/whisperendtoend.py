@@ -98,9 +98,13 @@ def run_inference(rank, world_size, dataset):
 BASE = ""
 
 # Whisper  from the huggingface whisper implementation
-processor = WhisperProcessor.from_pretrained("openai/whisper-medium.en")
+processor = WhisperProcessor.from_pretrained(
+    "openai/whisper-medium.en", language="english", task="translate"
+)
 # feature_extractor = WhisperFeatureExtractor.from_pretrained("openai/whisper-small")
-model = WhisperForConditionalGeneration.from_pretrained("openai/whisper-medium.en")
+model = WhisperForConditionalGeneration.from_pretrained(
+    "openai/whisper-medium.en", dropout=0.1
+)
 
 TEMPDIR = os.environ["TMPDIR"]
 respath = os.path.join(TEMPDIR, "results")

@@ -13,6 +13,7 @@ from transformers import (
 import os
 import torch
 from tqdm import tqdm
+from transformers.models.sam.modeling_sam import SamPositionalEmbedding
 from qeLogic import getAudios, getQE, writeCSV
 
 # dropout would be 0.1 as done in the paper in the experiment for evaluating the translation
@@ -29,8 +30,8 @@ def run_inference(rank, world_size, dataset):
     dist.init_process_group("nccl", rank=rank, world_size=world_size)
     model.to(rank)
     model.generation_config.forced_decoder_ids = None
-    num = 280
-    num = len(dataset) // world_size
+    num = 3
+    # num = len(dataset) // world_size
     print(num)
     # num = 3
     offset = 0 + rank * (num)
@@ -51,6 +52,7 @@ def run_inference(rank, world_size, dataset):
                 src_lang="eng",
                 tgt_lang="deu",
                 return_tensors="pt",
+                sampling_rate=16000,
             )
 
             text_input = text_input.to(rank)
@@ -81,7 +83,8 @@ def run_inference(rank, world_size, dataset):
             ## result = Result(sample["audiofile"],sample["timestamp"],sample["transcript"],trans,res,qe)
             # torch.save(result, TEMPDIR + "/results/seamless_result" + str(i) + ".pt")
             torch.cuda.empty_cache()
-            dpresults = dropoutres = []
+            dpresults = []
+            dropoutres = []
             for i in range(30):
                 model.train()
                 dropout_input = processor(
