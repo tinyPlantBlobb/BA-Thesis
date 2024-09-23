@@ -51,6 +51,8 @@ def worderror(hypothesis, references):
 def TranslationProbability(data):
     # toptoken= data[i].scores
     prop = 0
+    # print(data)
+
     for j in range(len(data.scores)):
         toptoken = torch.argmax(torch.nn.functional.softmax(data.scores[j], dim=-1))
         toptokenprob = torch.log_softmax(data.scores[j][0], dim=-1)[toptoken]
@@ -235,7 +237,7 @@ def getQE(data, dropout=False, dropouttrans=None, translation=True):
         com = lex = 0
         if translation:
             for i in range(len(data)):
-                print(data[i])
+                # print(data[i])
                 qe.append(TranslationProbability(data[i]))
                 # lex = lexsim(dropouttrans)
             tpdropout = torch.div(torch.sum(torch.as_tensor(qe)), 30)
