@@ -4,7 +4,7 @@
 #SBATCH --ntasks=1
 #SBATCH --mail-type=END,BEGIN,FAIL
 #SBATCH --gres=gpu:4
-#SBATCH --time=70:00
+#SBATCH --time=3:30:00
 #SBATCH --output=dropouteval.txt
 
 nodes=($(scontrol show hostnames $SLURM_JOB_NODELIST))
