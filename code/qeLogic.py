@@ -235,6 +235,7 @@ def getQE(data, dropout=False, dropouttrans=None, translation=True):
         com = lex = 0
         if translation:
             for i in range(len(data)):
+                print(data[i])
                 qe.append(TranslationProbability(data[i]))
                 # lex = lexsim(dropouttrans)
             tpdropout = torch.div(torch.sum(torch.as_tensor(qe)), 30)
