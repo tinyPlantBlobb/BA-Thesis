@@ -270,7 +270,7 @@ def getQE(data, dropout=False, dropouttrans=None, translation=True):
             qe = TranscriptionProbability(data)
             qemean = TranscriptionMean(data)
             res = (qe, qemean)
-        print(res)
+
         return res
 
 
