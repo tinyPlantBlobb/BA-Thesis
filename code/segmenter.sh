@@ -5,8 +5,9 @@ REFBASE="IWSLT23.tst2023.en-de/benchmark/en-de/tst2023/"
 src_xml=$REFBASE+”IWSLT.TED.tst2020.en-de.en.xml”
 ref_xml=$REFBASE+”IWSLT.TED.tst2020.en-de.de.xml”
 ref=”en-de.ref”
-name=”system1”
-$EVAL_DIR ="~/evaluation"
+name=”whisper-seamless”
+EVAL_DIR ="~/evaluation"
+
 # run mwer segmentation
 ~/opt/mwerSegmenter/segmentBasedOnMWER.sh ${src_xml} ${ref_xml} $EVAL_DIR/$sl-$tl.sys $name ${tl} $EVAL_DIR/$sl-$tl.sgm no_normalize 1
 
