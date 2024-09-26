@@ -12,4 +12,5 @@ result.yaml
 __pycache__
 *.sync-conflict*
 results/
+evaluation/
 spm.model
