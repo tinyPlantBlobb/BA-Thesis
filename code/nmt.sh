@@ -17,6 +17,6 @@ fairseq-preprocess \
 echo "preprocessing done"
 # todo fix path for model checkpoint (ask danni)
 srun fairseq-generate $(ws_find iswslt-dataset)/data-bin/data/ \
-  --path /project/OML/dliu/iwslt2023/model/mt/deltalm-large.tune.bilingual.de.diversify.adapt.TEDonly.clean/checkpoint_avg_last5.pt \
-  --source-lang en --target-lang de \
-  --batch-size 128 --beam 5 --remove-bpe --results-path $(ws_find iswslt-dataset)/results-${SLURM_JOB_ID} | tee $TMPDIR/results/dlmtranscriptions.csv
+  --path ~/checkpoint_avg_last5.pt \
+  --arch deltalm_large \
+  --source-lang en --target-lang de --max-tokens 32 --batch-size 32 --beam 5 --remove-bpe=sentencepiece --results-path $(ws_find iswslt-dataset)/results-${SLURM_JOB_ID}

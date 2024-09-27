@@ -2,9 +2,9 @@
 sl=en
 tl=de
 GENBASE=~/uni/BA/BA-Thesis/code
-REFBASE=IWSLT23.tst2023.en-de/benchmark/en-de/tst2023
-src_xml=$REFBASE/IWSLT.TED.tst2020.en-de.en.xml
-ref_xml=$REFBASE/IWSLT.TED.tst2020.en-de.de.xml
+REFBASE=$GENBASE/IWSLT23.tst2023.en-de/benchmark/en-de/tst2023
+src_xml=$REFBASE/IWSLT.TED.tst2023.en-de.en.xml
+ref_xml=$REFBASE/IWSLT.TED.tst2023.en-de.de.xml
 ref=en-de.ref
 name=”whisper-seamless”
 EVAL_DIR=$GENBASE/evaluation
