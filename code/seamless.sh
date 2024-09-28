@@ -1,4 +1,4 @@
-##!/bin/bash
+#!/bin/bash
 #SBATCH --job-name=whisper-eval
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
