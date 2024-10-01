@@ -15,8 +15,8 @@ fairseq-preprocess \
   --srcdict $ws/data-bin/dict.txt --tgtdict $ws/data-bin/dict.txt
 
 echo "preprocessing done"
-# todo fix path for model checkpoint (ask danni)
-srun fairseq-generate $(ws_find iswslt-dataset) \
+
+srun python ~/deltalm/generate.py $(ws_find iswslt-dataset)/data-bin/data \
   --path checkpoint_avg_last5.pt \
   --model-overrides "{'pretrained_deltalm_checkpoint': '~/deltalm-large.pt'}" \
   --source-lang en --target-lang de \
