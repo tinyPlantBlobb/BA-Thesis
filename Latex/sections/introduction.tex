@@ -10,10 +10,17 @@
 
 Translation is a time intense problem, that with the help of machine translation has gotten a lot easier, but since the machine translation is not perfect, humans still need to double check the translations. This process of double checking the translations still takes a lot of time that can be 
 
-
+The approach used in this thesis was proposed on text translation by \cite{fomicheva2020unsupervised} and has been adapted to Speech translation. 
 \section{Explanations}
+\subsection{Transcription probability}
+the probability that the ASR component transcribes the audio to this sequence of text
+\subsection{Translation probability}
+- the probability that the model generates the sequence $y = y_1, y_2 \dots y_n$ for the input $x=x_1, x_2 \dots x_n$
+norm the translation probabilty over the length of the transcribed and translation 
+
+
 \subsection{Dropout}
 - has been utilised in DNN to measure uncertainty
-- mainly in Deep achitectures but also in Autoencoders \cite{}
+- mainly in Deep architectures but also in Auto-encoders \cite{}
 -in ASR it has been tried here  \cite{8683086}
 - in ASR it mainly stems from noisy audio 
