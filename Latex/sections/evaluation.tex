@@ -12,17 +12,49 @@ Dataset: \cite{sperber2024evaluating}
 %% | Example content |
 %% -------------------
 
-\section{First Section}
+\section{Transctiption evaluation}
 \label{sec:Evaluation:FirstSection}
 
+using WER, proposed in \cite{woodard1982} and \cite{morris2004}, as reference score to compare the transctiption qe metric to and correlate with pearsoncorrelation \cite{2020SciPy-NMeth}
+for this the both the model result and the reference are normalised to be all lowercase 
+as the capialisation should have no effect on the quality of the the transcription but affects the WER
 
-\section{Second Section}
+\section{Translation evaluation}
 \label{sec:Evaluation:SecondSection}
+generate reference score with the help of comet \cite{rei-etal-2020-comet} which means that a score close to 1 is a good translation and a score close to 0 is a bad translation that is no better than random chance.
 
-\section{Third Section}
+\section{One unified score}
 \label{sec:Evaluation:ThirdSection}
 
 
 %% ---------------------
 %% | / Example content |
 %% ---------------------
+
+
+
+metric ex only ref and trans 
+
+pearson correlate \cite{2020SciPy-NMeth} the results to comet scores and compare those 
+
+\textbf{ pearsoncorr of the translation probability
+softmax correlation
+
+ standart div
+
+ transcription result
+-0.33164434985685437
+ trasncript mean
+-0.6049550605107343(}
+\section{Pearsoncorrelation scores}
+\begin{table}[]
+\begin{tabular}{ll|llll}
+ &&  Whisper+Seamless & Whisper+DeltaLM&  Seamless end-to-end \\ \hline
+ Transcripion&  Transcription Probability& -0.33164 & -0.33164&    \\
+ & Transription mean & -0.60496 & -0.60496  &    \\ \hline
+ Translation& Translation& 0.37592 &  &  &  \\
+ & Softmax Entropy& -0.30604 &  &  &  \\
+& Standard deviation & -0.32905 &  &  &  \\ \hline
+unified score &  &  &  &  & 
+\end{tabular}
+\end{table}
