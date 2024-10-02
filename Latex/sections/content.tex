@@ -10,32 +10,54 @@
 
 \section{Segmentation}
 \label{sec:FirstContent:FirstSection}
-THe segmentation of the audio from the data set will be done with the timestamps given in the dataset itself. The timestamps also correspond with the reference segments in the dataset 
-\dots
-
-\subsection{A Subsection}
-\label{sec:FirstContent:FirstSubSection}
-
-\dots
-
-\subsubsection{A Subsubsection}
-
-\section{Second Section}
-\label{sec:FirstContent:SecondSection}
-
-\dots
-
-
-\chapter{Dropout}
-\label{ch:SecondContent}
-
-\dots
-
-\section{First Section}
-\label{sec:SecondContent:FirstSection}
-
-\dots
+The segmentation of the audio from the data set will be done with the timestamps given in the dataset itself. The timestamps also correspond mostly well with the reference segments in the dataset 
+for the segments that do not overlap properly the mwerSegementer is used to align the outputs with the references properly. 
+mwerSegmenter minimises the WER between 2 segments,  for this the model transcritpion or translation is used as the gold segmentation to which the reference is aligned 
 
 \section{Second Section}
 \label{sec:SecondContent:SecondSection}
 
+\chapter{Experiments on Whisper}
+Whisper \cite{radford2022robust} is a multitask and multilanguage model for Automatic speech recognition as well as speech translation. It is primarily used as an ASR model in this thesis. Open AI gives several different sizes for whisper models, in this thesis the medium model is used specifically the pretrained model that is available on hugginface. 
+
+\section{Transcription Probability}
+the Transcription Probability is calculated in a simmilar manner as the translation probability, which results in the formula $$-\frac{1}{T}\sum_{t=1}^T log p(y_t^v)$$ where T is the number of decoding steps and p is the probability 
+
+\section{Dropout}
+for the dropout based uncertainty quantification the model transcribes the same bit of audio 30 times and for each pass the transcription probability and mean probability is computed, in each pass the model randomly masks some nodes to 0
+this results in some short and some faulty transcriptions but this also gives information about how certain the model is in it's transcription. the used dropout probability is 0.1 
+
+
+\section{End-to-End}
+
+
+\chapter{Experiments on Seamless}
+Seamless is a Multimodal model 
+experiments were run on \cite{seamless2023}
+
+
+\section{Translation probability}
+in the \cite{fomicheva2020unsupervised} papaer the Softmax entropy meassure was proposed as $$-\frac{1}{T}\sum_{t=1}^T\sum_{v=1}^Vp(y_t^v)logp(y_t^v)$$ with V being the Vocabulary size and T being the length of the translation. Which in this definition doesn't work with the data that the models produce as there are quite a lot of 0 values for the vocabulary after using the softmax, which means that the result of the sum like that would not be defined. To mittigate this the 0 values are masked for the log and essentially ignored. 
+
+
+\section{Dropout}
+for the dropout based approach the transcription with the best qe score, so the min/max score from the whisper step, is used 
+and then put into seamless which then translates this 30 times with a dropout probabiltity of 0.1.
+% potentially remove if finding a better solution
+Due to the nature of pytorch and huggingface models the dropout has to be done in training mode, as the evaluation mode turns off any dropout layers that are in the model. Due to this nature and a bug in the implementation for caching during forward passes in seamless, which leads to a tuple index out of range error that only appears in train mode. to mittigate that error the caching was turned off caching in the seamless config
+
+
+\section{End-To-End}
+for the end-to-end approach seamless is used and the resulting score is just a single score not as with the cascaded approach 2 scores that are combined 
+
+\chapter{Experiments on DeltaLM}
+the experiments \cite{ma2021deltalm} were done on a finetuned large version of it that was finetuned using the training data from the IWSLT 2023 constrained category, for this only the english german part was used
+\\
+the Text was preprocessed with the pretrained senctencepiece model and dictionary that has been given on the DeltaLM github page. 
+
+
+
+
+\section{Translation Probability}
+
+\section{Dropout}
