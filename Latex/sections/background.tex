@@ -35,17 +35,22 @@ the probability that the ASR component transcribes the audio to this sequence of
 norm the translation probabilty over the length of the transcribed and translation 
 %TODO
 \subsection{Pearsoncorrelation}
+method to see how correlated 2 sets of values are
+is 1 if it's correlated and -1 if it's inversely correlated 
+if it's 0 the sets are not correlated at all
 %TODO
 
 \section{Models}
-\subsection{Transformer}
-%TODO
 \subsection{Decoder-Encoder}
-Encoder-Decoder Models are Models that contain a Encoder, lorem ypsum 
+-Encoder-Decoder Models are Models that contain a Encoder, lorem ypsum 
 and a Decoder, lorem ypsum
-
-
+-Encoder-Decoder Achitecture is used for Sequence-to-Sequence models
 %TODO expand, add gaphics add citations 
+
+\subsection{Transformer}
+Neural Network architecture that was first introduced in the paper Attention is all you need \cite{vaswani2023attentionneed} that makes use of selfattention mechanisms. it has a Encoder-Decoder structure
+%TODO
+
 \subsection{ Cascaded Models}
 Cascaded Speech translation Models consist of 2 parts a part that is resposnibe for transcribing the audio, which is usually done with an ASR model, and a part that is responisble for translating the resulting transcription, which is done with neural machine translation or statistical machine translation. 
 %TODO citation and expand
