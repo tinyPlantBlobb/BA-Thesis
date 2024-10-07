@@ -19,5 +19,5 @@ echo "preprocessing done"
 srun python ~/deltalm/generate.py $(ws_find iswslt-dataset)/data-bin/data \
   --path checkpoint_avg_last5.pt \
   --model-overrides "{'pretrained_deltalm_checkpoint': '~/deltalm-large.pt'}" \
-  --source-lang en --target-lang de \
+  --source-lang en --target-lang de --retain-dropout True \
   --batch-size 128 --beam 5 --remove-bpe --results-path $(ws_find iswslt-dataset)/results-${SLURM_JOB_ID} | tee $TMPDIR/results/dlmtranscriptions.csv
