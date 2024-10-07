@@ -34,16 +34,15 @@
 
 
 %% The reviewers are the professors that grade your thesis
-\reviewerone{Prof. Nihues}
+\reviewerone{Prof. Niehues}
 \reviewertwo{Prof. B}
 
 %% The advisors are PhDs or Postdocs
-\advisorone{M.Sc. C}
-%% The second advisor can be omitted
-\advisortwo{M.Sc. D}
+\advisorone{M.Sc. Tu Anh Dinh}
+
 
 %% Please enter the start and end time of your thesis
-\editingtime{xx. Month 20XX}{xx. Month 20XX}
+\editingtime{10. September 2024}{10. January 2025}
 
 \settitle
 
@@ -63,8 +62,9 @@
 %% --------------------------------
 
 %% Use biber instead of BibTeX, see README
-\usepackage[citestyle=numeric,style=numeric,backend=biber]{biblatex}
+\usepackage[citestyle=numeric, style=numeric,backend=biber]{biblatex}
 \addbibresource{thesis.bib}
+
 
 %% ====================================
 %% ====================================
@@ -101,15 +101,15 @@
 %% The text is included in the following files:
 %% - sections/abstract
 
-%\includeabstract
+\includeabstract
 
 %% ------------------------
 %% |   Table of Contents  |
 %% ------------------------
-%\tableofcontents
+\tableofcontents
 
-%\listoffigures
-%\listoftables
+\listoffigures
+\listoftables
 
 %% -----------------
 %% |   Main part   |
@@ -119,7 +119,7 @@
 % TODO Proposal wieder raus nehmen 
 %\input{sections/proposal.tex}
 \input{sections/introduction.tex}
-\input{Latex/sections/background}
+\input{sections/background.tex}
 \input{sections/relatedworks.tex}
 \input{sections/content.tex}
 \input{sections/evaluation.tex}
