@@ -19,7 +19,7 @@ Speech translation or spoken language translation is simmilar to the regular tra
 
 \subsection{Dropout}
 - has been utilised in DNN to measure uncertainty
-- mainly in Deep architectures but also in Auto-encoders \cite{}
+- mainly in Deep architectures but also in Auto-encoders
 -in ASR it has been tried here  \cite{8683086}
 - in ASR it mainly stems from noisy audio 
 %TODO
@@ -44,7 +44,8 @@ if it's 0 the sets are not correlated at all
 \subsection{Decoder-Encoder}
 -Encoder-Decoder Models are Models that contain a Encoder, lorem ypsum 
 and a Decoder, lorem ypsum
--Encoder-Decoder Achitecture is used for Sequence-to-Sequence models
+-the encoder output is then used as input for the decoder that produces the output of the model 
+-Encoder-Decoder Achitecture is used for Sequence-to-Sequence models esp. more complex/advanced Sequence-to-Sequence models 
 %TODO expand, add gaphics add citations 
 
 \subsection{Transformer}
@@ -62,9 +63,19 @@ Whisper is a multilingual multitask Model that is focused on speech processing a
 %TODO
 \subsection{Seamless}
 Seamless is a Multimodal model that uses a Transformer architecture. 
-the architecture was proposed in \cite{communication2023seamlessm4t} 
+the architecture was proposed in \cite{seamless2023}Read Aloud: A Text to Speech Voice Reader 
 %TODO
 
 \subsection{DeltaLM}
-DeltaLM is one of the current state of the art Neural Machine Translation models and architectures that was proposed in \cite{ma2021deltalm}. 
+DeltaLM is one of the current state of the art Neural Machine Translation models and the architectures that was proposed in \cite{ma2021deltalm}. It is based off of the classical Encoder-Decoder structure but both the encoder and decoder are initialised with the pretrained multilingual encoder. The training happens in a self-supervised manner. 
+
+In addition to this is the Decoder a Interleaved Transformer Decoder, which is not the same architecture as the encoder and differs from the standard Transformer decoder in that the Transformerblocks now consist of a self-attention layer, two feed-forward networks and a cross-attention layer which are arranged as seen in \ref{fig:interleaved decoder}. 
+This way of building the decoder is more similar to the structure of the encoder and makes it easier to leverage the pretrained encoder. The interleaved decoder is then initialised with the layers from the pretrained encoder, which is the InfoXLM \cite{chi2021infoxlminformationtheoreticframeworkcrosslingual}, in the following way, the self-attention and the bottom FFN layers are initialised wiht the odd layers of the InfoXLM encoder and the cross-attention and top FFN layers are initialised with the even layers. 
+
+\begin{figure}
+    \centering
+    \includegraphics[width=0.5\linewidth]{Latex/logos/AI4LT_logo.png}
+    \caption{Vanilla Transformer Decoder (left) compared to the interleaved Transformer decoder(right)}
+    \label{fig:interleaved decoder}
+\end{figure}
 %TODO
