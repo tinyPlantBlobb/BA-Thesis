@@ -1,4 +1,5 @@
-# import csv
+import csv
+
 #
 # with open("results/seamlessfulltransctiptions.csv", "w") as resultfile:
 #    row = [
@@ -22,3 +23,26 @@
 #                    print("aaa")
 #                    continue
 #                csvwriter.writerow(j)
+with open("results/seamlesse2eresults.csv", "r") as resultfile:
+    row = [
+        "row",
+        "reference transcription",
+        "reference translation",
+        "Quality estimation nondropout",
+        "empty",
+    ]
+    dropoutes = ["dropoutresult" + str(i) for i in range(30)]
+    row.extend(dropoutes)
+    csvreader = csv.DictReader(resultfile, dialect="excel")
+    values = []
+    for i in csvreader:
+        runs = [
+            (
+                i["reference transcription"],
+                i["reference translation"],
+                i["Quality estimation nondropout"],
+            )
+        ]
+        for j in dropoutes:
+            runs.append(i[j])
+        values.append(runs)
