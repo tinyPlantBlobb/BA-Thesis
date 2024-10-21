@@ -44,5 +44,9 @@ with open("results/seamlesse2eresults.csv", "r") as resultfile:
             )
         ]
         for j in dropoutes:
-            runs.append(i[j])
+            spit = i[j].split(", (")
+
+            runs.append((list(map(float, spit[1][:-2].split(", "))), spit[0][1:]))
+
+            print(runs[-1])
         values.append(runs)
