@@ -45,10 +45,15 @@ with open("results/seamlesse2eresults.csv", "r") as resultfile:
             )
         ]
         for j in dropoutes:
-            qe = re.findall(
-                r"\d+\.\d+",
-                re.findall(r"\(-?\d+\.\d*, -?\d+\.\d*, -?\d+\.\d*\)\)\"?,?", i[j])[0],
-            )
+            qe = [
+                float(i)
+                for i in re.findall(
+                    r"-?\d+\.\d+",
+                    re.findall(r"\(-?\d+\.\d*, -?\d+\.\d*, -?\d+\.\d*\)\)\"?,?", i[j])[
+                        0
+                    ],
+                )
+            ]
 
             runs.append((i[j][1:-1].split(", (")[0], qe))
 
