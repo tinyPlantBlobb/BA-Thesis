@@ -1,4 +1,5 @@
 import csv
+import re
 
 #
 # with open("results/seamlessfulltransctiptions.csv", "w") as resultfile:
@@ -44,9 +45,14 @@ with open("results/seamlesse2eresults.csv", "r") as resultfile:
             )
         ]
         for j in dropoutes:
-            spit = i[j].split(", (")
+            qe = re.findall(
+                r"\d+\.\d+",
+                re.findall(r"\(-?\d+\.\d*, -?\d+\.\d*, -?\d+\.\d*\)\)\"?,?", i[j])[0],
+            )
 
-            runs.append((list(map(float, spit[1][:-2].split(", "))), spit[0][1:]))
+            runs.append((i[j][1:-1].split(", (")[0], qe))
+
+            # runs.append((list(map(float, spit[1][:-1].split(", "))), spit[0][1:]))
 
             print(runs[-1])
         values.append(runs)
