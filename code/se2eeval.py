@@ -1,5 +1,6 @@
 import csv
 import re
+import qeLogic
 
 #
 # with open("results/seamlessfulltransctiptions.csv", "w") as resultfile:
@@ -55,7 +56,7 @@ with open("results/seamlesse2eresults.csv", "r") as resultfile:
                 )
             ]
 
-            runs.append((i[j][1:-1].split(", (")[0], qe))
+            runs.append((i[j][1:-1].split(", (")[0], qe[0], qe[1], qe[2]))
 
             # runs.append((list(map(float, spit[1][:-1].split(", "))), spit[0][1:]))
 
