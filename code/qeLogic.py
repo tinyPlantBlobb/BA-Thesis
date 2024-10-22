@@ -231,6 +231,16 @@ def lexsim(transhypo):
     )
 
 
+def calcdropoutprob(data):
+    dropoutprob = 0
+    # print(data)
+    for i in range(1, len(data), 1):
+        # print(data[i])
+        dropoutprob += data[i][1]
+    dropoutprob = np.divide(dropoutprob, 30)
+    return dropoutprob
+
+
 def getQE(data, dropout=False, dropouttrans=None, translation=True):
     if dropout:
         qe = qevar = lex = qemean = []

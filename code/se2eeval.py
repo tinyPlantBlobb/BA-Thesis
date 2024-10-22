@@ -55,10 +55,13 @@ with open("results/seamlesse2eresults.csv", "r") as resultfile:
                     ],
                 )
             ]
-
-            runs.append((i[j][1:-1].split(", (")[0], qe[0], qe[1], qe[2]))
+            runs.append((i[j].split(", (")[0], qe[0], qe[1], qe[2]))
 
             # runs.append((list(map(float, spit[1][:-1].split(", "))), spit[0][1:]))
 
-            print(runs[-1])
-        values.append(runs)
+            # print(runs[-1])
+        # print(runs[1], type(runs[1][2]))
+        qeestimate = qeLogic.calcdropoutprob(runs)
+
+        values.append((runs, qeestimate))
+        print(qeestimate)
