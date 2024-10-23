@@ -1,4 +1,5 @@
 import csv
+from os import walk
 import re
 import qeLogic
 
@@ -65,3 +66,10 @@ with open("results/seamlesse2eresults.csv", "r") as resultfile:
 
         values.append((runs, qeestimate))
         print(qeestimate)
+
+    referencetranscrits = [i[0][0] for i in values]
+    referencetransaltion = [i[0][1] for i in values]
+    refqe = [i[0][2] for i in values]
+    refscores = cometscore(
+        referencetranscrits, referencetransaltion, reference_translation
+    )
