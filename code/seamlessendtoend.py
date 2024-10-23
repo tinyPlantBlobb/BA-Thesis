@@ -85,7 +85,7 @@ def run_inference(rank, world_size, dataset):
             torch.cuda.empty_cache()
             dpresults = []
             dropoutres = []
-            for i in range(30):
+            for j in range(30):
                 model.train()
                 dropout_input = processor(
                     audios=model_transctiption,
@@ -122,6 +122,7 @@ def run_inference(rank, world_size, dataset):
             dropoutqe = getQE(dpresults, dropout=True, translation=True)
             row = [
                 i,
+                sample["transcript"],
                 sample["translation"],
                 model_translation,
                 qe,
@@ -144,7 +145,6 @@ def run_inference(rank, world_size, dataset):
                 "row",
                 "reference transcript",
                 "reference translation",
-                "transcription",
                 "translation",
                 "transcript prob",
                 "transcript mean",

@@ -1,5 +1,4 @@
 import csv
-from os import walk
 import re
 import qeLogic
 
@@ -29,8 +28,9 @@ import qeLogic
 with open("results/seamlesse2eresults.csv", "r") as resultfile:
     row = [
         "row",
-        "reference transcription",
         "reference translation",
+        "reference transcription",
+        "model translation",
         "Quality estimation nondropout",
         "empty",
     ]
@@ -41,8 +41,8 @@ with open("results/seamlesse2eresults.csv", "r") as resultfile:
     for i in csvreader:
         runs = [
             (
-                i["reference transcription"],
                 i["reference translation"],
+                i["model translation"],
                 i["Quality estimation nondropout"],
             )
         ]
@@ -68,8 +68,8 @@ with open("results/seamlesse2eresults.csv", "r") as resultfile:
         print(qeestimate)
 
     referencetranscrits = [i[0][0] for i in values]
-    referencetransaltion = [i[0][1] for i in values]
+    modeltransaltion = [i[0][1] for i in values]
     refqe = [i[0][2] for i in values]
-    refscores = cometscore(
-        referencetranscrits, referencetransaltion, reference_translation
+    refscores = qeLogic.cometscore(
+        referencetranscrits, referencetransaltion, modeltransaltion
     )
