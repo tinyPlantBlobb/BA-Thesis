@@ -68,7 +68,8 @@ with open("results/seamlesse2eresults.csv", "r") as resultfile:
         print(qeestimate)
 
     referencetranscrits = [i[0][0] for i in values]
-    modeltransaltion = [i[0][1] for i in values]
+    referencetransaltion = [i[0][1] for i in values]
+    modeltransaltion = [i[0][2] for i in values]
     refqe = [i[0][2] for i in values]
     refscores = qeLogic.cometscore(
         referencetranscrits, referencetransaltion, modeltransaltion
