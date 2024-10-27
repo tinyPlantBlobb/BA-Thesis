@@ -31,8 +31,8 @@ def run_inference(rank, world_size, dataset):
     model.to(rank)
     model.generation_config.forced_decoder_ids = None
     num = 3
-    # num = len(dataset) // world_size
-    print(num)
+    num = len(dataset) // world_size
+    # print(num)
     # num = 3
     offset = 0 + rank * (num)
     # num = (len(dataset)) // (world_size)
