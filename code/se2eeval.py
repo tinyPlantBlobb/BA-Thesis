@@ -44,14 +44,23 @@ with open("results/seamlesse2eresult.csv", "r") as resultfile:
     for i in csvreader:
         if i["row"] == "row":
             continue
+        nondopqe = [
+            float(i)
+            for i in re.findall(
+                r"-?\d+\.\d+",
+                i["Quality estimation nondropout"],
+            )
+        ]
+
         runs = [
             (
                 i["reference translation"],
                 i["reference transcription"],
                 i["model translation"],
-                i["Quality estimation nondropout"],
+                nondopqe,
             )
         ]
+
         for j in dropoutes:
             qe = [
                 float(i)
@@ -77,13 +86,15 @@ with open("results/seamlesse2eresult.csv", "r") as resultfile:
     referencetranscrits = [i[0][0][0] for i in values]
     referencetransaltion = [i[0][0][1] for i in values]
     modeltransaltion = [i[0][0][2] for i in values]
-    reftranslationqe = [i[0][3][1] for i in values]
-    referencetranlationnormal = [i[0][3][2] for i in values]
-    referenceqe = [i[0][3][3] for i in values]
+
+    # regular translation prob qe that is normalised
+    print(values[0][0][3], values[0][0][3][3])
+    reftranslationqe = [i[0][0][3][1] for i in values]
+    referencetranlationnormal = [i[0][0][3][2] for i in values]
+    referenceqe = [i[0][0][3][0] for i in values]
+    # print(reftranslationqe[0], referenceqe[0])
     dropoutcalculatedqe = [i[1] for i in values]
-    # print(refqe[0])
-    # print(dpqe[0])
-    # print(referencetransaltion)
+
     refscores = qeLogic.cometscore(
         referencetranscrits,
         modeltransaltion,
@@ -95,4 +106,13 @@ with open("results/seamlesse2eresult.csv", "r") as resultfile:
     qescore2 = qeLogic.pearsoncorr(reftranslationqe, refscores["scores"])
     qescore3 = qeLogic.pearsoncorr(referencetranlationnormal, refscores["scores"])
     qescore4 = qeLogic.pearsoncorr(referenceqe, refscores["scores"])
-    print("dropout score", qescores["pearsonr"], qescore2, qescore3, qescore4)
+    print(
+        "dropout score",
+        qescores["pearsonr"],
+        "corr with mean tp qe",
+        qescore2["pearsonr"],
+        "corr with 3. qe",
+        qescore3["pearsonr"],
+        "corr with ref non normal tp ",
+        qescore4["pearsonr"],
+    )
