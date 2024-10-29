@@ -241,18 +241,27 @@ def calcdropoutprob(data):
     return dropoutprob
 
 
+def gettransllationdropoutqe(qelist):
+    qe = [i[0] for i in qelist]
+    tpavg = sum(qe) / len(qelist)
+    var = variance(qe)
+    return (tpavg, var, combo(tpavg, var))
+
+
 def getQE(data, dropout=False, dropouttrans=None, translation=True):
     if dropout:
         qe = qevar = lex = qemean = []
         com = lex = 0
         if translation:
-            for i in range(len(data)):
-                # print(data[i])
-                qe.append(TranslationProbability(data[i]))
-                # lex = lexsim(dropouttrans)
+            qe = [TranslationProbability(i) for i in data]
+            # for i in range(len(data)):
+            #     # print(data[i])
+            #     qe.append(TranslationProbability(data[i]))
+            #     # lex = lexsim(dropouttrans)
             tpdropout = torch.div(torch.sum(torch.as_tensor(qe)), 30)
             qevar = variance(qe)
             com = combo(tpdropout, qevar)
+
             res = (qe, qevar, com, lex)
         else:
             for i in range(len(data)):
