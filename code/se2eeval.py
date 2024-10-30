@@ -78,19 +78,22 @@ with open("results/seamlesse2eresult.csv", "r") as resultfile:
             # print(runs[-1])
         # print(runs[1], type(runs[1][2]))
         qeestimate = qeLogic.calcdropoutprob(runs)
-
-        values.append((runs, qeestimate))
+        qevariance = qeLogic.calcdropoutvariance(runs)
+        # print(qeestimate)
+        values.append((runs, qeestimate, qevariance, (1 - (qeestimate / qevariance))))
         # print(qeestimate)
     # print(values[0][0][3])
-    # first element of of values tuple=runs, first elements of runs =non dropout data tuple
+    # first element of of values tuple=runs, first elements of runs = non dropout data tuple = ref transcription, ref translation, model translation (tpqe, softmax, diviation)
+    # TODO add lexsim stuff here
+
     referencetranscrits = [i[0][0][0] for i in values]
     referencetransaltion = [i[0][0][1] for i in values]
     modeltransaltion = [i[0][0][2] for i in values]
 
     # regular translation prob qe that is normalised
-    print(values[0][0][3], values[0][0][3][3])
-    reftranslationqe = [i[0][0][3][1] for i in values]
-    referencetranlationnormal = [i[0][0][3][2] for i in values]
+    # print(values[0][0][3], values[0][0][3][3])
+    refentropyqe = [i[0][0][3][1] for i in values]
+    refstddivqe = [i[0][0][3][2] for i in values]
     referenceqe = [i[0][0][3][0] for i in values]
     # print(reftranslationqe[0], referenceqe[0])
     dropoutcalculatedqe = [i[1] for i in values]
@@ -102,17 +105,22 @@ with open("results/seamlesse2eresult.csv", "r") as resultfile:
     )
 
     qescores = qeLogic.pearsoncorr(dropoutcalculatedqe, refscores["scores"])
-
-    qescore2 = qeLogic.pearsoncorr(reftranslationqe, refscores["scores"])
-    qescore3 = qeLogic.pearsoncorr(referencetranlationnormal, refscores["scores"])
-    qescore4 = qeLogic.pearsoncorr(referenceqe, refscores["scores"])
+    qevariancecorr = qeLogic.pearsoncorr([i[2] for i in values], refscores["scores"])
+    qecombocorr = qeLogic.pearsoncorr([i[3] for i in values], refscores["scores"])
+    qescore2 = qeLogic.pearsoncorr(referenceqe, refscores["scores"])
+    qescore4 = qeLogic.pearsoncorr(refstddivqe, refscores["scores"])
+    qescore3 = qeLogic.pearsoncorr(refentropyqe, refscores["scores"])
     print(
-        "dropout score",
+        "dropout tp corr",
         qescores["pearsonr"],
+        "variance corr",
+        qevariancecorr["pearsonr"],
+        "combo corr",
+        qecombocorr["pearsonr"],
         "corr with mean tp qe",
         qescore2["pearsonr"],
-        "corr with 3. qe",
+        "corr with entropy qe",
         qescore3["pearsonr"],
-        "corr with ref non normal tp ",
+        "corr with ref std div tp ",
         qescore4["pearsonr"],
     )
