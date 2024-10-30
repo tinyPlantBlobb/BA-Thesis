@@ -225,9 +225,13 @@ def lexsim(transhypo):
                 meteor.compute(predictions=transhypo[i], reference=transhypo[i + 1])
             )
     # TODO write code for the simmilarity with the help of meteor
-    return torch.mul(
-        torch.div(1, torch.div(1, 2) * len(transhypo) * (len(transhypo) - 1)),
-        torch.sum(res),
+    return (
+        torch.mul(
+            torch.div(1, torch.div(1, 2) * len(transhypo) * (len(transhypo) - 1)),
+            torch.sum(res),
+        )
+        .cpu()
+        .numpy()
     )
 
 
@@ -239,6 +243,12 @@ def calcdropoutprob(data):
         dropoutprob += data[i][1]
     dropoutprob = np.divide(dropoutprob, 30)
     return dropoutprob
+
+
+def calcdropoutvariance(data):
+    qelist = [i[1] for i in data[1:]]
+    result = variance(qelist)
+    return result.cpu().numpy()
 
 
 def gettransllationdropoutqe(qelist):
@@ -298,7 +308,7 @@ def cometscore(source, prediction, reference):
     comet_score = comet_metric.compute(
         predictions=prediction, references=reference, sources=source
     )
-    print(comet_score)
+    # print(comet_score)
     return comet_score
 
 
