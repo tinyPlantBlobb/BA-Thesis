@@ -13,18 +13,18 @@ Dataset: \cite{sperber2024evaluating}
 %% -------------------
 
 \section{Transctiption evaluation}
-\label{sec:Evaluation:FirstSection}
+
 
 using WER, proposed in \cite{woodard1982} and \cite{morris2004}, as reference score to compare the transctiption qe metric to and correlate with pearsoncorrelation \cite{2020SciPy-NMeth}
 for this the both the model result and the reference are normalised to be all lowercase 
 as the capialisation should have no effect on the quality of the the transcription but affects the WER
 
 \section{Translation evaluation}
-\label{sec:Evaluation:SecondSection}
+
 generate reference score with the help of comet \cite{rei-etal-2020-comet} which means that a score close to 1 is a good translation and a score close to 0 is a bad translation that is no better than random chance.
 
 \section{One unified score}
-\label{sec:Evaluation:ThirdSection}
+
 
 
 %% ---------------------
@@ -49,12 +49,20 @@ softmax correlation
 \section{Pearsoncorrelation scores}
 \begin{table}[h]
 \begin{tabular}{l|llll}
- &&  Whisper+Seamless & Whisper+$\Delta$LM&  Seamless e2e\\ \hline
- Transcription Probability& -0.33164 & -0.33164&    \\
- Transription mean & -0.60496 & -0.60496  &    \\ \hline
-Translation& 0.37592 &  &  &  \\
-  Softmax Entropy& -0.30604 &  &  &  \\
-Standard deviation & -0.32905 &  &  &  \\ \hline
-unified score   &  &  &  & 
+ &  Whisper+Seamless & Whisper+$\Delta$LM&  Seamless e2e\\ \hline
+ Transcription Probability& -0.33164 & -0.33164&  -  \\
+ Transription mean & -0.60496 & -0.60496  &   - \\ \hline
+Translation& 0.37592 &    & 0.656299\\ 
+Softmax Entropy& -0.30604   &  & -0.60334 \\
+Standard deviation & -0.32905  &  & -0.67148 \\ \hline
+Dropout tp & & & 0.14194\\
+Dropout Variance & & & 0.13080\\
+Dropout combo & & & -0.20624\\
+unified score   &  &  &  %seamless e2e ropout tp corr 0.14194102654404397 variance corr 0.13080090857023727 combo corr -0.2062498022869868 corr with mean tp qe 0.6562990421299002 corr with entropy qe -0.6033401019202903 corr with ref std div tp  -0.6714843244308442
+
+
+
 \end{tabular}
+\label{results}
+\caption{Correlation scores for the seperate models and calculated quality scores}
 \end{table}
