@@ -5,7 +5,10 @@
 %% Prof. Dr. Jan Niehues
 %% Lab's website https://ai4lt.anthropomatik.kit.edu/english/index.php
 
-\chapter{Preparing the Dataset}
+
+%TODO add methedology and move from experiments part
+
+\chapter{the Dataset}
 \label{ch:FirstContent}
 
 \section{Segmentation}
@@ -14,50 +17,48 @@ The segmentation of the audio from the data set will be done with the timestamps
 for the segments that do not overlap properly the mwerSegementer is used to align the outputs with the references properly. 
 mwerSegmenter minimises the WER between 2 segments,  for this the model transcritpion or translation is used as the gold segmentation to which the reference is aligned 
 
-\section{Second Section}
-\label{sec:SecondContent:SecondSection}
+%TODO move stuff to the right places
+\chapter{Translation and transctiptions}
+\section{Whisper Transcription Probability}
+Whisper \cite{radford2022robust} is a multitask and multilanguage model for Automatic speech recognition as well as speech translation. It is primarily used as an ASR model in this thesis. Open AI gives several different sizes for whisper models, in this thesis the medium model is used specifically the pretrained model that is available on huggingface. 
 
-\chapter{Experiments on Whisper}
-Whisper \cite{radford2022robust} is a multitask and multilanguage model for Automatic speech recognition as well as speech translation. It is primarily used as an ASR model in this thesis. Open AI gives several different sizes for whisper models, in this thesis the medium model is used specifically the pretrained model that is available on hugginface. 
 
-\section{Transcription Probability}
 the Transcription Probability is calculated in a simmilar manner as the translation probability, which results in the formula $$-\frac{1}{T}\sum_{t=1}^T log p(y_t^v)$$ where T is the number of decoding steps and p is the probability 
 
-\section{Dropout}
+\section{Seamless Translation probability}
+in the formicheva \cite{fomicheva2020unsupervised} paper the Softmax entropy meassure was proposed as $$-\frac{1}{T}\sum_{t=1}^T\sum_{v=1}^Vp(y_t^v)logp(y_t^v) \label{formula:translation probability}$$ with V being the Vocabulary size and T being the length of the translation. Which in this definition doesn't work with the data that the models produce as there are quite a lot of 0 values for the vocabulary after using the softmax, which means that the result of the sum like that would not be defined. To mitigate this the 0 values are masked for the log and essentially ignored. 
+
+\section{DeltaLM translation probability}
+the experiments \cite{ma2021deltalm} were done on a finetuned large version of it that was finetuned using the training data from the IWSLT 2023 constrained category, for this only the english german part was used
+\\
+the Text was preprocessed with the pretrained senctencepiece model and dictionary that has been given on the DeltaLM github page. 
+the running of the experiments was done with the help of the fairseq toolkit \cite{ott2019fairseqfastextensibletoolkit}/\cite{ott2019fairseq}
+
+
+
+\section{Translation Probability}
+The translation probability is calculated in the same way as the translation probability \ref{formula:translation probability} for seamless 
+\chapter{Dropout}
+the dropout based metrics are optained by doing 30 passes with the same input through the models each time the 
+    
+
+\section{Whisper Dropout}
 for the dropout based uncertainty quantification the model transcribes the same bit of audio 30 times and for each pass the transcription probability and mean probability is computed, in each pass the model randomly masks some nodes to 0
 this results in some short and some faulty transcriptions but this also gives information about how certain the model is in it's transcription. the used dropout probability is 0.1 
 
 
-\section{End-to-End}
-
-
-\chapter{Experiments on Seamless}
-Seamless is a Multimodal model 
-experiments were run on \cite{seamless2023} specifically the large version of it both for the cascaded part and the end-to-end part
-
-
-\section{Translation probability}
-in the formicheva \cite{fomicheva2020unsupervised} paper the Softmax entropy meassure was proposed as $$-\frac{1}{T}\sum_{t=1}^T\sum_{v=1}^Vp(y_t^v)logp(y_t^v) \label{formula:translation probability}$$ with V being the Vocabulary size and T being the length of the translation. Which in this definition doesn't work with the data that the models produce as there are quite a lot of 0 values for the vocabulary after using the softmax, which means that the result of the sum like that would not be defined. To mittigate this the 0 values are masked for the log and essentially ignored. 
-
-
-\section{Dropout}
+\section{Seamless Dropout}
 for the dropout based approach the transcription with the best qe score, so the min/max score from the whisper step, is used 
 and then put into seamless which then translates this 30 times with a dropout probabiltity of 0.1.
 % potentially remove if finding a better solution
 Due to the nature of pytorch and huggingface models the dropout has to be done in training mode, as the evaluation mode turns off any dropout layers that are in the model. Due to this nature and a bug in the implementation for caching during forward passes in seamless, which leads to a tuple index out of range error that only appears in train mode. to mittigate that error the caching was turned off caching in the seamless config
 
+\section{Deltalm Dropout}
+The dropout with the deltaLM model is handled over fairseq. 
+the used dropout probability is 0.1 
 
-\section{End-To-End}
+
+\chapter{End-To-End}
 for the end-to-end approach seamless is used and the resulting score is just a single score not as with the cascaded approach 2 scores that are combined 
 
-\chapter{Experiments on DeltaLM}
-the experiments \cite{ma2021deltalm} were done on a finetuned large version of it that was finetuned using the training data from the IWSLT 2023 constrained category, for this only the english german part was used
-\\
-the Text was preprocessed with the pretrained senctencepiece model and dictionary that has been given on the DeltaLM github page. 
 
-
-
-
-\section{Translation Probability}
-The translation probability is calculated in the same way as the translation probability \ref{formula:translation probability probability} for seamless 
-\section{Dropout}
