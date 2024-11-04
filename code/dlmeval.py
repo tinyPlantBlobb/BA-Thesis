@@ -1,7 +1,7 @@
 import re
 import csv
 
-with open("results/generate-test.csv", "w") as csvfile:
+with open("results/dlmresults.csv", "w") as csvfile:
     csvwriter = csv.writer(csvfile)
     csvwriter.writerow(
         [
