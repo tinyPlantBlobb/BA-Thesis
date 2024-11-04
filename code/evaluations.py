@@ -46,6 +46,7 @@ with open(TMPDIR + "/results/seamlessfulltranscriptions.csv", "r", newline="") a
             tpscore.append(qe[0])
             softmaxent.append(qe[1])
             stddiv.append(qe[2])
+
     refscores = cometscore(transcripts, translation, reference_translation)
 
     refscore = refscores["scores"]
@@ -67,7 +68,7 @@ with open(TMPDIR + "/results/seamlessfulltranscriptions.csv", "r", newline="") a
         # resfile.write(str(refscore))
         resfile.write("\n\n\n pearsoncorr of the translation probability")
         resfile.write(str(tpresult["pearsonr"]))
-        resfile.write("\nsoftmax correlation\n")
+        resfile.write("\nsoftmax entropy correlation\n")
         resfile.write(str(softres["pearsonr"]))
         resfile.write("\n standart div\n")
         resfile.write(str(stdres["pearsonr"]))
