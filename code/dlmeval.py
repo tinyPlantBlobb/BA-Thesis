@@ -1,5 +1,7 @@
 import re
 import csv
+import qeLogic
+import numpy as np
 
 with open("results/dlmresults.csv", "w") as csvfile:
     csvwriter = csv.writer(csvfile)
@@ -13,6 +15,8 @@ with open("results/dlmresults.csv", "w") as csvfile:
             "qe",
         ]
     )
+    dptpqe = [0.0] * 3000
+    dpvar = [0.0] * 3000
     for i in range(1, 30):
         with open("results/generate-test" + str(i) + ".txt", "r") as f:
             lines = f.readlines()
@@ -33,19 +37,25 @@ with open("results/dlmresults.csv", "w") as csvfile:
                 i.split("\t")[1:] for i in output if re.search(r"D-\d.*", i)
             ]
             row = []
-            for i in range(len(detokenizedhypothesis) - 1):
-                print(i)
+            for j in range(len(detokenizedhypothesis) - 1):
+                # print(i)
+                dptpqe[j] += float(detokenizedhypothesis[j][0])
+
                 row.extend(
                     [
-                        target[i],
-                        probabilities[i],
+                        target[j],
+                        probabilities[j],
                         # hypothesis[i],
-                        srcsentences[i],
-                        detokenizedhypothesis[i][1],
-                        detokenizedhypothesis[i][0],
+                        srcsentences[j],
+                        detokenizedhypothesis[j][1],
+                        detokenizedhypothesis[j][0],
                     ]
                 )
+
             csvwriter.writerow(row)
-            print(target[i])
+            # print(target[i])
             # print(detokenizedhypothesis)
-# re    gex: [TPHSD]-\d.*
+    dpvar = qeLogic.variance(dptpqe).cpu().numpy()
+    # dpcombo = [(1.0 - ((i[0] / 30.0) / i[1])) for i in zip(dptpqe, dpvar) if i[1] != 0]
+    # print(dpcombo)
+    print(dptpqe, dpvar)
