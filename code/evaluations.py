@@ -39,7 +39,7 @@ with open(TMPDIR + "/results/seamlessfulltranscriptions.csv", "r", newline="") a
             reference_translation.append(r["reference translation"])
             reference_trancsript.append(r["reference transcript"])
             # print(r["qe"][1:-1].split(", "))
-            qe = r["qe"][1:-1].split(", ")
+            qe = re.findall(r"-?\d+\.\d+", r["qe"])
             transcriptionprob.append(r["transcript prob"])
             print(r["transcript mean"], " probability  ", r["transcript prob"])
             transcriptmean.append(r["transcript mean"])
@@ -50,7 +50,10 @@ with open(TMPDIR + "/results/seamlessfulltranscriptions.csv", "r", newline="") a
     refscores = cometscore(transcripts, translation, reference_translation)
 
     refscore = refscores["scores"]
-
+    with open(TMPDIR + "referencescores.txt", "w") as export:
+        for i in refscore:
+            export.write(i)
+            export.write("\n")
     wer = [
         worderror([transcripts[i].lower()], [reference_trancsript[i].lower()])
         for i in range(len(transcripts))
