@@ -1,42 +1,63 @@
 import re
 from datasets.features import translation
-from qeLogic import cometscore, pearsoncorr, worderror
+from qeLogic import TranslationProbability, cometscore, pearsoncorr, worderror
 import os
 import csv
-    
-    with open(TMPDIR + "/results/dropoutfulltranslationfulldropped", "r") as resfile:
+
+TMPDIR = "/home/plantpalfynn/uni/BA/BA-Thesis/code/"
+transcripts = []
+
+translation = []
+reference_translation = []
+reference_trancsript = []
+transcriptionprob = []
+transcriptmean = []
+tpscore = []
+softmaxent = []
+stddiv = []
+fullthing = []
+row = ["row", "reference transcript", "reference translation", "qe"]
+qes = ["transcript probability " + str(i) for i in range(0, 30)]
+transcriptindex = ["transcript probability " + str(i) for i in range(0, 30)]
+row.extend(["transcript probability " + str(i) for i in range(0, 30)])
+row.extend(["transcript " + str(i) for i in range(0, 30)])
+for i in range(4):
+    with open(
+        TMPDIR
+        + "results/results-24260948/dropouttranslationfulldropped"
+        + str(i)
+        + ".csv",
+        "r",
+    ) as resfile:
         reader = csv.DictReader(
             resfile,
             dialect="excel",
-            fieldnames=[
-            "row",
-            "reference transcript",
-            "reference translation",
-            "transcription",
-            "translation",
-            "transcript prob",
-            "transcript mean",
-            "qe",
-            ],
+            fieldnames=row,
         )
-        transcripts = []
-
-        translation = []
-        reference_translation = []
-        reference_trancsript = []
-        transcriptionprob = []
-        transcriptmean = []
-        tpscore = []
-        softmaxent = []
-        stddiv = []
         for r in reader:
-            if r["qe"] != "qe":
-            transcripts.append(r["transcription"])
-            translation.append(r["translation"])
-            reference_translation.append(r["reference translation"])
-            reference_trancsript.append(r["reference transcript"])
-            # print(r["qe"][1:-1].split(", "))
-            qe = r["qe"][1:-1].split(", ")
-            transcriptionprob.append(r["transcript prob"])
-            print(r["transcript mean"], " probability  ", r["transcript prob"])
-            transcriptmean.append(r["transcript mean"])
+            if r["row"] != "row":
+                # print(type(r))
+                fullthing.append(r)
+
+
+with open("seamlessdropout.csv", "w") as csvfile:
+    writer = csv.DictWriter(csvfile, fieldnames=row)
+    writer.writerows(sorted(fullthing, key=lambda x: int(x["row"])))
+reference_scores = []
+with open("referencescoress.txt", "r") as ref:
+    lines = ref.readlines()
+    reference_scores = [float(i) for i in lines]
+with open(("seamlessdropout.csv"), "r") as csvfile:
+    reader = csv.DictReader(csvfile, fieldnames=row)
+    for row in reader:
+        # transcripts.append(r["transcription"])
+        translation.extend([row[i] for i in transcriptindex])
+        reference_translation.append(row["reference translation"])
+        reference_trancsript.append(row["reference transcript"])
+        # print(r["qe"][1:-1].split(", "))
+        # qe = r["qe"][1:-1].split(", ")
+        transcriptionprob.extend(
+            [[float(j) for j in re.findall(r"-?\d+\.\d*", row[i])] for i in qes]
+        )
+    print(transcriptionprob)
+    translationProbability = [i[0] for i in transcriptionprob]

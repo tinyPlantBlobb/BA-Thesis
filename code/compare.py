@@ -12,7 +12,7 @@ with open(
     tp = [np.sum([float(x) for x in line]) for line in lines]
     result = []
     for i in lines:
-        result.append(np.divide(np.sum(i), len(i)))
+        result.append(np.divide(-np.sum(i), len(i)))
     with open(
         "/home/plantpalfynn/Downloads/en-de/dev.ende.df.short.tsv", "r"
     ) as refscores:
