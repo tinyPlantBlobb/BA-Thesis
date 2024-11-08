@@ -1,6 +1,6 @@
 import re
 from datasets.features import translation
-from qeLogic import TranslationProbability, cometscore, pearsoncorr, worderror
+from qeLogic import pearsoncorr, worderror
 import os
 import csv
 
@@ -44,7 +44,7 @@ with open("seamlessdropout.csv", "w") as csvfile:
     writer = csv.DictWriter(csvfile, fieldnames=row)
     writer.writerows(sorted(fullthing, key=lambda x: int(x["row"])))
 reference_scores = []
-with open("referencescoress.txt", "r") as ref:
+with open("referencescores.txt", "r") as ref:
     lines = ref.readlines()
     reference_scores = [float(i) for i in lines]
 with open(("seamlessdropout.csv"), "r") as csvfile:
@@ -56,8 +56,16 @@ with open(("seamlessdropout.csv"), "r") as csvfile:
         reference_trancsript.append(row["reference transcript"])
         # print(r["qe"][1:-1].split(", "))
         # qe = r["qe"][1:-1].split(", ")
-        transcriptionprob.extend(
+        transcriptionprob.append(
             [[float(j) for j in re.findall(r"-?\d+\.\d*", row[i])] for i in qes]
         )
-    print(transcriptionprob)
-    translationProbability = [i[0] for i in transcriptionprob]
+    print(len(transcriptionprob))
+    cutoff = len(transcriptionprob)
+    translationProbability = [sum([j[0] for j in i]) / 30 for i in transcriptionprob]
+
+    # softmaxent = [i[1] for i in transcriptionprob]
+    # stddiv = [i[2] for i in transcriptionprob]
+    result = pearsoncorr(translationProbability, reference_scores[:cutoff])
+    # result2 = pearsoncorr(softmaxent, reference_scores[:cutoff])
+    # result3 = pearsoncorr(stddiv, reference_scores[:cutoff])
+    print(result)
