@@ -15,4 +15,6 @@ results/
 evaluation/
 spm.model
 code/fairseq/*
+generate.py
+sequence_generator.py
 IWSLT23*
