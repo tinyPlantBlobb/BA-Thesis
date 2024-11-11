@@ -1,10 +1,12 @@
 import re
 from datasets.features import translation
-from qeLogic import pearsoncorr, worderror
+from qeLogic import pearsoncorr, worderror, cometscore
 import os
 import csv
 
 TMPDIR = "/home/plantpalfynn/uni/BA/BA-Thesis/code/"
+world_size = 4
+# world_size = torch.cuda.device_count()
 transcripts = []
 
 translation = []
@@ -21,12 +23,9 @@ qes = ["transcript probability " + str(i) for i in range(0, 30)]
 transcriptindex = ["transcript probability " + str(i) for i in range(0, 30)]
 row.extend(["transcript probability " + str(i) for i in range(0, 30)])
 row.extend(["transcript " + str(i) for i in range(0, 30)])
-for i in range(4):
+for i in range(world_size):
     with open(
-        TMPDIR
-        + "results/results-24260948/dropouttranslationfulldropped"
-        + str(i)
-        + ".csv",
+        TMPDIR + "results/dropouttranslationfulldropped" + str(i) + ".csv",
         "r",
     ) as resfile:
         reader = csv.DictReader(
@@ -43,10 +42,12 @@ for i in range(4):
 with open("seamlessdropout.csv", "w") as csvfile:
     writer = csv.DictWriter(csvfile, fieldnames=row)
     writer.writerows(sorted(fullthing, key=lambda x: int(x["row"])))
-reference_scores = []
-with open("referencescores.txt", "r") as ref:
-    lines = ref.readlines()
-    reference_scores = [float(i) for i in lines]
+reference_scores = 
+
+#with open("referencescores.txt", "r") as ref:
+#    lines = ref.readlines()
+#    reference_scores = [float(i) for i in lines]
+
 with open(("seamlessdropout.csv"), "r") as csvfile:
     reader = csv.DictReader(csvfile, fieldnames=row)
     for row in reader:
