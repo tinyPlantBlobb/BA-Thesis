@@ -18,14 +18,14 @@ tpscore = []
 softmaxent = []
 stddiv = []
 fullthing = []
-row = ["row", "reference transcript", "reference translation", "qe"]
+row = ["row", "reference transcript", "reference translation", "regulartranslation","qe"]
 qes = ["transcript probability " + str(i) for i in range(0, 30)]
 transcriptindex = ["transcript probability " + str(i) for i in range(0, 30)]
 row.extend(["transcript probability " + str(i) for i in range(0, 30)])
 row.extend(["transcript " + str(i) for i in range(0, 30)])
 for i in range(world_size):
     with open(
-        TMPDIR + "results/dropouttranslationfulldropped" + str(i) + ".csv",
+            TMPDIR + "results/dropouttranslationfulldropped" + str(i) + ".csv",
         "r",
     ) as resfile:
         reader = csv.DictReader(
