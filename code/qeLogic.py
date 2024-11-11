@@ -127,7 +127,8 @@ def writeCSV(results, path, dropout=False):
                 "row",
                 "reference transcript",
                 "reference translation",
-                "regulartranslation" "qe",
+                "regulartranslation",
+                "qe",
             ]
 
             row.extend(["transcript probability " + str(i) for i in range(30)])
