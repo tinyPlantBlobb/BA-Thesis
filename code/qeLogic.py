@@ -127,11 +127,12 @@ def writeCSV(results, path, dropout=False):
                 "row",
                 "reference transcript",
                 "reference translation",
-                "qe",
+                "regulartranslation" "qe",
             ]
 
             row.extend(["transcript probability " + str(i) for i in range(30)])
             row.extend(["transcript " + str(i) for i in range(30)])
+            row.extend(["translation probability" + str(i) for i in range(30)])
             row.extend(["translation" + str(i) for i in range(30)])
 
             # print(type(results), results)
@@ -189,6 +190,7 @@ def readCSV(path):
             )
             # data["transcription reference"].append(row["reference transcript"])
             # print("probabilities 0", probabilities[0], row[probabilities[0]])
+
             data["qe"].append(
                 [
                     (
