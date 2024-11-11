@@ -86,6 +86,7 @@ def run_inference(rank, world_size, dataset):
                 i,
                 sample["reference"][0],
                 sample["reference"][1],
+                model
                 qe,
             ]
             currrow.extend(sample["qe"])
