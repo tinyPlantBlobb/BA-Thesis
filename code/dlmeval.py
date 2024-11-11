@@ -12,6 +12,7 @@ with open("results/dlmresults.csv", "w") as csvfile:
             # "Hypothesis",
             "Source Sentences",
             "Detokenized Hypothesis",
+            "Vocabulary scores",
             "qe",
         ]
     )
@@ -35,6 +36,11 @@ with open("results/dlmresults.csv", "w") as csvfile:
             ]
             detokenizedhypothesis = [
                 i.split("\t")[1:] for i in output if re.search(r"D-\d.*", i)
+            ]
+            vocabscores = [
+                list(map(float, i.split("\t")[1:]))
+                for i in output
+                if re.search(r"V-\d.*", i)
             ]
             row = []
             for j in range(len(detokenizedhypothesis) - 1):
