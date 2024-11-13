@@ -38,7 +38,7 @@ with open("results/dlmresults.csv", "w") as csvfile:
                 i.split("\t")[1:] for i in output if re.search(r"D-\d.*", i)
             ]
             vocabscores = [
-                list(map(float, i.split("\t")[1:]))
+                list(map(float, i.split("\t")[1].split(" ")))
                 for i in output
                 if re.search(r"V-\d.*", i)
             ]
@@ -55,6 +55,7 @@ with open("results/dlmresults.csv", "w") as csvfile:
                         srcsentences[j],
                         detokenizedhypothesis[j][1],
                         detokenizedhypothesis[j][0],
+                        -sum(vocabscores[j]) / len(vocabscores[j]),
                     ]
                 )
 
