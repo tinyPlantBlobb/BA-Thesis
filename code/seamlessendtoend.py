@@ -30,10 +30,10 @@ def run_inference(rank, world_size, dataset):
     dist.init_process_group("nccl", rank=rank, world_size=world_size)
     model.to(rank)
     model.generation_config.forced_decoder_ids = None
+    #num = 3
+    num = (len(dataset) // (world_size*2))
+    #print(num)
     num = 3
-    num = len(dataset) // world_size
-    # print(num)
-    # num = 3
     offset = 0 + rank * (num)
     # num = (len(dataset)) // (world_size)
     # print(len(dataset), world_size)
@@ -41,7 +41,7 @@ def run_inference(rank, world_size, dataset):
     print("starting seamless regular on", num)
 
     with torch.no_grad():
-        for i in tqdm(range(offset, offset + num, 1)):
+        for i in range(offset, offset + num, 1):
             refscore = 0
             model.eval()
             sample = dataset[i]
@@ -76,7 +76,7 @@ def run_inference(rank, world_size, dataset):
             )[0]
             # refscore = cometscore([text], [trans], [sample["translation"]])
             qe = getQE(res, dropout=False)
-            # print(model_translation, reference_transctipt, qe)
+            #print(model_translation)
             # print(sample["transcript prob"], sample["transcript mean"])
             # torch.cuda.empty_cache()
             # result = (res, model_transctiption, reference_transctipt)
@@ -85,7 +85,7 @@ def run_inference(rank, world_size, dataset):
             torch.cuda.empty_cache()
             dpresults = []
             dropoutres = []
-            for j in range(30):
+            for i in range(30):
                 model.train()
                 dropout_input = processor(
                     audios=model_transctiption,
@@ -120,41 +120,42 @@ def run_inference(rank, world_size, dataset):
                 dropoutres.append((dropout_translation, dqe))
             # csv overview: row, model transcript transcripttion reference , modeltranslation, translation reference, qe
             dropoutqe = getQE(dpresults, dropout=True, translation=True)
+            print(dropoutqe)
             row = [
                 i,
                 sample["transcript"],
-                sample["translation"],
+                sample["translation"], 
                 model_translation,
                 qe,
                 dropoutqe,
             ]
             row.extend(dropoutres)
             csv.append(row)
-    output = [None for _ in range(world_size)]
-    dist.gather_object(
-        obj=csv, object_gather_list=output if dist.get_rank() == 0 else None, dst=0
+    #print("done", str(rank))
+    #output = [None for _ in range(world_size)]
+    #dist.gather_object(
+    #    obj=csv, object_gather_list=output if dist.get_rank() == 0 else None, dst=0
+    #)
+    #if rank == 0:
+    #    for i in range(len(output)):
+    #        if i == 0:
+    #            continue
+    #        csv.extend(output[i])
+    csv.insert(
+        0,
+        [
+            "row",
+            "reference transcript",
+            "reference translation",
+            "transcription",
+            "translation",
+            "transcript prob",
+            "transcript mean",
+            "qe",
+        ],
     )
-    if rank == 0:
-        for i in range(len(output)):
-            if i == 0:
-                continue
-            csv.extend(output[i])
-        csv.insert(
-            0,
-            [
-                "row",
-                "reference transcript",
-                "reference translation",
-                "translation",
-                "transcript prob",
-                "transcript mean",
-                "qe",
-            ],
-        )
-        writeCSV(
-            csv, TEMPDIR + "/results/seamlessfulltranscriptions.csv", dropout=False
-        )
-
+    writeCSV(csv, TEMPDIR + "/results/seamlesse2efulltranscriptions"+str(rank)+".csv", dropout=False)
+    print("writing done", str(rank))
 
 BASE = ""
 
@@ -166,7 +167,7 @@ if not os.path.exists(respath):
 
 
 def main():
-    print(TEMPDIR + "/results/fulltranscriptions.csv")
+    
     dataset = Dataset.from_dict(getAudios(BASE)).cast_column("audiofile", Audio())
 
     world_size = torch.cuda.device_count()

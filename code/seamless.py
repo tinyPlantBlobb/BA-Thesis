@@ -1,4 +1,3 @@
-from datasets.features import translation
 from requests import get
 import torch.distributed
 from torch.nn.functional import dropout
@@ -31,13 +30,16 @@ def run_inference(rank, world_size, dataset):
     torch.cuda.set_device(rank)
     dist.init_process_group("nccl", rank=rank, world_size=world_size)
     num_samples = 30
+    
     elemdp = dataset.num_rows // world_size
+    
     model.to(rank)
     model.generation_config.forced_decoder_ids = None
     offset = 0 + rank * elemdp
     csv = []
     with torch.no_grad():
-        for i in range(offset, offset + elemdp, 1):
+        for i in tqdm(range(offset, offset + elemdp, 1)):
+            model.eval()
             sample = dataset[i]
             qetranscript = [sample["qe"][j] for j in range(30)]
             maxqe = qetranscript.index(max(qetranscript, key=(lambda x: x[1])))
@@ -51,7 +53,16 @@ def run_inference(rank, world_size, dataset):
             dropoutdata = []
             translation = []
             qelist = []
-            for j in tqdm(range(num_samples)):
+            text = processor(
+                text=transcript, src_lang="eng", return_tensors="pt")
+            text = text.to(rank)
+            res = model.generate(**text,tgt_lang="deu",
+                    return_dict_in_generate=True,
+                    output_scores=True,
+                    output_logits=True,
+                    )
+            regulartranslation=processor.batch_decode(res["sequences"], skip_special_tokens=True)[0]
+            for j in range(num_samples):
                 #############################################
                 # Huggingface whisper implementation things #
                 #############################################
@@ -70,14 +81,18 @@ def run_inference(rank, world_size, dataset):
                         output_scores=True,
                         output_logits=True,
                     )
-                    dropoutdata.append(res)
+                    #dropoutdata.append(res)
                     currtranslation = processor.batch_decode(
-                        res["sequences"][0], skip_special_tokens=True
+                        res["sequences"], skip_special_tokens=True
                     )[0]
                     qelist.append(getQE(res, dropout=False, translation=True))
                     translation.append(currtranslation)
+                    torch.cuda.empty_cache()
+                    #print(currtranslation)
+                    del res
+                #print(translation)
                 torch.cuda.empty_cache()
-            qe = getQE(dropoutdata, dropout=True, translation=True)
+            #qe = getQE(dropoutdata, dropout=True, translation=True)
             # with open(TEMPDIR + "/results/dropresult"+str(i)+".txt", "w") as file:
             #     file.write(str(dropoutresult["all"]["tranlateion"]))
             #     file.close()
@@ -86,8 +101,8 @@ def run_inference(rank, world_size, dataset):
                 i,
                 sample["reference"][0],
                 sample["reference"][1],
-                model
-                qe,
+                regulartranslation,
+                "",
             ]
             currrow.extend(sample["qe"])
             currrow.extend(sample["transcript"])
@@ -138,3 +153,5 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+
