@@ -4,7 +4,7 @@
 #SBATCH --ntasks=1
 #SBATCH --mail-type=END,BEGIN,FAIL
 #SBATCH --gres=gpu:4
-#SBATCH --time=130:00
+#SBATCH --time=2:30:00
 #SBATCH --output=baseeval.txt
 
 nodes=($(scontrol show hostnames $SLURM_JOB_NODELIST))
@@ -19,26 +19,26 @@ mkdir -p $TMPDIR/data
 tar -C $TMPDIR/data -vxzf $(ws_find iswslt-dataset)/segments_IWSLT-23.en-de.tar.gz
 source qe-whitebox/bin/activate
 
-pip install transformers --upgrade
-pip install datasets --upgrade
-pip install evaluate --upgrade
-pip install librosa --upgrade
+pip install transformers
+pip install datasets 
+pip install evaluate
+pip install librosa
 pip install sentencepiece
 pip install protobuf
 pip install unbabel-comet
 pip install jiwer
 
 srun torchrun --nnodes 1 --nproc_per_node 1 asr_regular.py
-srun torchrun --nnodes 1 --nproc_per_node 1 seamless_regular.py
+PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION=python srun torchrun --nnodes 1 --nproc_per_node 1 seamless_regular.py
 #srun torchrun --nnodes 1 --nproc_per_node 1 mnt_part.py
 cp $TMPDIR/data-bin/* $(ws_find iswslt-dataset)/data-bin/
 # 1. param = path to the dir that contains the dataset in the deltalm split format
-# TODO output file angeben
-PRETRAINEDMODEL=/project/OML/dliu/iwslt2023/model/mt/deltalm-large.tune.bilingual.de.diversify.adapt.TEDonly.clean/checkpoint_avg_last5.pt
-SPMMODEL=$(ws_find iswslt-dataset)/spm.model
 
-#srun python spm.py $(ws_find iswslt-dataset)/data-bin/test.de $(ws_find iswslt-dataset)/data-bin/test.spm.de
-#srun python spm.py $(ws_find iswslt-dataset)/data-bin/test.en $(ws_find iswslt-dataset)/data-bin/test.spm.en
+#PRETRAINEDMODEL=/project/OML/dliu/iwslt2023/model/mt/deltalm-large.tune.bilingual.de.diversify.adapt.TEDonly.clean/checkpoint_avg_last5.pt
+#SPMMODEL=$(ws_find iswslt-dataset)/spm.model
+
+#srun python sentencepiece.py $(ws_find iswslt-dataset)/data-bin/test.de $(ws_find iswslt-dataset)/data-bin/test.spm.de
+#srun python sentencepiece.py $(ws_find iswslt-dataset)/data-bin/test.en $(ws_find iswslt-dataset)/data-bin/test.spm.en
 #
 #fairseq-preprocess \
 #  --source-lang en --target-lang de \
