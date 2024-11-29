@@ -7,7 +7,13 @@ with open("results/dlmresults.csv", "w") as csvfile:
     csvwriter = csv.writer(csvfile)
     csvwriter.writerow(
         [
-            "Target",
+            "non-droput translation",
+            "non-dropout source sentence",
+            "non-dropout translation probability",
+            "non-dropout softmax entropy",
+            "non-dropout variance",
+            "dropout translation probability",
+            "dropout transation mean" "Target",
             "Probabilities",
             # "Hypothesis",
             "Source Sentences",
@@ -21,7 +27,7 @@ with open("results/dlmresults.csv", "w") as csvfile:
     row = [[]]
     with open("results/generate-test.txt", "r") as f:
         lines = f.readlines()
-        output = [i.strip() for i in lines if re.search(r"^[TPHSD]-\d.*", i)]
+        output = [i.strip() for i in lines if re.search(r"^[TPHSDV]-\d.*", i)]
         output.sort()
         target = [i.split("\t")[1] for i in output if re.search(r"^T-\d.*", i)]
         dptpqe = dptpqe[: len(target)]
@@ -42,7 +48,12 @@ with open("results/dlmresults.csv", "w") as csvfile:
             if re.search(r"V-\d.*", i)
         ]
         line = [
-            [
+            target[i],
+            srcsentences[i],
+            detokenizedhypothesis[i][0],
+            (-sum(vocabscores[i]) / len(vocabscores[i])),
+
+
                 [target[i]],
                 [probabilities[i]],
                 [srcsentences[i]],
@@ -52,6 +63,7 @@ with open("results/dlmresults.csv", "w") as csvfile:
             ]
             for i in range(len(target))
         ]
+        
         row.extend(line)
 
     for i in range(1, 30):
