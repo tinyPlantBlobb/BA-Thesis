@@ -12,14 +12,15 @@ with open("results/dlmresults.csv", "w") as csvfile:
             "non-dropout translation probability",
             "non-dropout softmax entropy",
             "non-dropout variance",
-            "dropout translation probability",
-            "dropout transation mean" "Target",
+            "Target",
             "Probabilities",
             # "Hypothesis",
             "Source Sentences",
             "Detokenized Hypothesis",
             "Vocabulary scores",
             "qe",
+            "dropout translation probability",
+            "dropout transation mean",
         ]
     )
     dptpqe = [0.0] * 3000
@@ -47,13 +48,13 @@ with open("results/dlmresults.csv", "w") as csvfile:
             for i in output
             if re.search(r"V-\d.*", i)
         ]
+
         line = [
-            target[i],
-            srcsentences[i],
-            detokenizedhypothesis[i][0],
-            (-sum(vocabscores[i]) / len(vocabscores[i])),
-
-
+            [
+                target[i],
+                srcsentences[i],
+                detokenizedhypothesis[i][0],
+                (-sum(vocabscores[i]) / len(vocabscores[i])),
                 [target[i]],
                 [probabilities[i]],
                 [srcsentences[i]],
@@ -63,7 +64,7 @@ with open("results/dlmresults.csv", "w") as csvfile:
             ]
             for i in range(len(target))
         ]
-        
+
         row.extend(line)
 
     for i in range(1, 30):
