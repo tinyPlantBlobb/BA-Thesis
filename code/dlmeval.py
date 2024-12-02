@@ -25,7 +25,7 @@ with open("results/dlmresults.csv", "w") as csvfile:
     )
     dptpqe = [0.0] * 3000
     dpvar = [0.0] * 3000
-    row = [[]]
+    row = []
     with open("results/generate-test.txt", "r") as f:
         lines = f.readlines()
         output = [i.strip() for i in lines if re.search(r"^[TPHSDV]-\d.*", i)]
@@ -51,7 +51,7 @@ with open("results/dlmresults.csv", "w") as csvfile:
 
         line = [
             [
-                target[i],
+                detokenizedhypothesis[i][1],
                 srcsentences[i],
                 detokenizedhypothesis[i][0],
                 (-sum(vocabscores[i]) / len(vocabscores[i])),
@@ -73,7 +73,6 @@ with open("results/dlmresults.csv", "w") as csvfile:
     for i in range(1, 30):
         with open("results/generate-test" + str(i) + ".txt", "r") as f:
             lines = f.readlines()
-
             output = [i.strip() for i in lines if re.search(r"^[TPHSD]-\d.*", i)]
             output.sort()
             target = [i.split("\t")[1] for i in output if re.search(r"^T-\d.*", i)]
@@ -104,16 +103,6 @@ with open("results/dlmresults.csv", "w") as csvfile:
                 row[j + 1][8].append(detokenizedhypothesis[j][1])
                 row[j + 1][9].append(detokenizedhypothesis[j][0])
                 row[j + 1][10].append(-sum(vocabscores[j]) / len(vocabscores[j]))
-    csvwriter.writerow(
-        [
-            "tokentaget",
-            "tokenprobabilities",
-            "srcsentence",
-            "detokentised hypo score",
-            "detokenizedhypothesis",
-            "tokenvocabscores",
-        ]
-    )
     csvwriter.writerows(row)
     # print(target[i])
     # print(detokenizedhypothesis)
