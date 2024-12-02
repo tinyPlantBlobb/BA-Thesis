@@ -62,6 +62,8 @@ with open("results/dlmresults.csv", "w") as csvfile:
                 [detokenizedhypothesis[i][0]],
                 [detokenizedhypothesis[i][1]],
                 [(-sum(vocabscores[i]) / len(vocabscores[i]))],
+                sum(probabilities[i][1:]) / len(probabilities[i][1:]),
+                qeLogic.variance(probabilities[i]),
             ]
             for i in range(len(target))
         ]
