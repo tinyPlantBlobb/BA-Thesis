@@ -109,4 +109,4 @@ with open("results/dlmresults.csv", "w") as csvfile:
     dpvar = qeLogic.variance(dptpqe).cpu().numpy()
     # dpcombo = [(1.0 - ((i[0] / 30.0) / i[1])) for i in zip(dptpqe, dpvar) if i[1] != 0]
     # print(dpcombo)
-    print(dptpqe, dpvar)
+    print(dptpqe, dpvlar)
