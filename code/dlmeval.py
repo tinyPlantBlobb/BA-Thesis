@@ -98,12 +98,12 @@ with open("results/dlmresults.csv", "w") as csvfile:
             for j in range(len(detokenizedhypothesis) - 1):
                 # print(i)
                 dptpqe[j] += float(detokenizedhypothesis[j][0])
-                row[j + 1][0].append(target[j])
-                row[j + 1][1].append(probabilities[j])
-                row[j + 1][2].append(srcsentences[j])
-                row[j + 1][3].append(detokenizedhypothesis[j][1])
-                row[j + 1][4].append(detokenizedhypothesis[j][0])
-                row[j + 1][5].append(-sum(vocabscores[j]) / len(vocabscores[j]))
+                row[j + 1][5].append(target[j])
+                row[j + 1][6].append(probabilities[j])
+                row[j + 1][7].append(srcsentences[j])
+                row[j + 1][8].append(detokenizedhypothesis[j][1])
+                row[j + 1][9].append(detokenizedhypothesis[j][0])
+                row[j + 1][10].append(-sum(vocabscores[j]) / len(vocabscores[j]))
     csvwriter.writerow(
         [
             "tokentaget",
