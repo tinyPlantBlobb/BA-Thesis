@@ -55,6 +55,7 @@ with open("results/dlmresults.csv", "w") as csvfile:
                 srcsentences[i],
                 detokenizedhypothesis[i][0],
                 (-sum(vocabscores[i]) / len(vocabscores[i])),
+                qeLogic.variance(probabilities[i]).cpu().numpy(),
                 [target[i]],
                 [probabilities[i]],
                 [srcsentences[i]],
