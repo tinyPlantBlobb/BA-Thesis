@@ -8,6 +8,9 @@
 \chapter{Evaluation}
 \label{ch:Evaluation}
 The evaluation of results of the experiments that were concucted on the benchmark section of the IWSLT 2023 dataset \cite{sperber2024evaluating} with regards to \ref{ch:Dataset}
+
+pearson correlate \cite{2020SciPy-NMeth} the results to comet scores and compare those 
+
 %% -------------------
 %% | Example content |
 %% -------------------
@@ -28,12 +31,9 @@ those reference scores are then also pearson correlated with the scores from the
 
 
 \section{One unified score}
-since several different metrics are used in the translation part of the cascaded model it is interesting which one might be the best choice to use in a unified score, from the text translation paper \cite{fomicheva2020unsupervised} we can gather that different metrics work better for different language groups, as this thesis only tested on english to german translation no definite choice can be made but 
-% TODO full judgement
+since several different metrics are used in the translation part of the cascaded model it is interesting which one might be the best choice to use in a unified score, from the text translation paper \cite{fomicheva2020unsupervised} we can gather that different metrics work better for different language groups, as this thesis only tested on english to german translation no definite choice can be made but % TODO full judgement
 
-pearson correlate \cite{2020SciPy-NMeth} the results to comet scores and compare those 
 
-pearsoncorr of the translation probability
 
 \section{Pearsoncorrelation scores}
 \begin{table}[ht]
