@@ -2,6 +2,8 @@
 \chapter{Methodology}
 
 - take values from model to estimate quality (normal mode) for transctiption and transltation 
+- to get the model values, aka probabilies at each decoding step the models return them during generation, hence why open source models, like Whisper, seamless and deltalm were used
+
 - run model with dropout several times and get the same values each run 
 - summ over those values and take the average of those values as qe 
 - do this for transcription and translation 
