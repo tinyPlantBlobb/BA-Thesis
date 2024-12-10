@@ -21,8 +21,6 @@ The Transcription step is only done on the Whisper model.
 Whisper \cite{radford2022robust} is a multitask and multilanguage model for Automatic speech recognition as well as speech translation. It is primarily used as an ASR model in this thesis. Open AI gives several different sizes for whisper models, in this thesis the medium model is used specifically the pretrained model that is available on huggingface. 
 
 
-
-
 \subsection{Translation Probability}
 The translation probability is calcualted by the formula \ref{formula:translation probability} this is also the case in the seamless and deltalm model. 
 
@@ -36,7 +34,7 @@ The translation probabiltiy on seamless is jsut like the transcription probabili
 \subsection{DeltaLM translation probability}
 the experiments \cite{ma2021deltalm} were done on a finetuned large version of it that was finetuned using the training data from the IWSLT 2023 constrained category, for this only the english german part was used
 \\
-the Text was preprocessed with the pretrained senctencepiece model and dictionary that has been given on the DeltaLM github page. 
+the Text was preprocessed with the pretrained senctencepiece model and dictionary that has been provided on the DeltaLM github page after that it is preprocessed with faireq preprocess. the result of this is then put into fairseq generate with batch size and beam size 1 for the softmax entropy 
 the running of the experiments was done with the help of the fairseq toolkit \cite{ott2019fairseqfastextensibletoolkit}/\cite{ott2019fairseq}
 
 \subsection{end-to-end translation probability}
@@ -52,8 +50,8 @@ in both cases the batch and beam size are set to 1 as otherwise the resulting te
 
 %softmax entropy from the transcription part? maybe in the future 
 \section{variance}
-
-
+the variance is calculated over the top token probability at each decoding step 
+which doesn't quite match the word probabilities but is close enough 
 \section{Dropout}
 the dropout based metrics are obtained by doing 30 passes with the same input through the models each time neurons are masked to 0 my some probability, which is usually the same probability as was used in training. 
 

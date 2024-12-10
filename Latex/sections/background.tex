@@ -194,10 +194,15 @@ The X2T model, which can do T2TT, ASE and Speech to Text translation(S2TT), is t
 
 
 %TODO read further
-
+\subsection{SentencePiece}
+SentencePiece \cite{kudo-richardson-2018-sentencepiece} is a tokenizer and detokenizer that allows for subword units, especially byte pair-encoding \cite{sennrich-etal-2016-neural}, that are language independent as the sentences are treated as unicode character sequences and preprocessing is not always needed. It's comprised of a Normalizer, a Trainer, an Encoder and a Decoder. The Encoder uses the Normalizer to normalize the Test and then tokenizes the sentence. In the SentencePiece implementation the Decoding is considered the inverse operation of Encoding of normalized text, this results in a lossless tokenization, so there is no information loss over the process of encoding and decoding. To achieve this SentencePiece encodes white spaces with a meta-symbol that can be reverted. 
+SentencePiece also manages the Vocabulary that is used in preprocessing as it also outputs a dictionary and can output a id sequence to text and vice versa mapping. 
+As the SentencePiece model is self-contained it also leads to better reproducibility as only the model file is needed, which is publicly available. 
 
 \subsection{DeltaLM}
 DeltaLM is one of the current state of the art Neural Machine Translation models and the architectures that was proposed in \cite{ma2021deltalm}. It is based off of the classical Encoder-Decoder structure but both the encoder and decoder are initialised with the pretrained multilingual encoder. The training happens in a self-supervised manner. 
+
+DeltaLM is considered one of the best text to text translation models. 
 
 In addition to this is the Decoder a Interleaved Transformer Decoder, which is not the same architecture as the encoder and differs from the standard Transformer decoder in that the Transformerblocks now consist of a self-attention layer, two feed-forward networks and a cross-attention layer which are arranged as seen in \ref{fig:interleaved decoder}. 
 This way of building the decoder is more similar to the structure of the encoder and makes it easier to leverage the pretrained encoder. The interleaved decoder is then initialised with the layers from the pretrained encoder, which is the InfoXLM \cite{chi2021infoxlminformationtheoreticframeworkcrosslingual}, in the following way, the self-attention and the bottom FFN layers are initialised wiht the odd layers of the InfoXLM encoder and the cross-attention and top FFN layers are initialised with the even layers. The leftover components of the decoder are also initialised the same as the pretrained encoder. This means that all of the sublayers are initialised with the pretrained weights and none of them use randomised names. 
