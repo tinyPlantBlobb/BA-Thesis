@@ -43,7 +43,8 @@ put /home/plantpalfynn/uni/BA/BA-Thesis/code/asr_dropout.py asr_dropout.py
 . ./asr_dropout.sh
 
  sbatch -p gpu_4 -N 1 --ntasks-per-node=1 --gres=gpu:4 -t 70:00 asr_dropout.sh
-
+ 
+. mwerSegmenter/segmentBasedOnMWER.sh IWSLT23.tst2023.en-de/benchmark/en-de/tst2023/IWSLT.TED.tst2023.en-de.en.xml IWSLT23.tst2023.en-de/benchmark/en-de/tst2023/IWSLT.TED.tst2023.en-de.de.xml dlmprint.txt dlm German dlmsegmented nonormalise
 \end{verbatim}
 
 finalize  72 tensor([0], device='cuda:0') tensor([82], device='cuda:0') [-1.653840184211731] [
