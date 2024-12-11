@@ -1,5 +1,5 @@
 \chapter{Background}
-This chapter explains the methods and concepts these are seperated in 3 parts one for basic knowledge, one for the evaluation methods used and one for the used models. 
+This chapter explains the methods and concepts these are separated in 3 parts one for basic knowledge, one for the evaluation methods used and one for the used models. 
 
 \section{Basic Knowledge}
 Important knowledge for the contents of the thesis mainly the what translation, automatic Speech recognition and dropout
@@ -7,15 +7,17 @@ Important knowledge for the contents of the thesis mainly the what translation, 
 
 \subsection{Automatic Speech Recognition}
 Automatic speech recognition systems or short ASR systems are systems that recognise and transcribe spoken language. 
-%TODO
+
+\todo{expand, explain, formulate}
 
 \subsection{Translation}
 Translation is the practice of translating text or language from one language into another language. This can be done by hand by a human or in a very statical approach where a dictionary is used to directly translate the text 
-%TODO
+
+\todo{expand, explain, formulate}
 \subsubsection{Speech translation}
-Speech translation or spoken language translation is simmilar to the regular translation but it has, like the name says, spoken language as the basis instead of text. 
+Speech translation or spoken language translation is similar to the regular translation but it has, like the name says, spoken language as the basis instead of text. 
 in Machine translation this is done either with cascaded models or en-to-end models 
-%TODO
+\todo{expand, maybe citations, formulations}
 
 
 \subsection{Dropout}
@@ -26,29 +28,32 @@ usually used in training
 has been done as most NN outputs are deterministic so masking parts of the model with 0 should lead to different results with the same input as has been done in \cite{gal2016dropoutbayesianapproximationrepresenting}
 -in ASR it has been tried here  \cite{8683086}
 - in ASR it mainly stems from noisy audio 
-%TODO
+\todo{fully formulate, add that one empty citation, potentially graphic?}
+
 \subsection{Bayesian probabilities}
 probability maths where conditional probabilities are used, esp. when working with conditional probability distributions.
-
+\todo{explain the autoregressive manner used in these models, i.e., the probability of a generated token is based on the source sentence and the previous output prefixes.}
 
 \subsection{Transcription probability}
 - the probability that the ASR component transcribes the audio to this sequence of text $y_1\dots y_n$ 
 - in encoder-decoder models this is most commonly done my encoding the audio signal in the encoder and then using attention mechanisms to get teh context for the current next output token and then using previous predicted tokens to decode the current token
 this all results in the formula $$p(y|x,\Theta)=\prod_{t=1}^T p(y_t|y_{<t}, x, \Theta $$ where $\Theta$ is the model parameters, x is the audio input sequence, the softmax is used at every decoding step.
+\todo {formulate out, add reference  check with bayes}
 
-%TODO
 
 
 \subsection{Translation probability}
 - the probability that the model generates the sequence $y = y_1, y_2 \dots y_n$ for the input $x=x_1, x_2 \dots x_n$
 norm the translation probability over the length of the transcribed and translation 
-
+\todo{ formulate out, add reference  check with bayes}
 \subsection{Entropy}
 In Information theory the entropy is the amount of uncertainty or information that is in a probability distribution
 The entropy is mathematically defined as $- \sum_{x\in \chi} p(x) log p(x)$ where p is a probability and $\chi$ is the probability distribution and x is an element from that probabilitiy distribution.
+\todo{add citations, more explainations}
 %TODO
 \section{Evaluation metrics}
  for the evaluation of the results a couple of terms, algorithms, methods are used. 
+ 
 \subsection{WER}
 The Word Error Rate, in short WER, has been proposed in \cite{woodard1982} and \cite{morris2004}.
 It's based on the Levenshtein distance but instead of working on phonemes it operates on words.
@@ -57,11 +62,13 @@ The WER can be computed as $$WER=\frac{S+D+I}{N}=\frac{S+D+I}{S+D+C}$$ where S i
 \subsection{Comet}
 Comet, in full Crosslingual Optimized Metric for Evaluation of Translation, is a neuronal framework for machine translation evaluation that was proposed in \cite{rei-etal-2020-comet} 
 for this thesis relevant is the Estimator model which used to estimate a quality score 
+\todo{expand, explain more}
 
 \subsection{Pearsoncorrelation}
 method to see how correlated 2 sets of values are
 is 1 if it's correlated and -1 if it's inversely correlated 
 if it's 0 the sets are not correlated at all
+\todo{citations, expand, more explainantions how it works}
 %TODO
 
 \section{Models}
@@ -71,7 +78,10 @@ All the models used in this thesis use a encoder-decoder architecture and specif
 and a Decoder, which decodes an embedding from the model into a form that is for example a human readable text. 
 -the encoder output is then used as input for the decoder that produces the output of the model 
 -Encoder-Decoder Architecture is used for Sequence-to-Sequence models esp. more complex/advanced Sequence-to-Sequence models 
-%TODO expand, add gaphics add citations 
+\todo{
+expand, add citations, maybe different graphics
+}
+
 \tikzstyle{block} = [rectangle, draw, text width=3cm, text centered, minimum height=1.2cm, fill=blue!20]
 \tikzstyle{arrow} = [thick,->,>=stealth]
 \begin{figure}
@@ -101,7 +111,9 @@ and a Decoder, which decodes an embedding from the model into a form that is for
 \end{figure}
 
 \subsection{Transformer}
-Neural Network architecture that was first introduced in the paper Attention is all you need \cite{vaswani2023attentionneed} that makes use of self-attention mechanisms. it has a Encoder-Decoder structure whith N encoder blocks that are made up out of Multi-Head Attention blocks and feed forward networks both of which have a add and normalization layer behind that. The Decoder part consists of N blocks that contain a Masked multi-head attention block, a Multi-layer attention block and a feed forward neural network 
+Neural Network architecture that was first introduced in the paper Attention is all you need \cite{vaswani2023attentionneed} that makes use of self-attention mechanisms. 
+It has a Encoder-Decoder structure whith N encoder blocks that are made up out of Multi-Head Attention blocks and feed forward networks both of which have a add and normalization layer behind that. 
+The Decoder part consists of N blocks that contain a Masked multi-head attention block, a Multi-layer attention block and a feed forward neural network 
 in the end there is a linear layer and a softmax layer
 
 \begin{figure}
@@ -112,7 +124,7 @@ in the end there is a linear layer and a softmax layer
     \end{figure}
 
 %TODO
-
+\todo{add more, esp. more explainations}
 \subsection{Cascaded Models}
 Cascaded Speech translation Models consist of 2 parts a part that is responsible for transcribing the audio, which is usually done with an ASR model, and a part that is responsible for translating the resulting transcription, which is done with neural machine translation or statistical machine translation. 
 %TODO citation and expand
@@ -154,8 +166,9 @@ End-to-End models are trained to perform a task from the raw input, which in thi
 Whisper is a multilingual multitask Model that is focused on speech processing and was proposes in the Robust Speech Recogintion via Large-Scale Weak Supervsion paper \cite{radford2022robust}. 
 It's architecture is based on a classical Transformer Encoder-Decoder Architecture where the Transformer Encoder Blocks consist of self attention blocks and Multilayer perceptron blocks. 
 The Transformer Decoder blocks use the learned position embeddings and tied input-output token representations. 
-The encoder and decoder ahve the same number of transformer blocks 
-The audio pre-processing is done by making sure the audio chunks that are then given to the model are 30 seconds long have ben sampled to 16,000 Hz and have a 80-channel log-magnitude Mel spectrogram repesentation, this log-mel spectrogramm is then computed with 25-milliseconf windows and a stride of 10 milliseconds. This input is then scaled to be between -1 and 1 and is but through 2 convolutional layers that have a filter width of 3 and use the GELU function as activation function, the second of those 2 layers has a stride of 2. 
+The encoder and decoder ahve the same number of transformer blocks .
+The audio pre-processing is done by making sure the audio chunks that are then given to the model are 30 seconds long have ben sampled to 16,000 Hz and have a 80-channel log-magnitude Mel spectrogram repesentation, this log-mel spectrogramm is then computed with 25-milliseconf windows and a stride of 10 milliseconds. 
+This input is then scaled to be between -1 and 1 and is but through 2 convolutional layers that have a filter width of 3 and use the GELU function as activation function, the second of those 2 layers has a stride of 2. 
 The resulting data is then embedded with a sinusodial position embedding, which means %TODO
 and put in the Encoder blocks. 
 
@@ -190,22 +203,33 @@ The other change for v2 is that it uses a w2v-Bert 2.0 \cite{chung2021w2vbertcom
 SeamlessM4T has been trained on unlabeled, human-labeled, pseudo-labled and automatically aligned data, where the text-to-text-translation (T2TT) was done on NLLB data \cite{nllbteam2022languageleftbehindscaling}
 which is a method of creating low-resource language datasets with a combination of using flores \cite{guzmán2019floresevaluationdatasetslowresource} and NLLB Seed dataset, which is a set of professionally translated sentences in the wikipedia domain. 
 % from seamless v2 paper
-The X2T model, which can do T2TT, ASE and Speech to Text translation(S2TT), is trained on different sources of S2TT data that is human-labeled, pseudo-labeled and automatically aligned and is a combines the v2w-Bert model and the Text encoder from the NLLB T2TT model and the corresponding decoder. it was trained in 2 steps on this data, the first one forcuses on supervised English ASR and S2TT data where the target langauge is English. The 2. step then focuses on english to X S2TT and non-English ASR data.
+The X2T model, which can do T2TT, ASE and Speech to Text translation(S2TT), is trained on different sources of S2TT data that is human-labeled, pseudo-labeled and automatically aligned and is a combines the v2w-Bert model and the Text encoder from the NLLB T2TT model and the corresponding decoder.
+It was trained in 2 steps on this data, the first one forcuses on supervised English ASR and S2TT data where the target langauge is English. 
+The 2. step then focuses on english to X S2TT and non-English ASR data.
 
 
 %TODO read further
 \subsection{SentencePiece}
-SentencePiece \cite{kudo-richardson-2018-sentencepiece} is a tokenizer and detokenizer that allows for subword units, especially byte pair-encoding \cite{sennrich-etal-2016-neural}, that are language independent as the sentences are treated as unicode character sequences and preprocessing is not always needed. It's comprised of a Normalizer, a Trainer, an Encoder and a Decoder. The Encoder uses the Normalizer to normalize the Test and then tokenizes the sentence. In the SentencePiece implementation the Decoding is considered the inverse operation of Encoding of normalized text, this results in a lossless tokenization, so there is no information loss over the process of encoding and decoding. To achieve this SentencePiece encodes white spaces with a meta-symbol that can be reverted. 
+SentencePiece \cite{kudo-richardson-2018-sentencepiece} is a tokenizer and detokenizer that allows for subword units, especially byte pair-encoding \cite{sennrich-etal-2016-neural}, that are language independent as the sentences are treated as unicode character sequences and preprocessing is not always needed. 
+It's comprised of a Normalizer, a Trainer, an Encoder and a Decoder. 
+The Encoder uses the Normalizer to normalize the Test and then tokenizes the sentence. 
+In the SentencePiece implementation the Decoding is considered the inverse operation of Encoding of normalized text, this results in a lossless tokenization, so there is no information loss over the process of encoding and decoding. 
+To achieve this SentencePiece encodes white spaces with a meta-symbol that can be reverted. 
 SentencePiece also manages the Vocabulary that is used in preprocessing as it also outputs a dictionary and can output a id sequence to text and vice versa mapping. 
 As the SentencePiece model is self-contained it also leads to better reproducibility as only the model file is needed, which is publicly available. 
 
 \subsection{DeltaLM}
-DeltaLM is one of the current state of the art Neural Machine Translation models and the architectures that was proposed in \cite{ma2021deltalm}. It is based off of the classical Encoder-Decoder structure but both the encoder and decoder are initialised with the pretrained multilingual encoder. The training happens in a self-supervised manner. 
+DeltaLM is one of the current state of the art Neural Machine Translation models and the architectures that was proposed in \cite{ma2021deltalm}. 
+It is based off of the classical Encoder-Decoder structure but both the encoder and decoder are initialised with the pretrained multilingual encoder. 
+The training happens in a self-supervised manner. 
 
 DeltaLM is considered one of the best text to text translation models. 
 
 In addition to this is the Decoder a Interleaved Transformer Decoder, which is not the same architecture as the encoder and differs from the standard Transformer decoder in that the Transformerblocks now consist of a self-attention layer, two feed-forward networks and a cross-attention layer which are arranged as seen in \ref{fig:interleaved decoder}. 
-This way of building the decoder is more similar to the structure of the encoder and makes it easier to leverage the pretrained encoder. The interleaved decoder is then initialised with the layers from the pretrained encoder, which is the InfoXLM \cite{chi2021infoxlminformationtheoreticframeworkcrosslingual}, in the following way, the self-attention and the bottom FFN layers are initialised wiht the odd layers of the InfoXLM encoder and the cross-attention and top FFN layers are initialised with the even layers. The leftover components of the decoder are also initialised the same as the pretrained encoder. This means that all of the sublayers are initialised with the pretrained weights and none of them use randomised names. 
+This way of building the decoder is more similar to the structure of the encoder and makes it easier to leverage the pretrained encoder. 
+The interleaved decoder is then initialised with the layers from the pretrained encoder, which is the InfoXLM \cite{chi2021infoxlminformationtheoreticframeworkcrosslingual}, in the following way, the self-attention and the bottom FFN layers are initialised wiht the odd layers of the InfoXLM encoder and the cross-attention and top FFN layers are initialised with the even layers. 
+The leftover components of the decoder are also initialised the same as the pretrained encoder. 
+This means that all of the sublayers are initialised with the pretrained weights and none of them use randomised names. 
 
 %TODO
 \begin{figure}
