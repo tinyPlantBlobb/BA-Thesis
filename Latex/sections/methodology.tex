@@ -1,11 +1,14 @@
 
 \chapter{Methodology}
 
-- take values from model to estimate quality (normal mode) for transctiption and transltation 
+\todo{how to derive the QE scores from the approaches like log probability or dropout,... }
+\section{Translation and transcription}
+- take the softmax values at the last layer of the model to estimate quality (normal mode) for transctiption and transltation 
 - to get the model values, aka probabilies at each decoding step the models return them during generation, hence why open source models, like Whisper, seamless and deltalm were used
-
+\section{dropout}
 - run model with dropout several times and get the same values each run 
-- summ over those values and take the average of those values as qe 
+- sum over those values and take the average of those values as qe 
+- compute the variance between values of all the dropout runs 
 - do this for transcription and translation 
 
 
