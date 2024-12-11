@@ -5,7 +5,7 @@ import torch.utils
 import torch.utils.data
 import numpy as np
 import torch
-
+from comet import download_model, load_from_checkpoint
 import evaluate
 import yaml
 import torchaudio
@@ -13,10 +13,10 @@ import torchaudio
 
 def getAudios(TEMPDIR):
     # print("starting reading from tar")
-    with open(TEMPDIR + "/data/IWSLT.TED.tst2023.en-de.matched.yaml") as matched:
+    with open(TEMPDIR + "data/IWSLT.TED.tst2023.en-de.matched.yaml") as matched:
         data = yaml.load(matched, Loader=yaml.FullLoader)
         matched.close()
-    # print("closed tar")
+    
 
     resdataset = {
         "audiofile": [],
@@ -25,7 +25,7 @@ def getAudios(TEMPDIR):
         "timestamp": [],
     }
     # print("starting iterating over tar elements")
-    for t in os.scandir(TEMPDIR + "/data"):
+    for t in os.scandir(TEMPDIR + "data"):
         if t.name == "IWSLT.TED.tst2023.en-de.matched.yaml":
             continue
         tedwav = t.name.split(".")[0]
@@ -51,7 +51,7 @@ def worderror(hypothesis, references):
 def TranslationProbability(data):
     # toptoken= data[i].scores
     prop = 0
-    # print(data)
+
 
     for j in range(len(data.scores)):
         toptoken = torch.argmax(torch.nn.functional.softmax(data.scores[j], dim=-1))
@@ -87,9 +87,7 @@ def softmaxEntropy(data):
 
         mask = softmaxed != 0
         # logged[mask] = torch.log(softmaxed[mask])
-        prop = torch.sum(torch.mul(softmaxed[mask], torch.log(softmaxed[mask])), dim=-1)
-        # print("prob", prop, "masked", softmaxed[mask])
-        # print("softmax", softmaxed[0], type(softmaxed[0]))
+        prop = torch.sum(torch.mul(softmaxed[mask], torch.log(softmaxed[mask])), dim=-1) 
         resprop += prop
         # print(prop)
     qeent = -torch.div(
@@ -101,8 +99,12 @@ def softmaxEntropy(data):
     return qeent.cpu().numpy().item()
 
 
+def stddiv(data):
+    return np.std(np.array(data))
+
+
 def sentStd(data):
-    # TODO fix
+
     # Prediction scores of the language modeling head (scores for each vocabulary token before SoftMax).
     sequence = []
     prop = 0
@@ -119,27 +121,33 @@ def sentStd(data):
     return qestd
 
 
-def writeCSV(results, path, dropout=False):
+def writeCSV(results, path, dropout=False, appen=False):
     if dropout:
-        with open(path, "w", newline="") as f:
-            writer = csv.writer(f, dialect="excel")
-            row = [
-                "row",
-                "reference transcript",
-                "reference translation",
-                "regulartranslation",
-                "qe",
-            ]
+        if not appen:
+            with open(path, "w", newline="") as f:
+                writer = csv.writer(f, dialect="excel")
+                row = [
+                    "row",
+                    "reference transcript",
+                    "reference translation",
+                    "regulartransaltion",
+                    "qe",
+                ]
 
-            row.extend(["transcript probability " + str(i) for i in range(30)])
-            row.extend(["transcript " + str(i) for i in range(30)])
-            row.extend(["translation probability" + str(i) for i in range(30)])
-            row.extend(["translation" + str(i) for i in range(30)])
+                row.extend(["transcript probability " + str(i) for i in range(30)])
+                row.extend(["transcript " + str(i) for i in range(30)])
+                row.extend(["translation probability"+str(i) for i in range(30)])
+                row.extend(["translation" + str(i) for i in range(30)])
 
-            # print(type(results), results)
-            writer.writerow(row)
-            # writer.writerow(["reference", "transcriptions"])
-            writer.writerows(results)
+                # print(type(results), results)
+                writer.writerow(row)
+                # writer.writerow(["reference", "transcriptions"])
+                #writer.writerows(results)
+
+        else:
+            with open(path, "a", newline="") as f:
+                writer = csv.writer(f, dialect="excel")
+                writer.writerow(results)
     else:
         with open(path, "w", newline="") as f:
             writer = csv.writer(f, dialect="excel")
@@ -178,6 +186,7 @@ def readCSV(path):
         )
         data = {
             "transcript": [],
+            "reftranscript": [],
             # "translation reference": [],
             "qe": [],
             "reference": [],
@@ -186,21 +195,23 @@ def readCSV(path):
             if row["row"] == "row":
                 continue
             data["transcript"].append([row[i] for i in transcpipts])
+
             data["reference"].append(
                 (row["reference transcript"], row["reference translation"])
             )
             # data["transcription reference"].append(row["reference transcript"])
             # print("probabilities 0", probabilities[0], row[probabilities[0]])
-
-            data["qe"].append(
-                [
+            #[print(row[i])for i in probabilities]
+            qe =[
                     (
                         float(row[i].split(",")[0][1:]),
                         float(row[i].split(",")[1][:-1]),
                     )
                     for i in probabilities
                 ]
-            )
+            data["qe"].append(qe)
+            data["reftranscript"].append([row[i] for i in transcpipts][qe.index(max(qe, key=lambda x:x[1]))])
+                    
             # print(type(data["qe"][0][0]), "\n")
             # data["qe"].append((row["transcript probability"], row["transcript mean"]))
     return data
@@ -228,37 +239,10 @@ def lexsim(transhypo):
                 meteor.compute(predictions=transhypo[i], reference=transhypo[i + 1])
             )
     # TODO write code for the simmilarity with the help of meteor
-    return (
-        torch.mul(
-            torch.div(1, torch.div(1, 2) * len(transhypo) * (len(transhypo) - 1)),
-            torch.sum(res),
-        )
-        .cpu()
-        .numpy()
+    return torch.mul(
+        torch.div(1, torch.div(1, 2) * len(transhypo) * (len(transhypo) - 1)),
+        torch.sum(res),
     )
-
-
-def calcdropoutprob(data):
-    dropoutprob = 0
-    # print(data)
-    for i in range(1, len(data), 1):
-        # print(data[i])
-        dropoutprob += data[i][1]
-    dropoutprob = np.divide(dropoutprob, 30)
-    return dropoutprob
-
-
-def calcdropoutvariance(data):
-    qelist = [i[1] for i in data[1:]]
-    result = variance(qelist)
-    return result.cpu().numpy()
-
-
-def gettransllationdropoutqe(qelist):
-    qe = [i[0] for i in qelist]
-    tpavg = sum(qe) / len(qelist)
-    var = variance(qe)
-    return (tpavg, var, combo(tpavg, var))
 
 
 def getQE(data, dropout=False, dropouttrans=None, translation=True):
@@ -266,15 +250,13 @@ def getQE(data, dropout=False, dropouttrans=None, translation=True):
         qe = qevar = lex = qemean = []
         com = lex = 0
         if translation:
-            qe = [TranslationProbability(i) for i in data]
-            # for i in range(len(data)):
-            #     # print(data[i])
-            #     qe.append(TranslationProbability(data[i]))
-            #     # lex = lexsim(dropouttrans)
+            for i in range(len(data)):
+                # print(data[i])
+                qe.append(TranslationProbability(data[i]))
+                # lex = lexsim(dropouttrans)
             tpdropout = torch.div(torch.sum(torch.as_tensor(qe)), 30)
             qevar = variance(qe)
             com = combo(tpdropout, qevar)
-
             res = (qe, qevar, com, lex)
         else:
             for i in range(len(data)):
@@ -308,12 +290,18 @@ def getQE(data, dropout=False, dropouttrans=None, translation=True):
 
 def cometscore(source, prediction, reference):
     comet_metric = evaluate.load("comet")
-    comet_score = comet_metric.compute(
-        predictions=prediction, references=reference, sources=source
-    )
-    # print(comet_score)
-    return comet_score
 
+    comet_metric.add_batch(predictions=prediction, references=reference, sources=source)
+    comet_score = comet_metric.compute()
+    
+    return comet_score
+def comet(source, prediction, reference):
+    data=[{"src":source[i], "mt":prediction[i], "ref":reference[i]} for i in range(len(source))]
+    model_path=download_model("Unbabel/wmt22-comet-da")
+    model =load_from_checkpoint(model_path)
+    res = model.predict(data, batch_size=8,gpus=torch.cuda.device_count())
+    print(res)
+    return res
 
 def pearsoncorr(prediction, reference):
     pearson_met = evaluate.load("pearsonr")
@@ -325,21 +313,21 @@ def writedict(
     TEMPDIR, generated_transcript, transcription_reference, translation_reference
 ):
     with open(
-        "/pfs/work7/workspace/scratch/utqma-iswslt-dataset/data-bin/test.en", "w"
+        "/pfs/work7/workspace/scratch/utqma-finals/data-bin/test.en", "w"
     ) as src:
         for i in range(len(generated_transcript)):
             src.write(generated_transcript[i])
             src.write("\n")
         src.close()
     with open(
-        "/pfs/work7/workspace/scratch/utqma-iswslt-dataset/data-bin/test.de", "w"
+        "/pfs/work7/workspace/scratch/utqma-finals/data-bin/test.de", "w"
     ) as tgt:
         for i in range(len(translation_reference)):
             tgt.write(translation_reference[i])
             tgt.write("\n")
         src.close()
     with open(
-        "/pfs/work7/workspace/scratch/utqma-iswslt-dataset/data-bin/ref.de", "w"
+        "/pfs/work7/workspace/scratch/utqma-finals/data-bin/ref.de", "w"
     ) as ref:
         for i in range(len(translation_reference)):
             ref.write(translation_reference[i])
