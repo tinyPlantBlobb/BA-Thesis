@@ -37,7 +37,7 @@ probability maths where conditional probabilities are used, esp. when working wi
 \subsection{Transcription probability}
 - the probability that the ASR component transcribes the audio to this sequence of text $y_1\dots y_n$ 
 - in encoder-decoder models this is most commonly done my encoding the audio signal in the encoder and then using attention mechanisms to get teh context for the current next output token and then using previous predicted tokens to decode the current token
-this all results in the formula $$p(y|x,\Theta)=\prod_{t=1}^T p(y_t|y_{<t}, x, \Theta $$ where $\Theta$ is the model parameters, x is the audio input sequence, the softmax is used at every decoding step.
+this all results in the formula $$p(y|x,\Theta)=\prod_{t=1}^T p(y_t|y_{<t}, x, \Theta) $$ where $\Theta$ is the model parameters, x is the audio input sequence, the softmax is used at every decoding step.
 \todo {formulate out, add reference  check with bayes}
 
 
@@ -46,7 +46,11 @@ this all results in the formula $$p(y|x,\Theta)=\prod_{t=1}^T p(y_t|y_{<t}, x, \
 - the probability that the model generates the sequence $y = y_1, y_2 \dots y_n$ for the input $x=x_1, x_2 \dots x_n$
 norm the translation probability over the length of the transcribed and translation 
 \todo{ formulate out, add reference  check with bayes}
+
+
+
 \subsection{Entropy}
+\label{entropy}
 In Information theory the entropy is the amount of uncertainty or information that is in a probability distribution
 The entropy is mathematically defined as $- \sum_{x\in \chi} p(x) log p(x)$ where p is a probability and $\chi$ is the probability distribution and x is an element from that probabilitiy distribution.
 \todo{add citations, more explainations}
@@ -79,7 +83,7 @@ and a Decoder, which decodes an embedding from the model into a form that is for
 -the encoder output is then used as input for the decoder that produces the output of the model 
 -Encoder-Decoder Architecture is used for Sequence-to-Sequence models esp. more complex/advanced Sequence-to-Sequence models 
 \todo{
-expand, add citations, maybe different graphics
+expand, add citations, maybe different graphics, add basic example
 }
 
 \tikzstyle{block} = [rectangle, draw, text width=3cm, text centered, minimum height=1.2cm, fill=blue!20]
@@ -164,10 +168,10 @@ End-to-End models are trained to perform a task from the raw input, which in thi
 %TODO citations, different architectures and expand
 \subsection{Whisper}
 Whisper is a multilingual multitask Model that is focused on speech processing and was proposes in the Robust Speech Recogintion via Large-Scale Weak Supervsion paper \cite{radford2022robust}. 
-It's architecture is based on a classical Transformer Encoder-Decoder Architecture where the Transformer Encoder Blocks consist of self attention blocks and Multilayer perceptron blocks. 
+It's architecture is based on a classical Transformer Encoder-Decoder Architecture where the Transformer Encoder Blocks consist of self attention blocks and Multilayer perception blocks. 
 The Transformer Decoder blocks use the learned position embeddings and tied input-output token representations. 
-The encoder and decoder ahve the same number of transformer blocks .
-The audio pre-processing is done by making sure the audio chunks that are then given to the model are 30 seconds long have ben sampled to 16,000 Hz and have a 80-channel log-magnitude Mel spectrogram repesentation, this log-mel spectrogramm is then computed with 25-milliseconf windows and a stride of 10 milliseconds. 
+The encoder and decoder have the same number of transformer blocks .
+The audio pre-processing is done by making sure the audio chunks that are then given to the model are 30 seconds long have ben sampled to 16,000 Hz and have a 80-channel log-magnitude Mel spectrogram representation, this log-mel spectrogramm is then computed with 25-milliseconf windows and a stride of 10 milliseconds. 
 This input is then scaled to be between -1 and 1 and is but through 2 convolutional layers that have a filter width of 3 and use the GELU function as activation function, the second of those 2 layers has a stride of 2. 
 The resulting data is then embedded with a sinusodial position embedding, which means %TODO
 and put in the Encoder blocks. 
