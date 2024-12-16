@@ -1,11 +1,11 @@
 \chapter{Dataset}
 \label{ch:Dataset}
 The used dataset for all the scores is the benchmark section of the IWSLT2023 \cite{sperber2024evaluating}, which is a parallel dataset that consists of TED talks, the english transcriptions of those TED talks and contains reference translations, as well as a segmentation for the transcriptions, which matches roughly the translation segmentation. 
-
+\todo{add statistics of the data set, maybe comment about datasets used for training}
 \section{Segmentation}
 \label{sec:FirstContent:Segmentation}
 Since most ASR models and end-to-end speech translation models only take audio up to a certain length as input the given audio files have to be segemented into smaller chunks. 
 The segmentation of the audio from the data set will be done with the timestamps given in the dataset itself. 
 he timestamps given in the dataset correspond to the source language transcription reference and the target language translation also correspond mostly well with the reference segments given in the dataset. 
-For the segments that do not overlap properly or are shifted by a segment in the given xml, mwerSegementer is used to align the outputs with the references properly, so the comet scores can be calculated on those alrigned sentences and the computed reference scores fit. 
-mwerSegmenter minimises the WER between 2 segments,  for this the model transcription or translation is used as the gold segmentation to which the reference is aligned 
+%For the segments that do not overlap properly or are shifted by a segment in the given xml, mwerSegementer is used to align the outputs with the references properly, so the comet scores can be calculated on those alrigned sentences and the computed reference scores fit. 
+%mwerSegmenter minimises the WER between 2 segments,  for this the model transcription or translation is used as the gold segmentation to which the reference is aligned 
