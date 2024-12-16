@@ -40,24 +40,24 @@ since several different metrics are used in the translation part of the cascaded
 \section{Pearsoncorrelation scores}
 \begin{table}[ht]
 \begin{tabular}{l|llll}
- &  Whisper+Seamless & Whisper+$\Delta$LM&  Seamless e2e\\ \hline
+    &  Whisper+Seamless & Whisper+$\Delta$LM&  Seamless e2e\\ \hline
  Transcription Probability& -0.33164 & -0.33164&  -  \\
  Transription mean & -0.60496 & -0.60496  &   - \\ \hline
-Translation& 0.37592 &  0.21372  & 0.656299\\ 
-Softmax Entropy& -0.30604   & 0.18071 & -0.60334 \\
-Standard deviation & -0.32905  & -0.22523 & -0.67148 \\ \hline
+Translation & 0.37592 & 0.28284 & 0.656299\\ 
+Softmax Entropy & -0.30604   & 0.083771 or  0.18071 & -0.60334 \\
+Standard deviation & -0.32905  & -0.25363& -0.67148 \\ \hline
 
+Dropout transcription & -0.27601 & -0.27601& -\\
+Dropout translation &  0.088393  & 0.282556& 0.14194\\
 
-Dropout transcription &  &  & -\\
-Dropout translation & & & 0.14194\\
-
-Dropout Variance & & & 0.13080\\
-Dropout combo & & & -0.20624\\
+Dropout Variance &-0.0962085 & -0.16285& 0.13080\\
+Dropout combo & -0.163593& 0.17962061& -0.20624\\
 \hline
 unified score   &  &  & - 
+%{transcription'pearsonr': -0.3258220972065334} transcription mean {'pearsonr': -0.27601804379827566}
 
-
-
+%dlm probabilitycorrelation {'pearsonr': 0.2828435783527934} softmaxcorrelation {'pearsonr': 0.08377165154268117} std correlation {'pearsonr': -0.2536297836740317} dp prob corr {'pearsonr': 0.2825563734152303} dp var corr {'pearsonr': -0.1628538934576183} dpcombo {'pearsonr': 0.17962061402392054}
+%seamless dropout {'pearsonr': 0.08839374531318331} {'pearsonr': -0.0962085313546643}  
 \end{tabular}
 \label{results}
 \caption{Correlation scores for the seperate models and calculated quality scores}
