@@ -26,25 +26,29 @@ processor = SeamlessProcessor.from_pretrained(
 
 
 def run_inference(rank, world_size, dataset):
-    # TODO make it work with the distributed data on the different gpus, aka figure out which rank to use and make it work
     torch.cuda.set_device(rank)
     dist.init_process_group("nccl", rank=rank, world_size=world_size)
     num_samples = 30
+    print(torch.cuda.memory_allocated(), torch.cuda.max_memory_allocated(), torch.cuda.memory_reserved())
     
     elemdp = dataset.num_rows // world_size
-    
+    #elemdp = 3 
     model.to(rank)
     model.generation_config.forced_decoder_ids = None
     offset = 0 + rank * elemdp
     csv = []
+    writeCSV(csv, TEMPDIR + "/results/translation" + str(rank)+ ".csv", dropout=True, appen=False) 
     with torch.no_grad():
         for i in tqdm(range(offset, offset + elemdp, 1)):
+            #print(i)
             model.eval()
             sample = dataset[i]
-            qetranscript = [sample["qe"][j] for j in range(30)]
-            maxqe = qetranscript.index(max(qetranscript, key=(lambda x: x[1])))
+            #qetranscript = [sample["qe"][j] for j in range(30)]
+            transcript = sample["reftranscript"]
+            #maxqe = qetranscript.index(max(qetranscript, key=(lambda x: x[1])))
+            #del qetranscript
 
-            transcript = sample["transcript"][maxqe]
+            #transcript = sample["transcript"][maxqe]
             # print(transcript, sample["reference"])
             # text = sample["reference"]
             ####################
@@ -58,10 +62,12 @@ def run_inference(rank, world_size, dataset):
             text = text.to(rank)
             res = model.generate(**text,tgt_lang="deu",
                     return_dict_in_generate=True,
-                    output_scores=True,
-                    output_logits=True,
+                    output_scores=True, 
                     )
             regulartranslation=processor.batch_decode(res["sequences"], skip_special_tokens=True)[0]
+            baseqe = getQE(res, dropout=False, translation=True)
+            del res
+            torch.cuda.empty_cache()
             for j in range(num_samples):
                 #############################################
                 # Huggingface whisper implementation things #
@@ -69,17 +75,16 @@ def run_inference(rank, world_size, dataset):
                 model.train()
                 with torch.no_grad():
                     # this will return the last layer probabilities of the model
-                    input = processor(
-                        text=transcript, src_lang="eng", return_tensors="pt"
-                    )
+                    #input = processor(
+                    #    text=transcript, src_lang="eng", return_tensors="pt"
+                    #)
                     # print(input)
-                    input_features = input.to(rank)
+                    #input_features = input.to(rank)
                     res = model.generate(
-                        **input_features,
+                        **text,
                         tgt_lang="deu",
                         return_dict_in_generate=True,
                         output_scores=True,
-                        output_logits=True,
                     )
                     #dropoutdata.append(res)
                     currtranslation = processor.batch_decode(
@@ -87,50 +92,52 @@ def run_inference(rank, world_size, dataset):
                     )[0]
                     qelist.append(getQE(res, dropout=False, translation=True))
                     translation.append(currtranslation)
-                    torch.cuda.empty_cache()
-                    #print(currtranslation)
                     del res
+                    torch.cuda.empty_cache()
                 #print(translation)
                 torch.cuda.empty_cache()
             #qe = getQE(dropoutdata, dropout=True, translation=True)
             # with open(TEMPDIR + "/results/dropresult"+str(i)+".txt", "w") as file:
             #     file.write(str(dropoutresult["all"]["tranlateion"]))
             #     file.close()
-            # torch.save(dropoutdata, TEMPDIR + "/results/dropoutresult" + str(i) + ".pt")
             currrow = [
                 i,
                 sample["reference"][0],
                 sample["reference"][1],
                 regulartranslation,
-                "",
+                baseqe,
             ]
             currrow.extend(sample["qe"])
             currrow.extend(sample["transcript"])
             currrow.extend(qelist)
             currrow.extend(translation)
             # currrow.extend(dropoutdata)
-            csv.append(currrow)
+            writeCSV(currrow, TEMPDIR + "/results/translation" + str(rank)+ ".csv", dropout=True, appen=True)
+            del currrow
+            
+            del qelist
+             
             torch.cuda.empty_cache()
-            output = [None for _ in range(world_size)]
-            dist.gather_object(
-                obj=csv,
-                object_gather_list=output if dist.get_rank() == 0 else None,
-                dst=0,
-            )
-            if rank == 0:
-                for i in range(len(output)):
-                    if i == 0:
-                        continue
-                    csv.extend(output[i])
+            #output = [None for _ in range(world_size)]
+            #dist.gather_object(
+            #    obj=csv,
+            #    object_gather_list=output if dist.get_rank() == 0 else None,
+            #    dst=0,
+            #)
+            #if rank == 0:
+            #    for i in range(len(output)):
+            #        if i == 0:
+            #            continue
+            #        csv.extend(output[i])
 
-                writeCSV(
-                    csv,
-                    TEMPDIR
-                    + "/results/dropouttranslationfulldropped"
-                    + str(rank)
-                    + ".csv",
-                    dropout=True,
-                )
+            #    writeCSV(
+            #        csv,
+            #        TEMPDIR
+            #        + "/results/dropouttranslationfulldropped"
+            #        + str(rank)
+            #        + ".csv",
+            #        dropout=True,
+            #    )
 
 
 BASE = ""
