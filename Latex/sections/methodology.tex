@@ -3,7 +3,7 @@
 \label{ch:methods}
 This chapter goes more in depth on how the Quality estimation scores are derived from models in general where as the chapter \ref{ch:experiment} goes more in depth on how it was done for the specific models
 \todo{how to derive the QE scores from the approaches like log probability or dropout,... }
-\todo{all in a more mathe mathemical sende -> maybe move stuff from background here}
+\todo{all in a more mathe mathemical sense -> maybe move stuff from background here}
 
 \section{Translation and transcription}
 the general formula is $$TP=-\frac{1}{T}\sum_{t=1}^T log\; p(y_t^v)$$
@@ -17,7 +17,7 @@ the general formula is $$TP=-\frac{1}{T}\sum_{t=1}^T log\; p(y_t^v)$$
 - the probability that the ASR component transcribes the audio to this sequence of text $y_1\dots y_n$ 
 - in encoder-decoder models this is most commonly done my encoding the audio signal in the encoder and then -using attention mechanisms to get the context for the current next output token and then using previous predicted tokens to decode the current token
 -this all results in the formula $$p(y|x,\Theta)=\prod_{t=1}^T p(y_t|y_{<t}, x, \Theta) $$ where $\Theta$ is the model parameters, x is the audio input sequence, the softmax is used at every decoding step.
-\todo {formulate out, add reference  check with bayes}
+\todo {formulate out, add reference check with bayes}
 
 \subsection{Translation probability}
 - the probability that the model generates the sequence $y = y_1, y_2 \dots y_n$ for the input $x=x_1, x_2 \dots x_n$
@@ -26,10 +26,11 @@ norm the translation probability over the length of the transcribed and translat
 
 
 \subsection{Entropy}
-- get probabilities of whole vocabulary at decoding step, softmax it, compute the entropy\ref{entropy} for each element 
-- sum all entropies together
+- get probabilities of whole vocabulary at decoding step, softmax it, compute the entropy\ref{entropy} for each element, mask out 0 values 
+- sum all entropies in the Vocabulary together
 - sum result of all decoding steps
-$$\text{Softmax-Entropy}=-\frac{1}{T}\sum_{t=1}^T\sum_{v=1}^V p(y_t^v)log\; p(y_t^v)$$
+this process results in the Formula:
+$$\text{Softmax-Entropy}=-\frac{1}{T}\sum_{t=1}^T\sum_{v=1}^V p(y_t^v)log\; p(y_t^v) \label{formula:translation probability}$$ with V being the Vocabulary size and T being the length of the generated sequence.
 
 \subsection{standard deviation}
 - get the standard deviation over the top token at each decoding step of a sequence

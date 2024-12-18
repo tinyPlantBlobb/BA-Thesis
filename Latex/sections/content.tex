@@ -44,7 +44,7 @@ In end-to-end translation there is no intermediate step between the audio and te
 the resulting probability formula comes from the architecture, which in this case is a encoder decoder architecture which results in the formula: $$-\frac{1}{T}\sum_{t=1}^T log\; p(y_t)$$ which is the same as the translation probability and the transcription probability. 
 
 \section{Softmax entropy}
-in the formicheva \cite{fomicheva2020unsupervised} paper the Softmax entropy meassure was proposed as $$-\frac{1}{T}\sum_{t=1}^T\sum_{v=1}^Vp(y_t^v)logp(y_t^v) \label{formula:translation probability}$$ with V being the Vocabulary size and T being the length of the translation. Which in this definition doesn't work with the data that the models produce as there are quite a lot of 0 values for the vocabulary after using the softmax, which means that the result of the sum like that would not be defined. To mitigate this the 0 values are masked for the log and essentially ignored. 
+in the formicheva \cite{fomicheva2020unsupervised} paper the Softmax entropy meassure was proposed as $$-\frac{1}{T}\sum_{t=1}^T\sum_{v=1}^Vp(y_t^v)logp(y_t^v)$$ with V being the Vocabulary size and T being the length of the translation. Which in this definition doesn't work with the data that the models produce as there are quite a lot of 0 values for the vocabulary after using the softmax, which means that the result of the sum like that would not be defined. To mitigate this the 0 values are masked for the log and essentially ignored. 
 
 to get those values from the seamless model basic code has been written that iterates over all vocabulary tokens and calculated the entropy of each decoding step
 to get them from deltalm the fairseq source code was adapted to do the same
