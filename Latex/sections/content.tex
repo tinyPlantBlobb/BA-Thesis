@@ -9,13 +9,16 @@
 %TODO add methedology and move from experiments part
 
 \chapter{Experiments}
+\label{ch:experiment}
+This chapter details the dataset and the experiments that have been run on Whisper\cite{radford2022robust}, Seamless\cite{seamless2023} and DeltaLM\cite{ma2021deltalm}.
 
+\include{Latex/sections/Dataset}
 %TODO move stuff to the right places
-\section{Translation and transctiptions}
-Since all models that are worked with are Encoder-decoder-models that use the transformer architecture the resulting formulas for the resulting probabilities are simmilar, for completeness the probability formula per model is listed separately. 
+\section{Translation and transcriptions}
+Since all models that are worked with are Encoder-decoder-models that use the transformer architecture the resulting formulas for the resulting probabilities are similar, for completeness the probability formula per model is listed separately. 
 
 \subsection{Transcription Probability}
-the Transcription Probability is calculated in a simmilar manner as the translation probability, which results in the formula $$-\frac{1}{T}\sum_{t=1}^T log p(y_t^v)$$ where T is the number of decoding steps and p is the probability 
+the Transcription Probability is calculated in a similar manner as the translation probability, which results in the formula $$-\frac{1}{T}\sum_{t=1}^T log p(y_t^v)$$ where T is the number of decoding steps and p is the probability 
 
 The Transcription step is only done on the Whisper model.
 Whisper \cite{radford2022robust} is a multitask and multilanguage model for Automatic speech recognition as well as speech translation. It is primarily used as an ASR model in this thesis. Open AI gives several different sizes for whisper models, in this thesis the medium model is used specifically the pretrained model that is available on huggingface. 
@@ -54,7 +57,7 @@ which doesn't quite match the word probabilities but is close enough
 
 
 \section{Dropout}
-the dropout based metrics are obtained by doing 30 passes with the same input through the models each time neurons are masked to 0 my some probability, which is usually the same probability as was used in training. 
+the dropout based metrics are obtained by doing 30 passes with the same input through the models each time neurons are masked to 0 my some probability, which is usually the same probability as was used in training, or set to 0.1 as this is a common dropout probability. 
 
 \subsection{Whisper Dropout}
 for the dropout based uncertainty quantification the model transcribes the same bit of audio 30 times and for each pass the transcription probability and mean probability is computed, in each pass the model randomly masks some nodes to 0
@@ -68,9 +71,9 @@ and then put into seamless which then translates this 30 times with a dropout pr
 Due to the nature of pytorch and huggingface models the dropout has to be done in training mode, as the evaluation mode turns off any dropout layers that are in the model. Due to this and a bug in the implementation for caching during forward passes in the seamless model on huggingface, which leads to a tuple index out of range error that only appears in train mode with dropout turned on, the caching was turned off caching in the seamless config
 
 \subsection{Deltalm Dropout}
-The dropout with the deltaLM model is handled over fairseq. 
-the used dropout probability is 0.1 and is applied on the Decoder and specically it's modules
-
+The dropout with the deltaLM model is handled over fairseq, with the --retain-dropout flag which enables the dropout during interference.
+The used dropout probability is 0.1 and is applied on all modules that is was applies on during training, this includes the encoder and the decoder, it does not include attention dropout. 
+The resulting 
 
 
 \subsection{End-To-End seamless dropout}

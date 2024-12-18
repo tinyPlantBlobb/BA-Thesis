@@ -14,14 +14,16 @@ Automatic speech recognition systems or short ASR systems are systems that recog
 Translation is the practice of translating text or language from one language into another language. This can be done by hand by a human or in a very statical approach where a dictionary is used to directly translate the text 
 
 \todo{expand, explain, formulate}
+
 \subsubsection{Speech translation}
 Speech translation or spoken language translation is similar to the regular translation but it has, like the name says, spoken language as the basis instead of text. 
 in Machine translation this is done either with cascaded models or en-to-end models 
+
 \todo{expand, maybe citations, formulations}
 
 
 \subsection{Dropout}
-Monte-Carlo dropout is the process of masking neurons in a Deep Neural Network randomly, based on a Bayesian probability to 0. This is usually done during training to reduce the chance of the model overfitting on the trainings data \cite{}
+Monte-Carlo dropout is the process of masking neurons in a Deep Neural Network randomly, based on a Bayesian probability to 0. This is usually done during training to reduce the chance of the model overfitting on the trainings data \cite{} \todo{add citation}
 usually used in training 
 - has been utilised in DNN to measure uncertainty
 - mainly in Deep architectures but also in Auto-encoders
@@ -34,20 +36,11 @@ has been done as most NN outputs are deterministic so masking parts of the model
 probability maths where conditional probabilities are used, esp. when working with conditional probability distributions.
 \todo{explain the autoregressive manner used in these models, i.e., the probability of a generated token is based on the source sentence and the previous output prefixes.}
 
-\subsection{Transcription probability}
-- the probability that the ASR component transcribes the audio to this sequence of text $y_1\dots y_n$ 
-- in encoder-decoder models this is most commonly done my encoding the audio signal in the encoder and then using attention mechanisms to get teh context for the current next output token and then using previous predicted tokens to decode the current token
-this all results in the formula $$p(y|x,\Theta)=\prod_{t=1}^T p(y_t|y_{<t}, x, \Theta) $$ where $\Theta$ is the model parameters, x is the audio input sequence, the softmax is used at every decoding step.
-\todo {formulate out, add reference  check with bayes}
-
-
-
-\subsection{Translation probability}
-- the probability that the model generates the sequence $y = y_1, y_2 \dots y_n$ for the input $x=x_1, x_2 \dots x_n$
-norm the translation probability over the length of the transcribed and translation 
-\todo{ formulate out, add reference  check with bayes}
-
-
+\subsection{Probabilites}
+to get the probability of the model at the last layer after the input sequence  
+take the softmax values at the last layer of the model to estimate quality (normal mode) for transctiption and transltation 
+this all results in the formula $$p(y|x,\Theta)=\prod_{t=1}^T p(y_t|y_{<t}, x, \Theta) $$ where $\Theta$ is the model parameters, x is the input sequence, the softmax is used at every decoding step.
+\todo{add example? }
 
 \subsection{Entropy}
 \label{entropy}
@@ -59,6 +52,7 @@ The entropy is mathematically defined as $- \sum_{x\in \chi} p(x) log p(x)$ wher
  for the evaluation of the results a couple of terms, algorithms, methods are used. 
  
 \subsection{WER}
+\label{wer}
 The Word Error Rate, in short WER, has been proposed in \cite{woodard1982} and \cite{morris2004}.
 It's based on the Levenshtein distance but instead of working on phonemes it operates on words.
 The WER can be computed as $$WER=\frac{S+D+I}{N}=\frac{S+D+I}{S+D+C}$$ where S is the number of substitutions, D is the number of deletions, I is the number of insertions and N is the number of words in the reference and C is the number of correct words.
