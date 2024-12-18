@@ -20,7 +20,12 @@ pearson correlate \cite{2020SciPy-NMeth} the results to comet scores and compare
 using WER\ref{wer}, proposed in \cite{woodard1982} and \cite{morris2004}, as reference score to compare the transctiption quality estimation metric by correlating the wer scores with the help of the pearsoncorrelation \cite{2020SciPy-NMeth}
 As WER is case sensitive, both the model result and the reference are normalised to be all lowercase, as the capialisation should have no effect on the quality of the the transcription
 \todo{add (scatter)plot with model and reference prob plotted, expand}
-
+\begin{figure}
+    \centering
+    \includegraphics[width=0.5\linewidth]{images/transcriptionsplot.png}
+    \caption{plot over the transctiption proabilites, the transcription means and the WER scores}
+    \label{fig:transcript scatter plot}
+\end{figure}
 
 \section{Translation evaluation}
 
@@ -28,8 +33,8 @@ generate reference score with the help of comet \cite{rei-etal-2020-comet} which
 those reference scores are then also pearson correlated with the scores from the model. 
 \begin{figure}
     \centering
-    \includegraphics[width=0.5\linewidth]{}
-    \caption{Caption}
+    \includegraphics[width=0.5\linewidth]{images/translationcatterpolot.png}
+    \caption{Plot over the translation probabilities and the reference scores}
     \label{fig:translationeval scatter plot}
 \end{figure}
 \todo{add (scatter)plot, expand, compare results from seamless to dlm and the end to end scores}
@@ -41,8 +46,8 @@ for this the dropout probabilities are calculated by running the model 30 times 
 
 \begin{figure}
     \centering
-    \includegraphics[width=0.5\linewidth]{}
-    \caption{Caption}
+    \includegraphics[width=0.5\linewidth]{images/dropoutscatterplot.png}
+    \caption{plot over the dropout translation probabilites, the variances and the references}
     \label{fig:dropout scatter plot}
 \end{figure}
 
