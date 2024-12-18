@@ -1,8 +1,9 @@
-\chapter{Dataset}
+\section{Dataset}
 \label{ch:Dataset}
 The used dataset for all the scores is the benchmark section of the IWSLT2023 \cite{sperber2024evaluating}, which is a parallel dataset that consists of TED talks, the english transcriptions of those TED talks and contains reference translations, as well as a segmentation for the transcriptions, which matches roughly the translation segmentation. 
 \todo{add statistics of the data set, maybe comment about datasets used for training}
-\section{Segmentation}
+The benchmark section of the Dataset consists of \todo{number} ted talk wav files that result in 2252 segments. 
+\subsection{Segmentation}
 \label{sec:FirstContent:Segmentation}
 Since most ASR models and end-to-end speech translation models only take audio up to a certain length as input the given audio files have to be segemented into smaller chunks. 
 The segmentation of the audio from the data set will be done with the timestamps given in the dataset itself. 
