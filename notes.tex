@@ -22,6 +22,20 @@ logits: https://stackoverflow.com/questions/41455101/what-is-the-meaning-of-the-
 /project/OML/dliu/iwslt2023/model/mt/deltalm-large.tune.bilingual.de.diversify.adapt.TEDonly.clean/checkpoint_avg_last5.pt
 for file transfair use
 \begin{verbatim}
+  File "/home/ikraft/seamless.py", line 163, in <module>
+    main()
+  File "/home/ikraft/seamless.py", line 154, in main
+    dataset = Dataset.from_dict(readCSV(BASE + "dropoutfulltranscriptions.csv"))
+  File "/home/ikraft/qe-whitebox/lib/python3.9/site-packages/datasets/arrow_dataset.py", line 963, in from_dict
+    pa_table = InMemoryTable.from_pydict(mapping=mapping)
+  File "/home/ikraft/qe-whitebox/lib/python3.9/site-packages/datasets/table.py", line 758, in from_pydict
+    return cls(pa.Table.from_pydict(*args, **kwargs))
+  File "pyarrow/table.pxi", line 1920, in pyarrow.lib._Tabular.from_pydict
+  File "pyarrow/table.pxi", line 6137, in pyarrow.lib._from_pydict
+  File "pyarrow/table.pxi", line 4740, in pyarrow.lib.Table.from_arrays
+  File "pyarrow/table.pxi", line 4092, in pyarrow.lib.Table.validate
+  File "pyarrow/error.pxi", line 92, in pyarrow.lib.check_status
+pyarrow.lib.ArrowInvalid: Column 2 named translation reference expected length 2252 but got length 0
 scp <localpath> utqma@bwunicluster.scc.kit.edu:<pathoncluster>
 to synx
 rsync uni/BA/BA-Thesis/code/asr_dropout.py utqma@bwunicluster.scc.kit.edu:asr_dropout.py
