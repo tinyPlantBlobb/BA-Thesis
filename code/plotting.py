@@ -10,10 +10,10 @@ with open(ref, "r") as reffile:
     refs = list(map(float, reffile.readlines()))
     x = range(len(refs))
     plt.scatter(x, refs, color="yellow", label="Reference")
-
-with open(input, "r") as inpfile:
-    inps = list(map(float, inpfile.readlines()))
-    plt.scatter(x, inps, color="blue", label="Reference")
+if input != input:
+    with open(input, "r") as inpfile:
+        inps = list(map(float, inpfile.readlines()))
+        plt.scatter(x, inps, color="blue", label="Reference")
 
 plt.xlabel("dataset lines")
 plt.ylabel("probability")
