@@ -15,49 +15,66 @@ pearson correlate \cite{2020SciPy-NMeth} the results to comet scores and compare
 %% | Example content |
 %% -------------------
 
-\section{Transctiption evaluation}
+\section{Transcription evaluation}
 
-using WER, proposed in \cite{woodard1982} and \cite{morris2004}, as reference score to compare the transctiption quality estimation metric by correlating the wer scores with the help of the pearsoncorrelation \cite{2020SciPy-NMeth}
+using WER\ref{wer}, proposed in \cite{woodard1982} and \cite{morris2004}, as reference score to compare the transctiption quality estimation metric by correlating the wer scores with the help of the pearsoncorrelation \cite{2020SciPy-NMeth}
 As WER is case sensitive, both the model result and the reference are normalised to be all lowercase, as the capialisation should have no effect on the quality of the the transcription
-\todo{add plot with model and reference prob plotted, expand}
-
+\todo{add (scatter)plot with model and reference prob plotted, expand}
+\begin{figure}
+    \centering
+    \includegraphics[width=0.5\linewidth]{images/transcriptionsplot.png}
+    \caption{plot over the transctiption proabilites, the transcription means and the WER scores}
+    \label{fig:transcript scatter plot}
+\end{figure}
 
 \section{Translation evaluation}
 
 generate reference score with the help of comet \cite{rei-etal-2020-comet} which means that a score close to 1 is a good translation and a score close to 0 is a bad translation that is no better than random chance.
 those reference scores are then also pearson correlated with the scores from the model. 
-\todo{add plot, expand, compare results from seamless to dlm and the end to end scores}
+\begin{figure}
+    \centering
+    \includegraphics[width=0.5\linewidth]{images/translationcatterpolot.png}
+    \caption{Plot over the translation probabilities and the reference scores}
+    \label{fig:translationeval scatter plot}
+\end{figure}
+\todo{add (scatter)plot, expand, compare results from seamless to dlm and the end to end scores}
 
 \section{Dropout evaluation}
 the dropout score is calculated by taking the mean of the dropout probabilities of the model, the variance of the dropout probabilities and a combination of both, the dropout score is then pearson correlated with the comet scores or the word error scores in the case of the transctiption. 
 for this the dropout probabilities are calculated by running the model 30 times with the dropout layer enabled and then taking the mean and variance of the resulting probabilities. 
-\todo{add text, explain results, compare them, add plot}
+\todo{add text, explain results, compare them, add scatter plot}
+
+\begin{figure}
+    \centering
+    \includegraphics[width=0.5\linewidth]{images/dropoutscatterplot.png}
+    \caption{plot over the dropout translation probabilites, the variances and the references}
+    \label{fig:dropout scatter plot}
+\end{figure}
 
 \section{One unified score}
 since several different metrics are used in the translation part of the cascaded model it is interesting which one might be the best choice to use in a unified score, from the text translation paper \cite{fomicheva2020unsupervised} we can gather that different metrics work better for different language groups, as this thesis only tested on english to german translation no definite choice can be made but
 
 \todo{expand, add full judgement}
-
+for a unified score the baselines, which are the tranlsation and transcription probability, are multiplied
+but considering the results it might be better to use \todo{fill out}
 
 \section{Pearsoncorrelation scores}
 \begin{table}[ht]
   \begin{tabular}
   {l|llll}
-  &  Whisper+Seamless \\ \hline
+  &  Whisper \\ \hline
   Transcription Probability& -0.33164 \\
   Transription mean & -0.60496 \\ \hline
   Dropout transcription & -0.27601 \\
   dropout variance &  \\
   \end{tabular}
   \label{transcription results}
-  \caption{result from the transcitption part of the cascaded model, correlation with WER scores}
+  \caption{result from the transcription part of the cascaded model, correlatated with WER scores, with the reference and model transcript normalized}
 \end{table}
 
 \begin{table}[ht]
 \begin{tabular}{l|llll}
-    &  Whisper+Seamless & Whisper+$\Delta$LM&  Seamless e2e\\ \hline
- Transcription Probability& -0.33164 & -0.33164&  -  \\
- Transription mean & -0.60496 & -0.60496  &   - \\ \hline
+    & Seamless & $\Delta$LM&  Seamless e2e\\ \hline
 Translation & 0.37592 & 0.28284 & 0.656299\\ 
 Softmax Entropy & -0.30604   & 0.083771 or  0.18071 & -0.60334 \\
 Standard deviation & -0.32905  & -0.25363& -0.67148 \\ \hline
