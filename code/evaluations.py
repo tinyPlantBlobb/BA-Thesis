@@ -6,7 +6,7 @@ import csv
 
 TMPDIR = os.environ["TMPDIR"]
 
-with open(TMPDIR + "/results/seamlessfulltranscriptions.csv", "r", newline="") as file:
+with open(TMPDIR + "/results/translation0.csv", "r", newline="") as file:
     reader = csv.DictReader(
         file,
         dialect="excel",
