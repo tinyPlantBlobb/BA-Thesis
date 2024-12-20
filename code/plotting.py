@@ -11,6 +11,7 @@ splitting = args.parse_args().split
 with open(ref, "r") as reffile:
     refs = list(map(float, reffile.readlines()))
     x = range(len(refs))
+    print(len(x), len(refs))
     # plt.scatter(x, refs, color="yellow", label="Reference")
 if input != "ref.txt":
     with open(input, "r") as inpfile:
