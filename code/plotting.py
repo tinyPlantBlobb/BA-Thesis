@@ -1,15 +1,16 @@
 import matplotlib.pyplot as plt
 import argparse
 
+base = "/home/plantpalfynn/uni/BA/BA-Thesis/Latex/sections/images/"
 args = argparse.ArgumentParser()
 args.add_argument("--inp", type=str, default="inp.txt")
 args.add_argument("--ref", type=str, default="ref.txt")
 args.add_argument("--split", type=bool, default=False)
-args.add_argument("--outimg", type=str, default="out.png")
+args.add_argument("--model", type=str, default="out")
 ref = args.parse_args().ref
 input = args.parse_args().inp
 splitting = args.parse_args().split
-outpath = args.parse_args().outimg
+model = args.parse_args().model
 with open(ref, "r") as reffile:
     lines = reffile.readlines()
     refs = list(
@@ -21,10 +22,10 @@ with open(ref, "r") as reffile:
     x = range(len(refs))
     # print(len(x), len(refs))
     plt.scatter(x, wers, color="yellow", label="Reference")
-    plt.savefig("werref.png")
+    plt.savefig(base + model + "werref.png")
     plt.clf()
     plt.scatter(x, comets, color="blue", label="Comet")
-    plt.savefig("references.png")
+    plt.savefig(base + model + "references.png")
     plt.clf()
 if input != "ref.txt":
     with open(input, "r") as inpfile:
@@ -47,9 +48,13 @@ if input != "ref.txt":
             )
             # x = range(len(genprop))
             plt.scatter(comets, genprop, color="red", label="Probability")
-            plt.scatter(comets, entropy, color="green", label="Entropy")
-            plt.scatter(comets, stddiv, color="purple", label="Standard Deviation")
             plt.scatter(comets, dropprop, color="orange", label="Drop Probability")
+            plt.savefig(base + model + "prob.png")
+            plt.clf()
+            plt.scatter(comets, entropy, color="green", label="Entropy")
+            plt.savefig(base + model + "entropy.png")
+            plt.clf()
+            plt.scatter(comets, stddiv, color="purple", label="Standard Deviation")
             plt.scatter(comets, dropvar, color="black", label="Drop Variance")
             # plt.scatter(x, inps, color="gold", label="Reference")
         else:
@@ -58,4 +63,4 @@ if input != "ref.txt":
 
 plt.xlabel("dataset lines")
 plt.ylabel("probability")
-plt.savefig(outpath)
+plt.savefig(base + model + "divanddropout.png")
