@@ -11,31 +11,37 @@
 \chapter{Experiments}
 \label{ch:experiment}
 This chapter details the dataset and the experiments that have been run on Whisper\cite{radford2022robust}, Seamless\cite{seamless2023} and DeltaLM\cite{ma2021deltalm}.
-
+The experiments on whisper and seamless have been made with the help of the huggingface \cite{huggingface} models and frame works, where as DeltaLm has been used with the fairseq toolkit \cite{ott2019fairseq}.
 \include{Latex/sections/Dataset}
 %TODO move stuff to the right places
 \section{Translation and transcriptions}
 Since all models that are worked with are Encoder-decoder-models that use the transformer architecture the resulting formulas for the resulting probabilities are similar, for completeness the probability formula per model is listed separately. 
 
 \subsection{Transcription Probability}
-the Transcription Probability is calculated in a similar manner as the translation probability, which results in the formula $$-\frac{1}{T}\sum_{t=1}^T log p(y_t^v)$$ where T is the number of decoding steps and p is the probability 
+the Transcription Probability is calculated in a similar manner as the translation probability, which results in the formula $$-\frac{1}{T}\sum_{t=1}^T log p(y_t^v)$$ where T is the number of decoding steps and p is the probability.
+Since only the token with the highest probability is looked at those proabbilities are always bigger than 0 so there are no potential issues with 0 values. (as if the probabilities of all regualr tokens is 0 the end of section token would have a non 0 probability)
 
 The Transcription step is only done on the Whisper model.
-Whisper \cite{radford2022robust} is a multitask and multilanguage model for Automatic speech recognition as well as speech translation. It is primarily used as an ASR model in this thesis. Open AI gives several different sizes for whisper models, in this thesis the medium model is used specifically the pretrained model that is available on huggingface. 
+Whisper \cite{radford2022robust} is a multitask and multilanguage model for Automatic speech recognition as well as speech translation. It is primarily used as an ASR model in this thesis. 
+Open AI gives several different sizes for whisper models, in this thesis the medium model is used, specifically the pretrained model that is available on huggingface, which provides a processor and a few different whisper models that have different head on top of it, the basic Whisper model on huggingface outputs the raw hidden states without a specific head on-top of it. 
+The specific model version used in the experiments is the WhisperForConditionalGeneration, as it has a language modelling head, and is recommended for automatic speech recognition, there are also ones that have heads for audio classification or a language modelling head that is a linear layer with weights tied to the input embeddings. 
 
+To retrieve the final transcription probability the huggingface model returns a tuple (or dictionary) that contains the probability of each vocabulary entry at each decoding step.
+Those values are then processed so that the sum of the highest probabilities is taken and then normalised by the number of decoding steps that were done, this gives the transcription probability mean. For reference the pure probability sum was also collected and returned during the experiments. 
+THere is a small difference in the resulting QE scores between the two versions but that is more noticable in the dropout version of the transcription probabilty 
 
 \subsection{Translation Probability}
-The translation probability is calcualted by the formula \ref{formula:translation probability} this is also the case in the seamless and deltalm model. 
+The translation probability is calculated by the formula \ref{formula:translation probability} this is also the case in the seamless and deltalm model. 
 
 \todo{maybe remove subsections?}
 \subsection{Seamless Translation probability}
-The translation probability follows the general translation probability formula \ref{formula:translation probability}. To get the probability of the top token at each decoding step the huggingface api is used which is able to return the probabilities of all vocabulary entries 
-
-The translation probabiltiy on seamless is jsut like the transcription probabilitiy on Whisper retrievel with the help of the pytorch and the seamless large model on huggingface. 
+The translation probability follows the general translation probability formula \ref{formula:translation probability}. To get the probability of the top token at each decoding step the functionality from huggingface is used, which is able to return the log-probabilities and scores, so the processed log-proabbilites, of all vocabulary entries. 
+Then to get the final probability of the sequence the top token of each decoding step and it's probability is picked and the then summed up and divided by the number of decoding steps that are in the sequence.
+The translation probability on seamless is, just like the transcription probability on Whisper, retrieved with the help of the pytorch and the seamless large model on huggingface. 
 
 
 \subsection{DeltaLM translation probability}
-the experiments \cite{ma2021deltalm} were done on a finetuned large version of it that was finetuned using the training data from the IWSLT 2023 constrained category, for this only the english german part was used
+the experiments \cite{ma2021deltalm} were done on a finetuned large version of it that was finetuned using the training data from the IWSLT 2023 constrained category, for this only the english german part was used.
 \\
 the Text was preprocessed with the pretrained senctencepiece model and dictionary that has been provided on the DeltaLM github page after that it is preprocessed with faireq preprocess. the result of this is then put into fairseq generate with batch size and beam size 1 for the softmax entropy 
 the running of the experiments was done with the help of the fairseq toolkit \cite{ott2019fairseqfastextensibletoolkit}/\cite{ott2019fairseq} which gives the probability of the specific translation along with the translation hypothesis and prints the softmax probabilities after each decoding step. by default these probabilites are in the base 2 logarithm. 
@@ -44,16 +50,16 @@ In end-to-end translation there is no intermediate step between the audio and te
 the resulting probability formula comes from the architecture, which in this case is a encoder decoder architecture which results in the formula: $$-\frac{1}{T}\sum_{t=1}^T log\; p(y_t)$$ which is the same as the translation probability and the transcription probability. 
 
 \section{Softmax entropy}
-in the formicheva \cite{fomicheva2020unsupervised} paper the Softmax entropy meassure was proposed as $$-\frac{1}{T}\sum_{t=1}^T\sum_{v=1}^Vp(y_t^v)logp(y_t^v)$$ with V being the Vocabulary size and T being the length of the translation. Which in this definition doesn't work with the data that the models produce as there are quite a lot of 0 values for the vocabulary after using the softmax, which means that the result of the sum like that would not be defined. To mitigate this the 0 values are masked for the log and essentially ignored. 
+in the formicheva \cite{fomicheva2020unsupervised} paper the Softmax entropy meassure was proposed as $$-\frac{1}{T}\sum_{t=1}^T\sum_{v=1}^Vp(y_t^v)logp(y_t^v)$$ with V being the Vocabulary size and T being the length of the translation. Which in this definition doesn't work with the data that the models produce as there are quite a lot of 0 values for the vocabulary after using the softmax, which means that the result of the sum like that would not be defined, as the log of 0 is $-\infty$. To mitigate this the 0 values are masked for the log and by extend the sum, so those values are essentially ignored. 
 
-to get those values from the seamless model basic code has been written that iterates over all vocabulary tokens and calculated the entropy of each decoding step
-to get them from deltalm the fairseq source code was adapted to do the same
-in both cases the batch and beam size are set to 1 as otherwise the resulting tensors make it more difficult to pick out which is the right entropy for this batch. 
+To get the vocabulary values at each decoding stem from the seamless model basic code has been written that iterates over all vocabulary tokens, which are returned by the model generation by the huggingface model and calculated the entropy of each decoding step
+To get them from DeltaLm the fairseq source code was adapted to do the same as the huggingface model, as the fairseq toolkit is unable to do so natively so far. 
+In both cases the batch and beam size are set to 1 as otherwise the resulting tensors make it more difficult to pick out which is the right entropy for the resulting batch. 
 
 %softmax entropy from the transcription part? maybe in the future 
 \section{standart deviation}
 the standard deviation is calculated over the top token probability at each decoding step 
-which doesn't quite match the word probabilities but is close enough 
+->which doesn't quite match the word probabilities but is close enough 
 
 
 \section{Dropout}

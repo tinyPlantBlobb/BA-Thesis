@@ -7,17 +7,19 @@ Important knowledge for the contents of the thesis mainly the what translation, 
 
 \subsection{Automatic Speech Recognition}
 Automatic speech recognition systems or short ASR systems are systems that recognise and transcribe spoken language. 
+- what is an ASR System? 
 
 \todo{expand, explain, formulate}
 
 \subsection{Translation}
 Translation is the practice of translating text or language from one language into another language. This can be done by hand by a human or in a very statical approach where a dictionary is used to directly translate the text 
 
+- ml approach
 \todo{expand, explain, formulate}
 
 \subsubsection{Speech translation}
 Speech translation or spoken language translation is similar to the regular translation but it has, like the name says, spoken language as the basis instead of text. 
-in Machine translation this is done either with cascaded models or en-to-end models 
+In Machine translation this is done either with cascaded models or end-to-end models 
 
 \todo{expand, maybe citations, formulations}
 
@@ -45,11 +47,12 @@ this all results in the formula $$p(y|x,\Theta)=\prod_{t=1}^T p(y_t|y_{<t}, x, \
 \subsection{Entropy}
 \label{entropy}
 In Information theory the entropy is the amount of uncertainty or information that is in a probability distribution
-The entropy is mathematically defined as $- \sum_{x\in \chi} p(x) log p(x)$ where p is a probability and $\chi$ is the probability distribution and x is an element from that probabilitiy distribution.
+The entropy is mathematically defined as $- \sum_{x\in \chi} p(x) log p(x)$ where p is a probability and $\chi$ is the probability distribution and x is an element from that probability distribution.
+
 \todo{add citations, more explainations}
 %TODO
 \section{Evaluation metrics}
- for the evaluation of the results a couple of terms, algorithms, methods are used. 
+ for the evaluation of the results a couple of terms, algorithms, methods are used. The explanation of them is in this section. 
  
 \subsection{WER}
 \label{wer}
@@ -62,7 +65,7 @@ Comet, in full Crosslingual Optimized Metric for Evaluation of Translation, is a
 for this thesis relevant is the Estimator model which used to estimate a quality score 
 \todo{expand, explain more}
 
-\subsection{Pearsoncorrelation}
+\subsection{Pearson-correlation}
 method to see how correlated 2 sets of values are
 is 1 if it's correlated and -1 if it's inversely correlated 
 if it's 0 the sets are not correlated at all
