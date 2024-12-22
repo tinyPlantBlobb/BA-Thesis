@@ -23,7 +23,7 @@ As WER is case sensitive, both the model result and the reference are normalised
 \todo{add (scatter)plot with model and reference prob plotted, expand}
 \begin{figure}
     \centering
-    \includegraphics[width=0.5\linewidth]{Latex/sections/images/dlm plot.png}
+    \includegraphics[width=0.5\linewidth]{Latex/sections/images/werref.png}
     \caption{plot over the transctiption proabilites, the transcription means and the WER scores}
     \label{fig:transcript scatter plot}
 \end{figure}
@@ -34,7 +34,7 @@ generate reference score with the help of comet \cite{rei-etal-2020-comet} which
 those reference scores are then also pearson correlated with the scores from the model. 
 \begin{figure}
     \centering
-    \includegraphics[width=0.5\linewidth]{images/translationcatterpolot.png}
+    \includegraphics[width=0.5\linewidth]{Latex/sections/images/seamlessscoresoverref.png}
     \caption{Plot over the translation probabilities and the reference scores}
     \label{fig:translationeval scatter plot}
 \end{figure}
@@ -47,7 +47,7 @@ for this the dropout probabilities are calculated by running the model 30 times 
 
 \begin{figure}
     \centering
-    \includegraphics[width=0.5\linewidth]{images/dropoutscatterplot.png}
+    \includegraphics[width=0.5\linewidth]{Latex/sections/images/seamlessscores.png}
     \caption{plot over the dropout translation probabilites, the variances and the references}
     \label{fig:dropout scatter plot}
 \end{figure}
