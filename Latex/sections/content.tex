@@ -11,7 +11,8 @@
 \chapter{Experiments}
 \label{ch:experiment}
 This chapter details the dataset and the experiments that have been run on Whisper\cite{radford2022robust}, Seamless\cite{seamless2023} and DeltaLM\cite{ma2021deltalm}.
-The experiments on whisper and seamless have been made with the help of the huggingface \cite{huggingface} models and frame works, where as DeltaLm has been used with the fairseq toolkit \cite{ott2019fairseq}.
+The experiments on whisper and seamless have been made with the help of the huggingface \cite{huggingface} models and frame works, where as DeltaLm has been used with the fairseq toolkit \cite{ott2019fairseqfastextensibletoolkit}.
+
 \include{Latex/sections/Dataset}
 %TODO move stuff to the right places
 \section{Translation and transcriptions}
@@ -43,8 +44,8 @@ The translation probability on seamless is, just like the transcription probabil
 \subsection{DeltaLM translation probability}
 the experiments \cite{ma2021deltalm} were done on a finetuned large version of it that was finetuned using the training data from the IWSLT 2023 constrained category, for this only the english german part was used.
 \\
-the Text was preprocessed with the pretrained senctencepiece model and dictionary that has been provided on the DeltaLM github page after that it is preprocessed with faireq preprocess. the result of this is then put into fairseq generate with batch size and beam size 1 for the softmax entropy 
-the running of the experiments was done with the help of the fairseq toolkit \cite{ott2019fairseqfastextensibletoolkit}/\cite{ott2019fairseq} which gives the probability of the specific translation along with the translation hypothesis and prints the softmax probabilities after each decoding step. by default these probabilites are in the base 2 logarithm. 
+the Text was preprocessed with the pretrained senctencepiece model and dictionary that has been provided on the DeltaLM github page \cite{deltalmurl} after that it is preprocessed with faireq preprocess. the result of this is then put into fairseq generate with batch size and beam size 1 for the softmax entropy 
+ dthe running of the experiments was done with the help of the fairseq toolkit \cite{ott2019fairseqfastextensibletoolkit} which gives the probability of the specific translation along with the translation hypothesis and prints the softmax probabilities after each decoding step. by default these probabilites are in the base 2 logarithm. 
 \subsection{end-to-end translation probability}
 In end-to-end translation there is no intermediate step between the audio and text part so the resulting probability is a single score for the whole process.
 the resulting probability formula comes from the architecture, which in this case is a encoder decoder architecture which results in the formula: $$-\frac{1}{T}\sum_{t=1}^T log\; p(y_t)$$ which is the same as the translation probability and the transcription probability. 
