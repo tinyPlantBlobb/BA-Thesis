@@ -1,4 +1,5 @@
 \chapter{Background}
+\label{ch:background}
 This chapter explains the methods and concepts these are separated in 3 parts one for basic knowledge, one for the evaluation methods used and one for the used models. 
 
 \section{Basic Knowledge}
@@ -73,20 +74,14 @@ if it's 0 the sets are not correlated at all
 %TODO
 
 \section{Models}
+\label{ch:models}
 All the models used in this thesis use a encoder-decoder architecture and specifically transformers
 \subsection{Decoder-Encoder}
--Encoder-Decoder Models are Models that contain a Encoder, which creates an embedding for the model
-and a Decoder, which decodes an embedding from the model into a form that is for example a human readable text. 
--the encoder output is then used as input for the decoder that produces the output of the model 
--Encoder-Decoder Architecture is used for Sequence-to-Sequence models esp. more complex/advanced Sequence-to-Sequence models 
-\todo{
-expand, add citations, maybe different graphics, add basic example
-}
 
-\tikzstyle{block} = [rectangle, draw, text width=3cm, text centered, minimum height=1.2cm, fill=blue!20]
-\tikzstyle{arrow} = [thick,->,>=stealth]
 \begin{figure}
     \centering
+    \tikzstyle{block} = [rectangle, draw, text width=3cm, text centered, minimum height=1.2cm, fill=blue!20]
+\tikzstyle{arrow} = [thick,->,>=stealth]
 \begin{tikzpicture}
     % Nodes
     \node(input) [align=center] {Input};
@@ -107,9 +102,20 @@ expand, add citations, maybe different graphics, add basic example
     \node[below of=decoder] {Decoding Process};
 
 \end{tikzpicture}
-\label{fig:encoder-decoder model}
+
 \caption{basic overview of a encoder-decoder model architecture}
+\label{fig:encoderdecodermodel}
 \end{figure}
+
+-Encoder-Decoder Models are Models that contain a Encoder, which creates an embedding for the model
+and a Decoder, which decodes an embedding from the model into a form that is for example a human readable text. 
+-the encoder output is then used as input for the decoder that produces the output of the model 
+-Encoder-Decoder Architecture is used for Sequence-to-Sequence models esp. more complex/advanced Sequence-to-Sequence models (for seq-to-seq\cite{sutskever2014sequencesequencelearningneural})
+- conxept in \ref{fig:encoderdecodermodel}
+\todo{
+expand, add citations, maybe different graphics, add basic example
+}
+
 
 \subsection{Transformer}
 Neural Network architecture that was first introduced in the paper Attention is all you need \cite{vaswani2023attentionneed} that makes use of self-attention mechanisms. 
@@ -117,28 +123,25 @@ It has a Encoder-Decoder structure whith N encoder blocks that are made up out o
 The Decoder part consists of N blocks that contain a Masked multi-head attention block, a Multi-layer attention block and a feed forward neural network 
 in the end there is a linear layer and a softmax layer
 
+for the graphical represenation of the transformer see \ref{fig:transformermodel}
 \begin{figure}
         \centering
         \includegraphics[width=0.5\linewidth]{Latex//sections//images/transformermodel.png}
         \caption{Transformer model architecture Vaswani et. all 2017}
-        \label{fig:enter-label}
+        \label{fig:transformermodel}
     \end{figure}
 
-%TODO
+
 \todo{add more, esp. more explainations}
+
 \subsection{Cascaded Models}
-Cascaded Speech translation Models consist of 2 parts a part that is responsible for transcribing the audio, which is usually done with an ASR model, and a part that is responsible for translating the resulting transcription, which is done with neural machine translation or statistical machine translation. 
-%TODO citation and expand
 \tikzstyle{block} = [rectangle, draw, text width=3.5cm, text centered, minimum height=1.2cm, fill=blue!20]
 \tikzstyle{arrow} = [thick,->,>=stealth]
 \tikzstyle{inputoutput} = [ellipse, draw, text width = 3.5cm, minimum height=1cm, text centered, fill=green!20]
 
 \begin{figure}
     \centering
-    
-
-\begin{tikzpicture}
-    
+    \begin{tikzpicture}
     % Nodes
     \node (input) [inputoutput] {Speech Input \\(Source Language)};
     \node (asr) [block, below of=input, node distance=3cm] {Automatic Speech \\ Recognition (ASR)};
@@ -153,12 +156,13 @@ Cascaded Speech translation Models consist of 2 parts a part that is responsible
     % Labels for processes
     \node[below of=asr] {Speech Recognition};
     \node[below of=translation] {Text Translation};
-    
-
-\end{tikzpicture}
-\label{fig:cascaded model}
+    \end{tikzpicture}
 \caption{Basic overview of a cascaded speech translation model}
+\label{fig:cascadedmodel}
 \end{figure}
+Cascaded Speech translation Models consist of 2 parts a part that is responsible for transcribing the audio, which is usually done with an ASR model, and a part that is responsible for translating the resulting transcription, which is done with neural machine translation or statistical machine translation. A basic overview of this can be seen in \ref{fig:cascadedmodel}.
+%TODO citation and expand
+
 \subsection{End-to-End Models}
 End-to-End Speech translation models do not have the explicit split between the Automatic Speech Recognition model and the translation, this means that such a model gets audio as an input and outputs the text in the target language. 
 End-to-End models are trained to perform a task from the raw input, which in this case is audio, to the output, in this case the corresponding translation, without any intermediate processing from outside the model or feature-engineering in sub-models. 
