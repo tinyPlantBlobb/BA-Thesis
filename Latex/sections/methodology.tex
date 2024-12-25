@@ -50,10 +50,12 @@ For this the same input is run several times through the model, due to the poten
 
 \subsection{General Probability}
 \label{dropoutprob}
-- run model with dropout several times and get the same values each run 
-- sum over those values and take the average of those values as qe -> mean of them/expectation value
+The dropout probability is the mean of the regular probabilities, as done in \ref{transcription results}. 
+For this the method described above is run on the model with dropout several times and get the Probability scores for each run. 
+This results in the fromula:
 $$\text{D-TP}=\frac{1}{N}\sum_{n=1}^N TP_{\hat\theta n}\label{formula:dropoutprobability}$$
-
+This method works to estimate the quality because if the masked neurons affect the result it is most likely to lower the probability, especially if the model is very certian about the resulting sequence. This is the case because if the model is certain of the resulting sequence then the dropout does not \todo{fix wording and logic of this, I'm too t tired for this rn}
+%- sum over those values and take the average of thpose values as qe -> mean of them/expectation value
 
 \subsection{Variance}
 \label{dropoutvar}
