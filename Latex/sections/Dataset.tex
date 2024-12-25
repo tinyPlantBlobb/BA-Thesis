@@ -12,7 +12,7 @@ This is especially useful since Whisper takes audio segments of 30 seconds.
 if a segment is longer than 30 seconds, whisper uses a moving window and padding to transcribe the audio in 30 second chunks, the more precise stuff is taken care of by the preprocessor/tokenizer.
 The timestamps given in the dataset correspond to the source language transcription reference and the target language translation also correspond mostly well with the reference segments given in the dataset. 
 the segments in the dataset were generated with the help of mwerSegmenter \footnote{https:
-//www-i6.informatik.rwth-aachen.de/web/Software/mwerSegmenter.tar.gz} which can also be used to align the model outputs to the references as it minimazies the word error rate between model translation and or or more references.
+//www-i6.informatik.rwth-aachen.de/web/Software/mwerSegmenter.tar.gz} for the IWSLT 2023, but it can also be used to align the model outputs to the references as it minimizes the word error rate between model translation and one or more references.
 
 %For the segments that do not overlap properly or are shifted by a segment in the given xml, mwerSegementer is used to align the outputs with the references properly, so the comet scores can be calculated on those alrigned sentences and the computed reference scores fit. 
 %mwerSegmenter minimises the WER between 2 segments,  for this the model transcription or translation is used as the gold segmentation to which the reference is aligned n

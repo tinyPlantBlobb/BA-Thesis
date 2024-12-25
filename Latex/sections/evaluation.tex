@@ -78,7 +78,9 @@ since several different metrics are used in the translation part of the cascaded
 
 for a unified score the baselines, which are the tranlsation and transcription probability, are multiplied, or rather multiplied since the transcription metrics estimate the wer quite well. 
 
-the resulting pearson score that can be found in \ref{results} is calculated by correlating the product of translation probability and transcription probability with the the comet score divided\todo{figure out how to deal with 0 wer, aka perferct transcript} by the WER, which was choosen since the transcription probability is anti-correlated to the wer. 
+the resulting pearson score that can be found in \ref{results} is calculated by correlating the product of translation probability and transcription probability with the the comet score multiplied by the by the WER mapped to be from 0 to 1 by dividing all WER scores by the worst, so highest, WER score in the dataset (alt. just setting it to 100) and subtracting it from 1.
+$$reference = cometscore*(1-\frac{WER}{max(WER)})$$
+which was choosen since the transcription probability is anti-correlated to the wer and since the best score of the WER is 0 that had to be taken into account as it ruled out just flat out dividing the comet score by the WER.
 
 
 \section{Pearsoncorrelation scores}
@@ -101,7 +103,7 @@ the resulting pearson score that can be found in \ref{results} is calculated by 
 \begin{tabular}{l|llll}
     & Seamless & $\Delta$LM&  Seamless e2e\\ \hline
 Translation & 0.37592 & 0.28284 & 0.656299\\ 
-Softmax Entropy & -0.30604   & -0.083771 or -0.18071 & -0.60334 \\
+Softmax Entropy & -0.30604   &-0.18071 & -0.60334 \\
 Standard deviation & -0.32905  & -0.25363& -0.67148 \\ \hline
 
 Dropout translation & 0.150755& 0.282556& 0.14194\\
@@ -112,11 +114,11 @@ Dropout combo & -0.163593& 0.17962061& -0.20624\\
 unified score   & -0.32965 &  & - 
 %{transcription'pearsonr': -0.3258220972065334} transcription mean {'pearsonr': -0.27601804379827566}
 
-%dlm probabilitycorrelation {'pearsonr': 0.2828435783527934} softmaxcorrelation {'pearsonr': 0.08377165154268117} std correlation {'pearsonr': -0.2536297836740317} dp prob corr {'pearsonr': 0.2825563734152303} dp var corr {'pearsonr': -0.1628538934576183} dpcombo {'pearsonr': 0.17962061402392054}
+%dlm probabilitycorrelation {'pearsonr': 0.2828435783527934} softmaxcorrelation {'pearsonr': -0.08377165154268117 or  -0.083771} std correlation {'pearsonr': -0.2536297836740317} dp prob corr {'pearsonr': 0.2825563734152303} dp var corr {'pearsonr': -0.1628538934576183} dpcombo {'pearsonr': 0.17962061402392054}
 %seamless dropout {'pearsonr': 0.08839374531318331} {'pearsonr': -0.0962085313546643}  
 \end{tabular}
 
 \caption{Correlation scores for the seperate models and calculated quality scores}
 \label{results}
 \end{table}
-other interesting values: the pearson correlation of the entropies in dropout shows a signigicant prediction value with a correlation of the mean of -0.23241 and a correlation of -0.17032 of the variance of the entropies on seamless.
+other interesting values: the pearson correlation of the entropies in dropout shows a significant prediction value with a correlation of the mean of -0.23241 and a correlation of -0.17032 of the variance of the entropies on seamless.

@@ -26,19 +26,21 @@ In Machine translation this is done either with cascaded models or end-to-end mo
 
 
 \subsection{Dropout}
-Monte-Carlo dropout is the process of masking neurons in a Deep Neural Network randomly, based on a Bayesian probability to 0. This is usually done during training to reduce the chance of the model overfitting on the trainings data \todo{add citation}
-usually used in training 
-- has been utilised in DNN to measure uncertainty
-- mainly in Deep architectures but also in Auto-encoders
-has been done as most NN outputs are deterministic so masking parts of the model with 0 should lead to different results with the same input as has been done in \cite{gal2016dropoutbayesianapproximationrepresenting}
--in ASR it has been tried here  \cite{8683086}
+Monte-Carlo dropout is the process of masking neurons in a Deep Neural Network randomly, based on a Bayesian probability to 0. This is usually done during training to reduce the chance of the model overfitting on the trainings data\cite{JMLR:v15:srivastava14a} \\
+-> usually/commonly used in training \\
+- has been utilised in DNN to measure uncertainty\\
+- mainly in Deep architectures but also in Auto-encoders\\
+has been done as most NN outputs are deterministic so masking parts of the model with 0 should lead to different results with the same input as has been done in \cite{gal2016dropoutbayesianapproximationrepresenting}\\
+-in ASR it has been tried here  \cite{8683086}\\
 - in ASR it mainly stems from noisy audio 
 \todo{fully formulate, add that one empty citation, potentially graphic?}
 
 \subsection{Bayesian probabilities}
 probability maths where conditional probabilities are used, esp. when working with conditional probability distributions.
 \todo{explain the autoregressive manner used in these models, i.e., the probability of a generated token is based on the source sentence and the previous output prefixes.}
-
+\subsection{Softmax}
+maps a probability distribution to be between 0 and 1 by setting all values below 0 to 0 and scaleing averything that is about 0 to fall between 0 and 1 do that that sum of all the values is 1. 
+\todo{add more explainations, citations and example}
 \subsection{Probabilites}
 to get the probability of the model at the last layer after the input sequence  
 take the softmax values at the last layer of the model to estimate quality (normal mode) for transctiption and transltation 
@@ -75,7 +77,7 @@ if it's 0 the sets are not correlated at all
 
 \section{Models}
 \label{ch:models}
-All the models used in this thesis use a encoder-decoder architecture and specifically transformers
+All the models used in this thesis use a encoder-decoder architecture and more specifically transformer architecture models, which is a subsection of encoder-decpder models. All of the models are sequence to sequence models as well which take an input sequence of text or audio and outputs a sequence again, as compared to for example word-for-word translation. 
 \subsection{Decoder-Encoder}
 
 \begin{figure}
@@ -165,7 +167,35 @@ Cascaded Speech translation Models consist of 2 parts a part that is responsible
 
 \subsection{End-to-End Models}
 End-to-End Speech translation models do not have the explicit split between the Automatic Speech Recognition model and the translation, this means that such a model gets audio as an input and outputs the text in the target language. 
-End-to-End models are trained to perform a task from the raw input, which in this case is audio, to the output, in this case the corresponding translation, without any intermediate processing from outside the model or feature-engineering in sub-models. 
+End-to-End models are trained to perform a task from the raw input, which in this case is audio, to the output, in this case the corresponding translation, without any intermediate processing from outside the model or feature-engineering in sub-models. \ref{fig:end-to-end models}
+\begin{figure}
+    \centering
+    \tikzstyle{block} = [rectangle, draw, text width=3cm, text centered, minimum height=1.2cm, fill=blue!20]
+\tikzstyle{arrow} = [thick,->,>=stealth]
+\begin{tikzpicture}
+    % Nodes
+    \node(input) [align=left] {Spoken language};
+    \node(encoder) [block, right of=input, xshift=2.8cm] {Encoder};
+    \node(bottleneck) [block, below of=encoder, yshift=-1.5cm, fill=red!20] {Representation};
+    \node(decoder) [block, below of=bottleneck, yshift=-1.5cm] {Decoder};
+    \node (output) [align=right, right of=decoder, xshift=3cm] {Translated text};
+
+    % Arrows
+    \draw [arrow](input) -- (encoder);
+    \draw [arrow] (encoder) -- (bottleneck);
+    \draw [arrow] (bottleneck) -- (decoder);
+    \draw [arrow] (decoder) -- (output);
+
+    % Labels
+    \node[below of=encoder] {Encoding Process};
+    \node[below of=bottleneck] {Bottleneck};
+    \node[below of=decoder] {Decoding Process};
+
+\end{tikzpicture}
+
+\caption{basic overview of a encoder-decoder model architecture}
+\label{fig:end-to-end models}
+\end{figure}
 %TODO citations, different architectures and expand
 \subsection{Whisper}
 Whisper is a multilingual multitask Model that is focused on speech processing and was proposes in the Robust Speech Recogintion via Large-Scale Weak Supervsion paper \cite{radford2022robust}. 

@@ -1,13 +1,13 @@
 
 \chapter{Methodology}
 \label{ch:methods}
-This chapter goes more in depth on how the Quality estimation scores are derived from models in general where as the chapter \ref{ch:experiment} goes more in depth on how it was done for the specific models
+This chapter goes more in depth on how the Quality estimation scores are derived from data retrieved from the models in general, whereas chapter \ref{ch:experiment} goes more in depth on how it was done for the specific models and some of the potential errors that were made in the experiments.
 %\todo{how to derive the QE scores from the approaches like log probability or dropout,... }
 %\todo{all in a more mathematical sense -> maybe move stuff from background here}
 
 \section{Translation and transcription}
-the general formula of both the translation and transcription probability is $$TP=-\frac{1}{T}\sum_{t=1}^T log\; p(y_t) \label{formula:translation Probability}$$
-where p is the log-probability of generating the t-th token in the ouptut sequence, so to get the probability of the whole sequence log-probabilities the log-probabilities of each token are added together, and then normalized with the length of the sequence T. 
+The general formula of both the translation and transcription probability is $$TP=-\frac{1}{T}\sum_{t=1}^T log\; p(y_t) \label{formula:translation Probability}$$
+where p is the log-probability of generating the t-th token in the output sequence, so to get the probability of the whole sequence log-probabilities the log-probabilities of each token are added together, and then normalized with the length of the sequence T. 
 This is the case since the architectures are the same.
 These log-probabilities are the probabilities after applying the softmax to the decoding probability distribution and then applying the logarithm to the highest probability.
 The sum of those values is then used as the quality estimation, especially as a baseline to compare the other estimators to.
@@ -17,35 +17,38 @@ The sum of those values is then used as the quality estimation, especially as a 
 
 \subsection{Transcription probability}
 The transcription probability is the probability that the ASR component transcribes the audio to this sequence of text $y_1\dots y_n$. 
-In encoder-decoder models this is most commonly done by encoding the audio signal in the encoder and then, using attention mechanisms to get the context for the current next output token and then using previous predicted tokens to decode the current token
-This all results in the formula $$p(y|x,\Theta)=\prod_{t=1}^T p(y_t|y_{<t}, x, \Theta) $$ where $\Theta$ is the model parameters, x is the audio input sequence, the softmax is used after every decoding step t on the resulting probability distribution $p(y_t|y_{<t}, x,\Theta)$. 
+In encoder-decoder models this is most commonly done by encoding the audio signal in the encoder and then, using attention mechanisms to get the context for the current next output token and then using previous predicted tokens to decode the current token. 
+That next output token has a certain probability that, after applying the softmax to the whole probability distribution of the Vocabulary is between 0 and 1. This probability is on the last layer of the decoder and retrieved from the model. 
+This probability can be mathematically described in the formula $$p(y|x,\Theta)=\prod_{t=1}^T p(y_t|y_{<t}, x, \Theta) $$ where $\Theta$ is the model parameters, x is the audio input sequence, the softmax is used after every decoding step t on the resulting probability distribution $p(y_t|y_{<t}, x,\Theta)$. 
 \todo {formulate out, add reference check with bayes}
 
 \subsection{Translation probability}
-The translation probability is the probability a Machine translation model out puts the sequence $y = y_1, y_2 \dots y_n$ for the input $x=x_1, x_2 \dots x_n$. The probability is calculated by Formula \ref{formula:translation Probability} where the probability of generating the sequence y is defined as $ p(y)=p(y|x,\Theta)=\prod_{t=1}^T p(y_t|y_{<t}, x, \Theta)$ where $\Theta$ is the model parameters.
-The probability $p(y_t|y_{<t}, x,\Theta)$ is the probability distribution after the decoding step of the t-th decoding step after applying the softmax is taken.
+The translation probability is the probability a Machine translation model out puts the sequence $y = y_1, y_2 \dots y_n$ for the input $x=x_1, x_2 \dots x_n$. The probability is calculated by Formula \ref{formula:translation Probability} where the probability of generating the sequence y is defined as $$ p(y)=p(y|x,\Theta)=\prod_{t=1}^T p(y_t|y_{<t}, x, \Theta)$$ where $\Theta$ is the model parameters.
+The probability $p(y_t|y_{<t}, x,\Theta)$ is the probability distribution after the decoding step of the t-th decoding step after applying the softmax.
 The $\frac{1}{T}$ is there to normalise the translation probability over the length of the translation sequence T as to minimize the effect of longer sequences getting a higher score when they shouldn't. 
 \todo{ formulate out, add reference  check with bayes}
 
 
-\subsection{Entropy}\label{sect:entropy}
-The Softmax entropy is the entropy of each element in the vocabulary at decoding step.
+\subsection{Softmax Entropy}\label{sect:entropy}
+The Softmax entropy is the entropy of each element in the vocabulary at decoding step, this is a way to measure the uncertainty in the vocabulary at each decoding step.
 To compute the entropy \ref{entropy} for each element, and then sum all entropies in the Vocabulary together, this results in the entropy of the decoding step. 
-Then the sum of the entropy of all decoding steps is taken and normalised over the sequence length. 
+Then the sum of the entropy of all decoding steps is taken and normalised over the sequence length. \\
 This results in the Formula:
-$$\text{Softmax-Entropy}=-\frac{1}{T}\sum_{t=1}^T\sum_{v=1}^V p(y_t^v)log\; p(y_t^v) \label{formula:translation entropy}$$ where V is the Vocabulary size and T is he length of the generated sequence. The minus comes from the entropy.
-As to how entropy works a lower value in the score is better since then the information that the 
-\todo{why do this?}
+$$\text{Softmax-Entropy}=-\frac{1}{T}\sum_{t=1}^T\sum_{v=1}^V p(y_t^v)log\; p(y_t^v) \label{formula:translation entropy}$$ where V is the Vocabulary size and T is he length of the generated sequence. The minus comes from the entropy and is only moved in front of the sums for ease of computation.
+Due to how entropy works a lower value, so one closer to 0, in the score is better since then the information that the vocabulary contains less entropy when there is less uncertainty. so if there are less entries in the vocabulary that have similar probabilities during a single decoding step then the entropy of that decoding step will be lower.
 
 \subsection{Standard Deviation}\label{sect:stddiv}
-- get the standard deviation over the top token at each decoding step of a sequence
-- $$\text{Seq-Std}=\sqrt{\mathbf{E}[P^2]-(\mathbf{E}[P])^2}$$ where $P=p(y_1 , \dots y_T)$ is the token-level log-probabilities for the sequence
-\todo{expand and explain why}
+The standard deviation, similarly to the Softmax entropy aims to measure the uncertainty by looking at the dispersion of the probabilities in the sequence. 
+Since the mean that is the probability score does not account for the different behaviour that for example [0.1,0.9] and [0.5,0.5] have even though the have the same mean. 
+To obtain this quality estimator the standard deviation over the top token at each decoding step of a sequence is computed.
+This means the mathematical formula is: $$\text{Seq-Std}=\sqrt{\mathbf{E}[P^2]-(\mathbf{E}[P])^2}$$ where $P=p(y_1) , \dots p(y_T)$ is the token-level log-probabilities for the sequence.
+\todo{expand?}
 
 \section{Dropout}
-measures uncertainty with the help of Monte Carlo dropout \cite{gal2016dropoutbayesianapproximationrepresenting} by masking neurons to 0 based on a Bernoulli distributuion. 
+Dropout, in particular the Monte Carlo dropout \cite{gal2016dropoutbayesianapproximationrepresenting}, which is the masking of neurons to 0 based on a Bernoulli distribution, aims to measure the uncertainty in a Deep Neural network. 
+For this the same input is run several times through the model, due to the potential masking of neurons different results can be observed from the model. Based on how much these results differ from each other and a reference that was obtained without dropout conclusions can be made as to how certain the original result is. 
 
-\subsection{general Probability}
+\subsection{General Probability}
 \label{dropoutprob}
 - run model with dropout several times and get the same values each run 
 - sum over those values and take the average of those values as qe -> mean of them/expectation value
@@ -66,5 +69,6 @@ $$\text{D-Var}=E[TP_{\hat\theta}^2]-(E[TP_{\hat\theta}])^2\label{formula:dropout
 - this has been used in the past to minimize the effect of low quality outputs on NMT training with back translation \cite{wang-etal-2018-alibaba} \todo{expand?}
 
 %\subsection{Lexical Simililarity}
-
-%- for a single score in cascaded models: add/multiply the values together if need be with weights 
+\section{unified score}
+- for a single score in cascaded models: multiply the values together if need be with weights 
+%- possible reference score: because the 
