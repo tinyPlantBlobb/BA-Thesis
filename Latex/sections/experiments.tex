@@ -55,12 +55,14 @@ the experiments \cite{ma2021deltalm} were done on a finetuned large version of i
 the Text was preprocessed with the pretrained senctencepiece model and dictionary that has been provided on the DeltaLM github page \cite{deltalmurl} after that it is preprocessed with faireq preprocess. the result of this is then put into fairseq generate with batch size and beam size 1 for the softmax entropy 
  dthe running of the experiments was done with the help of the fairseq toolkit \cite{ott2019fairseqfastextensibletoolkit} which gives the probability of the specific translation along with the translation hypothesis and prints the softmax probabilities after each decoding step. by default these probabilites are in the base 2 logarithm. 
 
-\subsection{end-to-end translation probability}
+\subsection{End-to-End translation probability}
 In end-to-end translation there is no intermediate step between the audio and text part so the resulting probability is a single score for the whole process.
-the resulting probability formula comes from the architecture, which in this case is a encoder decoder architecture which results in the formula: $$-\frac{1}{T}\sum_{t=1}^T log\; p(y_t)$$ which is the same as the translation probability and the transcription probability. 
+The resulting probability formula comes from the architecture, which in this case is a encoder decoder architecture which results in the formula: $$-\frac{1}{T}\sum_{t=1}^T log\; p(y_t)$$ which is the same as the translation probability and the transcription probability.
+The translation probabilities have once again been retrieved with the help of the huggingface implementation and pytorch. 
+The caching also has been turned off to avoid the error that also appears in the plain machine translation part. 
 
 \section{Softmax Entropy}
-in the formicheva \cite{fomicheva2020unsupervised} paper the Softmax entropy meassure was proposed as $$-\frac{1}{T}\sum_{t=1}^T\sum_{v=1}^Vp(y_t^v)logp(y_t^v)$$ with V being the Vocabulary size and T being the length of the translation. Which in this definition doesn't work with the data that the models produce as there are quite a lot of 0 values for the vocabulary after using the softmax, which means that the result of the sum like that would not be defined, as the log of 0 is $-\infty$. To mitigate this the 0 values are masked for the log and by extend the sum, so those values are essentially ignored. 
+in the formicheva \cite{fomicheva2020unsupervised} paper the Softmax entropy meassure was proposed as $$-\frac{1}{T}\sum_{t=1}^T\sum_{v=1}^Vp(y_t^v)logp(y_t^v)$$ with V being the Vocabulary size and T being the length of the translation. Which in this definition doesn't work with the data that the models produce as there are quite a lot of 0 values for the vocabulary after using the softmax, which means that the result of the sum like that would not be defined, as the log of 0 is undefined but approaches $-\infty$. To mitigate this the 0 values are masked for the log and by extend the sum, so those values are essentially ignored. 
 
 To get the vocabulary values at each decoding stem from the seamless model basic code has been written that iterates over all vocabulary tokens, which are returned by the model generation by the huggingface model and calculated the entropy of each decoding step
 To get them from DeltaLm the fairseq source code was adapted to do the same as the huggingface model, as the fairseq toolkit is unable to do so natively so far. 
