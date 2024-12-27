@@ -75,13 +75,15 @@ The correlation results are listed in \ref{results} for the translation part and
 since several different metrics are used in the translation part of the cascaded model it is interesting which one might be the best choice to use in a unified score, from the text translation paper \cite{fomicheva2020unsupervised} we can gather that different metrics work better for different language groups, as this thesis only tested on english to german translation no definite choice can be made without looking at other languages as well.
 \todo{expand, add full judgement}
 
+For a unified score the baselines, which are the translation and transcription probability, are multiplied. 
 
-for a unified score the baselines, which are the tranlsation and transcription probability, are multiplied, or rather multiplied since the transcription metrics estimate the wer quite well. 
-
-the resulting pearson score that can be found in \ref{results} is calculated by correlating the product of translation probability and transcription probability with the the comet score multiplied by the by the WER mapped to be from 0 to 1 by dividing all WER scores by the worst, so highest, WER score in the dataset (alt. just setting it to 100) and subtracting it from 1.
+the resulting pearson score that can be found in \ref{results} is calculated by correlating this unified score, product of translation probability and transcription probability, with the the comet score multiplied by the by the WER mapped to be from 0 to 1 by dividing all WER scores by the worst, so highest, WER score in the dataset (alt. just setting it to 100) and subtracting it from 1. 
+This is can be described mathematically as 
 $$reference = cometscore*(1-\frac{WER}{max(WER)})$$
-which was choosen since the transcription probability is anti-correlated to the wer and since the best score of the WER is 0 that had to be taken into account as it ruled out just flat out dividing the comet score by the WER.
+which was choosen since the transcription probability is anti-correlated to the wer and since the best score of the WER is 0 that had to be taken into account as it ruled out just flat out dividing the comet score by the WER.\\
 
+Alternatively a unified score can be achieved by weighing the translation and transcription probabilities differently, which results in the formula $$unifiedscore_\alpha= \alpha TP_{transcript} \cdot (1-\alpha)TP_{translation}$$. 
+\todo{add graph and evaluation}
 
 \section{Pearsoncorrelation scores}
 \begin{table}[ht]
@@ -118,7 +120,8 @@ unified score   & -0.32965 &  & -
 %seamless dropout {'pearsonr': 0.08839374531318331} {'pearsonr': -0.0962085313546643}  
 \end{tabular}
 
-\caption{Correlation scores for the seperate models and calculated quality scores}
+\caption{Correlation scores for the separate models and calculated quality scores}
 \label{results}
 \end{table}
+
 other interesting values: the pearson correlation of the entropies in dropout shows a significant prediction value with a correlation of the mean of -0.23241 and a correlation of -0.17032 of the variance of the entropies on seamless.

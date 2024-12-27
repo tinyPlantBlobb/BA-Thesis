@@ -76,31 +76,31 @@ on DLM it's done with the help of numpy on the probabilities that have been outp
 
 
 \section{Dropout}\label{experiment:dropout}
-the dropout based metrics are obtained by doing 30 passes with the same input through the models each time neurons are masked to 0 my some probability, which is usually the same probability as was used in training, or set to 0.1 as this is a common dropout probability. 
+the dropout based metrics are obtained by doing 30 passes with the same input through the models each time neurons are masked to 0 my some probability, which is usually the same probability as was used in training, or set to 0.1 as both whisper and seamless are using this during training. 
 
 \subsection{Whisper Dropout}
 for the dropout based uncertainty quantification the model transcribes the same bit of audio 30 times and for each pass the transcription probability and mean probability is computed, in each pass the model randomly masks some nodes to 0
-this results in some short and some faulty transcriptions but this also gives information about how certain the model is in it's transcription. the used dropout probability is 0.1 
+this results in some short and some faulty transcriptions but this also gives information about how certain the model is in it's transcription. The used dropout probability is 0.1, which is enabled on the whole model.
 
 
 \subsection{Seamless Dropout}
 for the dropout based approach the transcription with the best qe score, so the min/max score from the whisper step, is used 
 and then put into seamless which then translates this 30 times with a dropout probabiltity of 0.1.
 % potentially remove if finding a better solution
-Due to the nature of pytorch and huggingface models the dropout has to be done in training mode, as the evaluation mode turns off any dropout layers that are in the model. Due to this and a bug in the implementation for caching during forward passes in the seamless model on huggingface, which leads to a tuple index out of range error that only appears in train mode with dropout turned on, the caching was turned off caching in the seamless config
+Due to the nature of pytorch and huggingface models the dropout has to be done in training mode, as the evaluation mode turns off any dropout layers that are in the model. Due to this and a bug in the implementation for caching during forward passes in the seamless model on huggingface, which leads to a tuple index out of range error that only appears in train mode with dropout turned on, the caching was turned off caching in the seamless config. 
 
 \subsection{Deltalm Dropout}
 The dropout with the DeltaLM model is handled over fairseq, with the --retain-dropout flag which enables the dropout during interference.
 The used dropout probability is 0.1 and is applied on all modules that is was applies on during training, this includes the encoder and the decoder, it does not include attention dropout. 
-The resulting 
-
+The resulting scores
+\todo{finish sentence}
 
 \subsection{End-To-End Seamless Dropout}
 The dropout for the end-to-end approach is once again applies on the model and as with the translation part of seamless the caching in the model has been turned off. 
 The dropout probability is 0.1, same as in the translation part. 
-The batch size used for running this is once again 1 and the beamsize is also set to 1. 
+The batch size used for running this is once again 1 and the beam size is also set to 1. 
 The Probabilities are retrieved with the functionality of huggingface and then processed with the help of pytorch.
-The resulting dropout probabilites and variances apply for the whole model, as the \todo{finish, add more stuff, citation?}
+The resulting dropout probabilities and variances apply for the whole model, as the model does not have separate parts for transcription and translation, as it is used as an end-to-end model. \todo{add more stuff, citation?}
 
 
 %\section{lexsim}
