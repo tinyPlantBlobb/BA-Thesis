@@ -20,13 +20,13 @@ The transcription probability is the probability that the ASR component transcri
 In encoder-decoder models this is most commonly done by encoding the audio signal in the encoder and then, using attention mechanisms to get the context for the current next output token and then using previous predicted tokens to decode the current token. 
 That next output token has a certain probability that, after applying the softmax to the whole probability distribution of the Vocabulary is between 0 and 1. This probability is on the last layer of the decoder and retrieved from the model. 
 This probability can be mathematically described in the formula $$p(y|x,\Theta)=\prod_{t=1}^T p(y_t|y_{<t}, x, \Theta) $$ where $\Theta$ is the model parameters, x is the audio input sequence, the softmax is used after every decoding step t on the resulting probability distribution $p(y_t|y_{<t}, x,\Theta)$. 
-\todo {formulate out, add reference check with bayes}
+\todo {add reference?, check with bayes in background}
 
 \subsection{Translation probability}
 The translation probability is the probability a Machine translation model out puts the sequence $y = y_1, y_2 \dots y_n$ for the input $x=x_1, x_2 \dots x_n$. The probability is calculated by Formula \ref{formula:translation Probability} where the probability of generating the sequence y is defined as $$ p(y)=p(y|x,\Theta)=\prod_{t=1}^T p(y_t|y_{<t}, x, \Theta)$$ where $\Theta$ is the model parameters.
 The probability $p(y_t|y_{<t}, x,\Theta)$ is the probability distribution after the decoding step of the t-th decoding step after applying the softmax.
 The $\frac{1}{T}$ is there to normalise the translation probability over the length of the translation sequence T as to minimize the effect of longer sequences getting a higher score when they shouldn't. 
-\todo{ formulate out, add reference  check with bayes}
+\todo{add reference? check with bayes}
 
 
 \subsection{Softmax Entropy}\label{sect:entropy}
@@ -42,35 +42,46 @@ The standard deviation, similarly to the Softmax entropy aims to measure the unc
 Since the mean that is the probability score does not account for the different behaviour that for example [0.1,0.9] and [0.5,0.5] have even though the have the same mean. 
 To obtain this quality estimator the standard deviation over the top token at each decoding step of a sequence is computed.
 This means the mathematical formula is: $$\text{Seq-Std}=\sqrt{\mathbf{E}[P^2]-(\mathbf{E}[P])^2}$$ where $P=p(y_1) , \dots p(y_T)$ is the token-level log-probabilities for the sequence.
-\todo{expand?}
+\todo{expand? explain how the std div works?}
 
 \section{Dropout}
 Dropout, in particular the Monte Carlo dropout \cite{gal2016dropoutbayesianapproximationrepresenting}, which is the masking of neurons to 0 based on a Bernoulli distribution, aims to measure the uncertainty in a Deep Neural network. 
-For this the same input is run several times through the model, due to the potential masking of neurons different results can be observed from the model. Based on how much these results differ from each other and a reference that was obtained without dropout conclusions can be made as to how certain the original result is. 
+For this the same input is run N times through the model, due to the potential masking of neurons different results can be observed from the model. Based on how much these results differ from each other and a reference that was obtained without dropout conclusions can be made as to how certain the original result is. 
+The following measures have been used in the past to minimize the effect of low quality outputs on neural machine translation training with back translation \cite{wang-etal-2018-alibaba}
+The dropout measures are used on the transcription and translation part of the cascaded models. 
+
 
 \subsection{General Probability}
 \label{dropoutprob}
 The dropout probability is the mean of the regular probabilities, as done in \ref{transcription results}. 
 For this the method described above is run on the model with dropout several times and get the Probability scores for each run. 
-This results in the fromula:
+This results in the formula:
 $$\text{D-TP}=\frac{1}{N}\sum_{n=1}^N TP_{\hat\theta n}\label{formula:dropoutprobability}$$
-This method works to estimate the quality because if the masked neurons affect the result it is most likely to lower the probability, especially if the model is very certian about the resulting sequence. This is the case because if the model is certain of the resulting sequence then the dropout does not \todo{fix wording and logic of this, I'm too t tired for this rn}
-%- sum over those values and take the average of thpose values as qe -> mean of them/expectation value
+This method works to estimate the quality because if the masked neurons affect the result sequence and resulting probability, especially if the model is very uncertain about the resulting sequence. if the model is certain about the resulting sequence then masking neurons to 0 will not affect the resulting sequence and probability as much. 
 
 \subsection{Variance}
 \label{dropoutvar}
-- compute the variance between values of all the dropout runs 
-- do this for transcription and translation 
-- measures the uncertainty of the N runs 
+The dropout variance is the variance of the different probabilities gathered during the N runs. 
+Mathematically this can be described as:
+% measures the uncertainty of the N runs 
 $$\text{D-Var}=E[TP_{\hat\theta}^2]-(E[TP_{\hat\theta}])^2\label{formula:dropoutvariance}$$
+Where $TP_{\hat\theta}$ is the probability \ref{formula:translation Probability} of the runs. 
+If the Dropout Variance is high then the model is uncertain about the resulting sequence, and if the variance is closer to 0 it is quite certain about the sequence.
+So a low variance is to be considered better than a high score.
 
 \subsection{Combo}
-- combine the results from the probability and the variance by calculating $$D-Combo=(1-\frac{D-TP}{D-Var})\label{formula:Dropoutcombo}$$
-- where $D-TP$ and $D-Var$ are the Translation probability mean (\ref{dropoutprob}) and the Dropout variance (\ref{dropoutvar})
+As the variance does not take into account the probability of the sequence, a combination of the dropout Probability and dropout variance is proposed by Fomicheva et al \cite{fomicheva2020unsupervised}. 
+The combination of the results from the probability and the variance is done by calculating $$D-Combo=(1-\frac{D-TP}{D-Var})\label{formula:Dropoutcombo}$$, where $D-TP$ and $D-Var$ are the Translation probability mean (\ref{dropoutprob}) and the Dropout variance (\ref{dropoutvar}).
 
-- this has been used in the past to minimize the effect of low quality outputs on NMT training with back translation \cite{wang-etal-2018-alibaba} \todo{expand?}
+
 
 %\subsection{Lexical Simililarity}
 \section{unified score}
-- for a single score in cascaded models: multiply the values together if need be with weights 
-%- possible reference score: because the 
+The unified score is a combination score for the transcription and translation part as an attempt to approximate the quality of the whole cascaded model. 
+For this the translation probability and transcription probability are multiplied together as both the translation and transcription probabilities fall between 0 and 1. 
+
+$$\text{unified score}= TP_{transcript}\cdot TP_{translation}$$
+
+alternative options for a unified score are weighing the translation and transcription probabilities differently, which results in the formula $$unifiedscore_\alpha= \alpha TP_{transcript} \cdot (1-\alpha)TP_{translation}$$. 
+This was previously proposed in by Le et al. \cite{le2016automatic}, but in that case the quality estimation is done with classification onto good or bad translations and not scores.
+
