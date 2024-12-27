@@ -59,26 +59,26 @@ the Text was preprocessed with the pretrained senctencepiece model and dictionar
 In end-to-end translation there is no intermediate step between the audio and text part so the resulting probability is a single score for the whole process.
 The resulting probability formula comes from the architecture, which in this case is a encoder decoder architecture which results in the formula: $$-\frac{1}{T}\sum_{t=1}^T log\; p(y_t)$$ which is the same as the translation probability and the transcription probability.
 The translation probabilities have once again been retrieved with the help of the huggingface implementation and pytorch. 
-The caching also has been turned off to avoid the error that also appears in the plain machine translation part. 
 
 \section{Softmax Entropy}
 in the formicheva \cite{fomicheva2020unsupervised} paper the Softmax entropy meassure was proposed as $$-\frac{1}{T}\sum_{t=1}^T\sum_{v=1}^Vp(y_t^v)logp(y_t^v)$$ with V being the Vocabulary size and T being the length of the translation. Which in this definition doesn't work with the data that the models produce as there are quite a lot of 0 values for the vocabulary after using the softmax, which means that the result of the sum like that would not be defined, as the log of 0 is undefined but approaches $-\infty$. To mitigate this the 0 values are masked for the log and by extend the sum, so those values are essentially ignored. 
 
-To get the vocabulary values at each decoding stem from the seamless model basic code has been written that iterates over all vocabulary tokens, which are returned by the model generation by the huggingface model and calculated the entropy of each decoding step
+To get the vocabulary values at each decoding stem from the seamless model basic code has been written that iterates over all vocabulary tokens, which are returned by the model generation by the huggingface model and calculated the entropy of each decoding step.
 To get them from DeltaLm the fairseq source code was adapted to do the same as the huggingface model, as the fairseq toolkit is unable to do so natively so far. 
 In both cases the batch and beam size are set to 1 as otherwise the resulting tensors make it more difficult to pick out which is the right entropy for the resulting batch. 
 
 %softmax entropy from the transcription part? maybe in the future 
 \section{Standard Deviation}
-the standard deviation is calculated over the top token probability at each decoding step\\
-on seamless it's done on the translation prob retrieved with hugginface with the help of pytorch and numpy implementations of the standard deviation
-on DLM it's done with the help of numpy on the probabilities that have been output by fairseq
+the standard deviation is calculated over the top token probability at each decoding step.\\
+on seamless it's done on the translation prob retrieved with hugginface with the help of pytorch and numpy implementations of the standard deviation.
+on DLM it's done with the help of numpy on the probabilities that have been output by fairseq. 
 \todo{explain implementation, formula how the results are gotten that are put in}
 %->which doesn't quite match the word probabilities but is close enough 
 
 
 \section{Dropout}\label{experiment:dropout}
-the dropout based metrics are obtained by doing 30 passes with the same input through the models each time neurons are masked to 0 my some probability, which is usually the same probability as was used in training, or set to 0.1 as both whisper and seamless are using this during training. 
+the dropout based metrics are obtained by doing 30 passes with the same input through the models. 
+Each time neurons in the model are masked to 0 by some probability, which is usually the same probability as was used in training, or set to 0.1 when no information about that was avainlabel, as both whisper and seamless are using this during training. 
 
 \subsection{Whisper Dropout}
 for the dropout based uncertainty quantification the model transcribes the same bit of audio 30 times and for each pass the transcription probability and mean probability is computed, in each pass the model randomly masks some nodes to 0
@@ -105,5 +105,6 @@ The Probabilities are retrieved with the functionality of huggingface and then p
 The resulting dropout probabilities and variances apply for the whole model, as the model does not have separate parts for transcription and translation, as it is used as an end-to-end model. \todo{add more stuff, citation?}
 
 
+The caching also has been turned off to avoid the error that also appears in the plain machine translation part. 
 %\section{lexsim}
 %the lexical similarity between 2 sentences from the dropout experiments are computed with the help of meteor \cite{banerjee-lavie-2005-meteor}
