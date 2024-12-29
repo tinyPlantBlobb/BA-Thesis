@@ -7,27 +7,29 @@ Important knowledge for the contents of the thesis mainly the what translation, 
 
 
 \subsection{Automatic Speech Recognition}
-Automatic speech recognition systems or short ASR systems are systems that recognise and transcribe spoken language. 
-- what is an ASR System? 
-
+Automatic speech recognition systems or short ASR systems are systems that recognise and transcribe spoken language into written text.
+To do this an ASR system takes the audio data encoded in some way, for example the mel-log spectrogramm, which encodes the audio frequencies onto the mel scale which is based on human perception. The model then transforms this input into text, for example by using a deep neural network like a transformer architecture.
 \todo{expand, explain, formulate}
 
 \subsection{Translation}
-Translation is the practice of translating text or language from one language into another language. This can be done by hand by a human or in a very statical approach where a dictionary is used to directly translate the text 
-
-- ml approach
-\todo{expand, explain, formulate}
+Translation is the practice of translating text or language from one language into another language. This can be done by hand by a human or in a very statical approach where a dictionary is used to directly translate the text. 
+Or with a machine learning approach where a Neural network learns the representations of one language and how this translates in a different language. 
+\todo{ml approach expand, explain, formulate}
 
 \subsubsection{Speech translation}
-Speech translation or spoken language translation is similar to the regular translation but it has, like the name says, spoken language as the basis instead of text. 
-In Machine translation this is done either with cascaded models or end-to-end models 
+Speech translation or spoken language translation is similar to the regular translation but it has, like the name says, spoken language as the basis for the translation instead of text. 
+In Machine translation this is done either with cascaded models or end-to-end models.
+Cascaded models have been used for a long time but end-to-end models have gained quite a lot more popularity in the last years as they promise better results and ideas that have proven to work well in text-to-text neural machine translation.
 
 \todo{expand, maybe citations, formulations}
 
 
 \subsection{Dropout}
-Monte-Carlo dropout is the process of masking neurons in a Deep Neural Network randomly, based on a Bayesian probability to 0. This is usually done during training to reduce the chance of the model overfitting on the trainings data\cite{JMLR:v15:srivastava14a} \\
--> usually/commonly used in training \\
+Dropout in the context of machine learning usually referes to the process of dropping out, so omitting, units in the neural network. 
+One variation of these dropout methods is Monte-Carlo dropout \cite{gal2016dropoutbayesianapproximationrepresenting}, in short MC dropout, which is the process of masking neurons in a Deep Neural Network randomly, based on a Bayesian probability to 0. 
+This is usually done during training to reduce the chance of the model overfitting on the trainings data and this application was first proposed by Srivastava et al. \cite{JMLR:v15:srivastava14a}. \\
+Nowadays it is very common to use dropout in general and in particular MC dropout during training.
+Monte Carlo Dropout has also been utilized in Deep Neural Networks to measure the uncertainty of the Network.   
 - has been utilised in DNN to measure uncertainty\\
 - mainly in Deep architectures but also in Auto-encoders\\
 has been done as most NN outputs are deterministic so masking parts of the model with 0 should lead to different results with the same input as has been done in \cite{gal2016dropoutbayesianapproximationrepresenting}\\
@@ -70,8 +72,10 @@ for this thesis relevant is the Estimator model which used to estimate a quality
 
 \subsection{Pearson-correlation}
 method to see how correlated 2 sets of values are
-is 1 if it's correlated and -1 if it's inversely correlated 
-if it's 0 the sets are not correlated at all
+is 1 if it's correlated, so a linear relation between the 2 value sets and -1 if it's inversely correlated 
+if the pearson r value is 0 the sets are not correlated at all
+
+it's symmetric, so switchign the order of the inputs does not change teh correlation score
 \todo{citations, expand, more explainantions how it works}
 %TODO
 
