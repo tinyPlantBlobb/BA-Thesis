@@ -8,7 +8,8 @@ import torch
 from comet import download_model, load_from_checkpoint
 import evaluate
 import yaml
-import torchaudio
+
+# import torchaudio
 import werpy
 
 
@@ -42,7 +43,7 @@ def getAudios(TEMPDIR):
     return resdataset
 
 
-def worderror(hypothesis, references):
+def wer(hypothesis, references):
     wer = evaluate.load("wer")
     wer_score = wer.compute(predictions=hypothesis, references=references)
     return wer_score
@@ -349,5 +350,5 @@ def writedict(
 
 
 def worderror(hypothesis, references):
-    wer_score = werpy.wers(werpy.normalize(hypothesis), werpy.normalize(references))
+    wer_score = werpy.wers(hypothesis, werpy.normalize(references))
     return wer_score

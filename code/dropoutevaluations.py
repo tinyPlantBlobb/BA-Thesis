@@ -1,9 +1,9 @@
 import re
 import qeLogic
 from datasets.features import translation
-from qeLogic import cometscore, pearsoncorr, worderror
-import os
+from qeLogic import cometscore, pearsoncorr, worderror, wer
 import csv
+import werpy
 import math
 
 TMPDIR = "/home/plantpalfynn/uni/BA/BA-Thesis/code/"
@@ -50,7 +50,7 @@ with open(TMPDIR + "/results/translation0.csv", "r", newline="") as file:
     for r in reader:
         # print(r)
         if r["qe"] != "qe":
-            transcripts.append(r["transcript 0"])
+            # transcripts.append(r["transcript 0"])
             translation.append(r["regulartranslation"])
             reference_translation.append(r["reference translation"])
             reference_trancsript.append(r["reference transcript"])
@@ -65,8 +65,16 @@ with open(TMPDIR + "/results/translation0.csv", "r", newline="") as file:
             )
 
             # print(r["transcript mean"], " probability  ", r["transcript prob"])
-            transcriptmean.append([t[1] for t in transcriptionprob])
-            transcrptprobabiltiy.append([i[0] for i in transcriptionprob])
+            transcriptmean.append([t[1] for t in transcriptionprob[-1]])
+            mean = [t[1] for t in transcriptionprob[-1]]
+            transcripts.append(r["transcript " + str(mean.index(max(mean)))])
+            transcrptprobabiltiy.append([i[0] for i in transcriptionprob[-1]])
+
+            print(
+                len(werpy.normalize(transcripts[-1])),
+                len(werpy.normalize(r["reference transcript"])),
+            )
+
             qes = [
                 list(map(float, r[i].strip("([])").split(",")))
                 for i in translationindex
@@ -80,17 +88,16 @@ with open(TMPDIR + "/results/translation0.csv", "r", newline="") as file:
             translationstddiv.append(math.fsum([i[2] for i in qes]))
             translationstddivvariance.append(qeLogic.variance([i[2] for i in qes]))
 
+    wer = worderror(transcripts, werpy.normalize(reference_trancsript))
+
     refscores = cometscore(reference_translation, translation, reference_translation)
 
     refscore = refscores["scores"]
     with open(TMPDIR + "referencescores.txt", "w") as export:
         for i in refscore:
-            export.write(i)
+            export.write(str(i) + " " + str(wer[i]))
             export.write("\n")
-    wer = [
-        worderror([transcripts[i].lower()], [reference_trancsript[i].lower()])
-        for i in range(len(transcripts))
-    ]
+
     # print(wer, len(wer), len(transcriptmean))
     # print(transcriptmean)
     meanresult = pearsoncorr(transcriptmean, wer)
