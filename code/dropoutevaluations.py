@@ -65,10 +65,13 @@ with open(TMPDIR + "/results/translation0.csv", "r", newline="") as file:
             )
 
             # print(r["transcript mean"], " probability  ", r["transcript prob"])
-            transcriptmean.append([t[1] for t in transcriptionprob[-1]])
+            transcriptmean.append(math.fsum([t[1] for t in transcriptionprob[-1]]) / 30)
+
             mean = [t[1] for t in transcriptionprob[-1]]
             transcripts.append(r["transcript " + str(mean.index(max(mean)))])
-            transcrptprobabiltiy.append([i[0] for i in transcriptionprob[-1]])
+            transcrptprobabiltiy.append(
+                math.fsum([i[0] for i in transcriptionprob[-1]]) / 30
+            )
 
             print(
                 len(werpy.normalize(transcripts[-1])),
@@ -87,6 +90,7 @@ with open(TMPDIR + "/results/translation0.csv", "r", newline="") as file:
             translationEntropyvariance.append(qeLogic.variance([i[1] for i in qes]))
             translationstddiv.append(math.fsum([i[2] for i in qes]))
             translationstddivvariance.append(qeLogic.variance([i[2] for i in qes]))
+    # print(len(transcriptmean), len(transcriptmean[0]))
 
     wer = worderror(transcripts, werpy.normalize(reference_trancsript))
 
@@ -94,14 +98,13 @@ with open(TMPDIR + "/results/translation0.csv", "r", newline="") as file:
 
     refscore = refscores["scores"]
     with open(TMPDIR + "referencescores.txt", "w") as export:
-        for i in refscore:
-            export.write(str(i) + " " + str(wer[i]))
+        for i in enumerate(refscore):
+            export.write(str(i[1]) + " " + str(wer[i[0]]))
             export.write("\n")
-
     # print(wer, len(wer), len(transcriptmean))
     # print(transcriptmean)
     meanresult = pearsoncorr(transcriptmean, wer)
-    tpresult = pearsoncorr(tpscore, refscore)
+    tpresult = pearsoncorr(translationdpprob, refscore)
     softres = pearsoncorr(softmaxent, refscore)
     stdres = pearsoncorr(stddiv, refscore)
     transcriptresult = pearsoncorr(transcriptionprob, wer)
