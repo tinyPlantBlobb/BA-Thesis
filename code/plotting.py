@@ -21,7 +21,7 @@ with open(ref, "r") as reffile:
 
     x = range(len(refs))
     # print(len(x), len(refs))
-    plt.scatter(x, wers, color="yellow", label="Reference")
+    plt.scatter(x, wers, color="green", label="Reference")
     plt.savefig(base + model + "werref.png")
     plt.clf()
     plt.scatter(x, comets, color="blue", label="Comet")
@@ -48,13 +48,17 @@ if input != "ref.txt":
             )
             # x = range(len(genprop))
             plt.scatter(comets, genprop, color="red", label="Probability")
+            plt.savefig(base + model + "genprob.png")
+            plt.clf()
             plt.scatter(comets, dropprop, color="orange", label="Drop Probability")
-            plt.savefig(base + model + "prob.png")
+            plt.savefig(base + model + "dropprob.png")
             plt.clf()
             plt.scatter(comets, entropy, color="green", label="Entropy")
             plt.savefig(base + model + "entropy.png")
             plt.clf()
             plt.scatter(comets, stddiv, color="purple", label="Standard Deviation")
+            plt.savefig(base + model + "stddiv.png")
+            plt.clf()
             plt.scatter(comets, dropvar, color="black", label="Drop Variance")
             # plt.scatter(x, inps, color="gold", label="Reference")
         else:
@@ -63,4 +67,4 @@ if input != "ref.txt":
 
 plt.xlabel("dataset lines")
 plt.ylabel("probability")
-plt.savefig(base + model + "divanddropout.png")
+plt.savefig(base + model + "dropoutvarinace.png")
