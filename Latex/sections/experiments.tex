@@ -8,7 +8,7 @@
 \chapter{Experiments}
 \label{ch:experiment}
 This chapter details the dataset and the experiments that have been run on Whisper \cite{radford2022robust}, Seamless \cite{seamless2023} and DeltaLM \cite{ma2021deltalm}.
-The experiments on whisper and seamless have been made with the help of the huggingface \cite{huggingface}\todo{does this citation make sense? change into sht else?} models and frame works, where as DeltaLM has been used with the fairseq toolkit \cite{ott2019fairseqfastextensibletoolkit}.\\
+The experiments on whisper and seamless have been made with the help of the huggingface \cite{huggingface}\cite{huggingfaceseamless}\cite{huggingfacewhisper}\todo{do these citations make sense? change into sht else?} models and frame works, where as DeltaLM has been used with the fairseq toolkit \cite{ott2019fairseqfastextensibletoolkit}.\\
 For the cascaded models the transcription from the ASR model is passed into the translation model. 
 In the case of the dropout quality estimators the decision of which transcript to put into translation model has been made based on the quality estimations of those transcriptions.
 The Transcript with the highest transcription probability mean has been chosen to be the basis for the dropout of the translation. 
@@ -78,7 +78,7 @@ on DLM it's done with the help of numpy on the probabilities that have been outp
 
 \section{Dropout}\label{experiment:dropout}
 the dropout based metrics are obtained by doing 30 passes with the same input through the models. 
-Each time neurons in the model are masked to 0 by some probability, which is usually the same probability as was used in training, or set to 0.1 when no information about that was avainlabel, as both whisper and seamless are using this during training. 
+Each time neurons in the model are masked to 0 by some probability, which is usually the same probability as was used in training, or set to 0.1 when no information about that was available, as both whisper and seamless are using this during training. 
 
 \subsection{Whisper Dropout}
 for the dropout based uncertainty quantification the model transcribes the same bit of audio 30 times and for each pass the transcription probability and mean probability is computed, in each pass the model randomly masks some nodes to 0
