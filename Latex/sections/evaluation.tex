@@ -59,6 +59,7 @@ Similarly to the softmax entropy, the absolute standard deviation correlation sc
 
 \section{Dropout evaluation}
 The dropout score is calculated by taking the mean of the dropout probabilities of the model, the variance of the dropout probabilities and a combination of both, the dropout score is then Pearson correlated with the comet scores or the word error scores in the case of the transcription. 
+The reference scores are computed with the non dropout transcriptions and translations, since the dropped out sequences can differ a lot from the non-dropout sequences, which would impact the score. 
 The correlation results are listed in \ref{results} for the translation part and \ref{transcription results} for the transcription dropout. 
 %for this the dropout probabilities are calculated by running the model 30 times with the dropout layer enabled and then taking the mean and variance of the resulting probabilities. 
 The baseline for the dropout is the dropout translation, found under that name in Table \ref{results}, as can be seen the correlation between the seamless results, both the translation only and the end to end versions, is lower than the ones from DeltaLM, this is most likely due to how the dropout is implemented or used with the different toolsets/frameworks, but it could also be due to model differences. To properly distinguish between those possibilities more experiments would be needed where either dropout is enabled only on different parts of the model, so for example just the decoder, just the encoder, including attention and the like. Alternatively it might also stem from different versions of the input, into the dropout part of seamless but that would not explain the drastically lower score on the end to end version of seamless, since that takes the audio as an input. 
@@ -84,7 +85,7 @@ since several different metrics are used in the translation part of the cascaded
 
 For a unified score the baselines, which are the translation and transcription probability, are multiplied. 
 
-the resulting pearson score that can be found in \ref{results} is calculated by correlating this unified score, product of translation probability and transcription probability, with the the comet score multiplied by the by the WER mapped to be from 0 to 1 by dividing all WER scores by the worst, so highest, WER score in the dataset (alt. just setting it to 100) and subtracting it from 1. 
+The resulting pearson score that can be found in \ref{results} is calculated by correlating this unified score, product of translation probability and transcription probability, with the the comet score multiplied by the by the WER mapped to be from 0 to 1 by dividing all WER scores by the worst, so highest, WER score in the dataset (alt. just setting it to 100) and subtracting it from 1. 
 This is can be described mathematically as 
 $$reference = cometscore*(1-\frac{WER}{max(WER)})$$
 which was choosen since the transcription probability is anti-correlated to the wer and since the best score of the WER is 0 that had to be taken into account as it ruled out just flat out dividing the comet score by the WER.\\
