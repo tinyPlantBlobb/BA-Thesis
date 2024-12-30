@@ -27,25 +27,29 @@ Cascaded models have been used for a long time but end-to-end models have gained
 \subsection{Dropout}
 Dropout in the context of machine learning usually referes to the process of dropping out, so omitting, units in the neural network. 
 One variation of these dropout methods is Monte-Carlo dropout \cite{gal2016dropoutbayesianapproximationrepresenting}, in short MC dropout, which is the process of masking neurons in a Deep Neural Network randomly, based on a Bayesian probability to 0. 
-This is usually done during training to reduce the chance of the model overfitting on the trainings data and this application was first proposed by Srivastava et al. \cite{JMLR:v15:srivastava14a}. \\
+This is usually done during training to reduce the chance of the model overfitting on the trainings data and this application was first proposed by Srivastava et al. \cite{JMLR:v15:srivastava14a}. 
+
 Nowadays it is very common to use dropout in general and in particular MC dropout during training.
 Monte Carlo Dropout has also been utilized in Deep Neural Networks to measure the uncertainty of the Network.   
-- has been utilised in DNN to measure uncertainty\\
-- mainly in Deep architectures but also in Auto-encoders\\
-has been done as most NN outputs are deterministic so masking parts of the model with 0 should lead to different results with the same input as has been done in \cite{gal2016dropoutbayesianapproximationrepresenting}\\
--in ASR it has been tried here  \cite{8683086}\\
-- in ASR it mainly stems from noisy audio 
-\todo{fully formulate, add that one empty citation, potentially graphic?}
+This is mostly used in deep architectures but is also used to measure the uncertainty in Auto-encoders. \cite{gawlikowski2022surveyuncertaintydeepneural}
+Using dropout to measure the uncertainty has been done as most NN outputs are deterministic so masking parts of the model with 0 should lead to different results with the same input as has been done in \cite{gal2016dropoutbayesianapproximationrepresenting}\\
+The use of dropout to measure the models uncertainty in Automatic Speech recognition has been tried by Vyas et al. \cite{8683086} before 
+they have found that most uncertainty in ASR stems from noisy input data, especially since non-noisy data produces good transcriptions a lot of the time if the model knows all used words and names. 
+\todo{fully formulate, potentially graphic?}
 
 \subsection{Bayesian probabilities}
 probability maths where conditional probabilities are used, esp. when working with conditional probability distributions.
 \todo{explain the autoregressive manner used in these models, i.e., the probability of a generated token is based on the source sentence and the previous output prefixes.}
+
 \subsection{Softmax}
-maps a probability distribution to be between 0 and 1 by setting all values below 0 to 0 and scaleing averything that is about 0 to fall between 0 and 1 do that that sum of all the values is 1. 
+Taking the softmax of a probability distribution maps each entry in that probability distribution to be between 0 and 1 by setting all values below 0 to 0 and scaling everything that is about 0 to fall between 0 and 1 do that that sum of all the values is 1. 
 \todo{add more explainations, citations and example}
+
 \subsection{Probabilites}
-to get the probability of the model at the last layer after the input sequence  
-take the softmax values at the last layer of the model to estimate quality (normal mode) for transctiption and transltation 
+The word probability in this thesis is primarily used to describe the probability of a token or sequence from the output of a neural network.
+The probability is obtained by taking the softmax of the input representation at the last layer of the model, which is a probability distribution over the whole vocabulary of the model. 
+If the probability of a single token is looked at it is the softmax of the last layer in the model after the output token has been determined 
+values at the last layer of the model to estimate quality (normal mode) for transctiption and transltation 
 this all results in the formula $$p(y|x,\Theta)=\prod_{t=1}^T p(y_t|y_{<t}, x, \Theta) $$ where $\Theta$ is the model parameters, x is the input sequence, the softmax is used at every decoding step.
 \todo{add example? }
 
