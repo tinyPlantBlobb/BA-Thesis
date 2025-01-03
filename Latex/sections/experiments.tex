@@ -5,21 +5,34 @@
 %% Prof. Dr. Jan Niehues
 %% Lab's website https://ai4lt.anthropomatik.kit.edu/english/index.php
 
-\chapter{Experiments}
+\chapter{Experiments}\todo{move around things, put implementations specific things into appendix ig?, split up things for different models? }
 \label{ch:experiment}
 This chapter details the dataset and the experiments that have been run on Whisper \cite{radford2022robust}, Seamless \cite{seamless2023} and DeltaLM \cite{ma2021deltalm}.
-The experiments on whisper and seamless have been made with the help of the huggingface \cite{huggingface}\cite{huggingfaceseamless}\cite{huggingfacewhisper}\todo{do these citations make sense? change into sht else?} models and frame works, where as DeltaLM has been used with the fairseq toolkit \cite{ott2019fairseqfastextensibletoolkit}.\\
+The experiments on whisper and seamless have been made with the help of the huggingface \cite{huggingfaceseamless}\cite{huggingfacewhisper}\footnote{huggingface can be found here: \url{https://huggingface.co/}, the whisper model documentation here: \url{https://huggingface.co/docs/transformers/model_doc/whisper} and the Seamless M4T v2 documentation here: \url{https://huggingface.co/docs/transformers/main/model_doc/seamless_m4t_v2}}\todo{do these citations make sense? change into sht else?} models and frame works, where as DeltaLM\footnote{the code for deltaLM can be found here: \url{https://github.com/microsoft/unilm/tree/master/deltalm}} has been used with the fairseq toolkit \cite{ott2019fairseqfastextensibletoolkit}\footnote{the documentation for fairseq can be found here: \url{https://fairseq.readthedocs.io/en/v0.10.2} and the github repo is found here: \url{https://github.com/facebookresearch/fairseq}}.
+
 For the cascaded models the transcription from the ASR model is passed into the translation model. 
 In the case of the dropout quality estimators the decision of which transcript to put into translation model has been made based on the quality estimations of those transcriptions.
-The Transcript with the highest transcription probability mean has been chosen to be the basis for the dropout of the translation. 
+One option is taking the transcript with the highest transcription probability mean to be the basis for the dropout of the translation. 
 This is not the best way of obtaining the best transcription as the basis for the translations but it is a very good method if only the dropout part of the quality estimation is run. 
-The best method of obtaining a good transcript is running the transcription once without the dropout turned on, as that would result in the regular transcript that the model would output but this method is fairly likely to return such a transcription due to the way of how the dropout is used, more on that is described in section \ref{experiment:dropout}.
+An example of this can be seen in \autoref{tab:transcriptshift}.
+This is the case as there some transcriptions with dropout that have a higher score at the end than the regular transcript would have but have obvious signs of the dropout being enabled, like a lot of repeated letters.
+So taking the transcript with the highest score can propagate unwanted errors in the transcription to the translation section.
+The other and better method of obtaining a good transcript is running the transcription once without the dropout turned on, as that would result in the regular transcript that the model would output but this method is fairly likely to return such a transcription due to the way of how the dropout is used, more on that is described in \autoref{experiment:dropout}.
 Running the transcription once more without using dropout should be considered as compared to the number of runs that is done for the dropout it does not add a lot more time to the runtime of a single sequence.
-%In the case of dropout both variations of taking the non dropout transcription as input for the translation and taking the transcript with the highest quality score have been tested, and while there is a difference, especially when choosing based on the mean instead of just the probability sum, both work well. 
-%The variation with the dropout is especially useful if only the dropout part of both the transcription and translation are supposed to be run. 
-%But since adding a single translation or transcription that does not have dropout enables is not much more of a time investment when only transcribing and translating single sequences, that method is overall more likely to yield better results.
-%\todo{change text}
-%TODO move stuff to the right places
+\begin{table}[ht]
+    \centering
+    \begin{tabularx}{\textwidth}{l|X}
+         qe& transcript \\\hline
+         -0.30165& Because that's it. \\
+         -0.12921& Because that's it.\\\hline
+         -0.33879& No, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no,, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no,, no,, no, no, no,, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no,. no, no, no, no, no, no, no, no, no, no\\
+         -0.094421 &Not a model, not a replica.\\
+         -0.644232&  Not a model, not a replica.
+    \end{tabularx}
+    \caption{example of differing transcript results, the top is an example where the transcript with dropout (first line) that has the highest quality estimation score is the same as the transcript without dropout. compared to an example where the transcription withe highest score is vastly different from the non dropout transcription, 2. to last line. The last line is a different result from the dropout runs that is essentially the non dropout result. The left column is the corresponding quality score, the quality score shows is the transcription mean}
+    \label{tab:transcriptshift}
+\end{table}
+
 \include{Latex/sections/Dataset}
 
 
@@ -28,7 +41,7 @@ Since all models that are worked with are Encoder-decoder-models that use the tr
 
 \subsection{Transcription Probability}
 the Transcription Probability is calculated in a similar manner as the translation probability, which results in the formula $$-\frac{1}{T}\sum_{t=1}^T log p(y_t)$$ where T is the number of decoding steps and p is the probability.
-Since only the token with the highest probability is looked at those proabbilities are always bigger than 0 so there are no potential issues with 0 values. (as if the probabilities of all regualr tokens is 0 the end of section token would have a non 0 probability)
+Since only the token with the highest probability is looked at those probabilities are always bigger than 0 so there are no potential issues with 0 values. (as if the probabilities of all regular tokens is 0 the end of section token would have a non 0 probability)
 
 The Transcription step is only done on the Whisper model.
 Whisper \cite{radford2022robust} is a multitask and multilanguage model for Automatic speech recognition as well as speech translation. 
@@ -39,19 +52,19 @@ To retrieve the final transcription probability the huggingface model returns a 
 Those values are then processed so that the sum of the highest probabilities is taken and then normalised by the number of decoding steps that were done, this gives the transcription probability mean. For reference the pure probability sum was also collected and returned during the experiments. 
 THere is a small difference in the resulting QE scores between the two versions but that is more noticable in the dropout version of the transcription probabilty 
 
-\subsection{Translation Probability}
-The translation probability is calculated by the formula \ref{formula:translation probability} this is, as mentioned in \ref{ch:models}, the case because the Seamless and DeltaLM model are models that make use of Transformers. 
+\subsection{Translation Probability}\label{sect:translationprob}
+The translation probability is calculated by the formula \autoref{formula:translation probability} this is, as mentioned in \autoref{ch:models}, the case because the Seamless and DeltaLM model are models that make use of Transformers. 
 
 \todo{maybe remove subsections?}
 \subsection{Seamless Translation Probability}
-The translation probability follows the general translation probability formula \ref{formula:translation probability}. To get the probability of the top token at each decoding step the functionality from huggingface is used, which is able to return the log-probabilities and scores, so the processed log-proabbilites, of all vocabulary entries. 
+The translation probability follows the general translation probability formula \autoref{formula:translation probability}. To get the probability of the top token at each decoding step the functionality from huggingface is used, which is able to return the log-probabilities and scores, so the processed log-proabbilites, of all vocabulary entries. 
 Then to get the final probability of the sequence the top token of each decoding step and it's probability is picked and the then summed up and divided by the number of decoding steps that are in the sequence.
 The translation probability on seamless is, just like the transcription probability on Whisper, retrieved with the help of the pytorch and the seamless large model on huggingface. 
 there are a couple of difference model sizes of seamless that are provided by meta, the one that was used to run the experiments is the seamless M4T v2 large model that is available on huggingface. 
 
 \subsection{DeltaLM translation probability}
 the experiments \cite{ma2021deltalm} were done on a finetuned large version of it that was finetuned using the training data from the IWSLT 2023 constrained category, for this only the english german part was used.
-\\
+
 the Text was preprocessed with the pretrained senctencepiece model and dictionary that has been provided on the DeltaLM github page \cite{deltalmurl} after that it is preprocessed with faireq preprocess. the result of this is then put into fairseq generate with batch size and beam size 1 for the softmax entropy 
  dthe running of the experiments was done with the help of the fairseq toolkit \cite{ott2019fairseqfastextensibletoolkit} which gives the probability of the specific translation along with the translation hypothesis and prints the softmax probabilities after each decoding step. by default these probabilites are in the base 2 logarithm. 
 
@@ -69,9 +82,13 @@ In both cases the batch and beam size are set to 1 as otherwise the resulting te
 
 %softmax entropy from the transcription part? maybe in the future 
 \section{Standard Deviation}
-the standard deviation is calculated over the top token probability at each decoding step.\\
-on seamless it's done on the translation prob retrieved with hugginface with the help of pytorch and numpy implementations of the standard deviation.
-on DLM it's done with the help of numpy on the probabilities that have been output by fairseq. 
+The standard deviation is calculated over the top token probability at each decoding step. 
+Those probabilities are the same ones that are retrieved in the translation probability part \autoref{sect:translationprob}.
+On seamless this is done on the translation probability retrieved from the hugginface implementation with the help of pytorch. 
+On those results the numpy implementations of the standard deviation\cite{numpystddiv} was then used to retrieve the score.
+On DLM it's done with the help of the numpy implementation on the probabilities that have been output by fairseq. 
+The numpy implementation of the standard deviation takes an array like data structure and if it is not given, calculates the mean of the values in the array and then with that the deviation of the values from the mean. 
+The standard deviation used in numpy is defined as $$\sqrt{\frac{\sum_i |a_i-\overline{a}|}{N}}$$ where $\overline{a}$ is the mean and $a_i$ is the i-th element in the array.
 \todo{explain implementation, formula how the results are gotten that are put in}
 %->which doesn't quite match the word probabilities but is close enough 
 
