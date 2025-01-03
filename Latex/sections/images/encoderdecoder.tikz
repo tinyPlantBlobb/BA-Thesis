@@ -1,0 +1,21 @@
+\tikzstyle{block} = [rectangle, draw, text centered, fill=blue!20]
+\tikzstyle{arrow} = [thick,->,>=stealth]
+\begin{tikzpicture}
+    % Nodes
+    \node(input)  {Input sequence};
+    \node(encoder) [rectangle, draw, fill=blue!20, right=1cm of input] {Encoder};
+    \node(bottleneck) [block, below of=encoder, fill=red!20] {Representation};
+    \node(decoder) [block, below of=bottleneck] {Decoder};
+    \node (output) [right=1cm of decoder] {Output sequence};
+
+    % Arrows
+    \draw [arrow](input)--(encoder);
+    \draw [arrow] (encoder) --(bottleneck);
+    \draw [arrow] (bottleneck) -- (decoder);
+    \draw [arrow] (decoder) -- (output);
+
+    % Labels
+    %\node[below of=encoder] {Encoding Process};
+    %\node[below of=bottleneck] {Bottleneck};
+    %\node[below of=decoder] {Decoding Process};
+\end{tikzpicture}

@@ -1,7 +1,7 @@
 
-\chapter{Methodology}
+\chapter{Methodology}\todo{move around to have section with fomicheva proposed methods, and my own proposed methods, like how to apply the fomicheva methods to ASR, how to combine them etc.}
 \label{ch:methods}
-This chapter goes more in depth on how the Quality estimation scores are derived from data retrieved from the models in general, whereas chapter \ref{ch:experiment} goes more in depth on how it was done for the specific models and some of the potential errors that were made in the experiments.
+This chapter goes more in depth on how the Quality estimation scores are derived from data retrieved from the models in general, whereas chapter \autoref{ch:experiment} goes more in depth on how it was done for the specific models and some of the potential errors that were made in the experiments.
 %\todo{how to derive the QE scores from the approaches like log probability or dropout,... }
 %\todo{all in a more mathematical sense -> maybe move stuff from background here}
 
@@ -23,7 +23,7 @@ This probability can be mathematically described in the formula $$p(y|x,\Theta)=
 \todo {add reference?, check with bayes in background}
 
 \subsection{Translation probability}
-The translation probability is the probability a Machine translation model out puts the sequence $y = y_1, y_2 \dots y_n$ for the input $x=x_1, x_2 \dots x_n$. The probability is calculated by Formula \ref{formula:translation Probability} where the probability of generating the sequence y is defined as $$ p(y)=p(y|x,\Theta)=\prod_{t=1}^T p(y_t|y_{<t}, x, \Theta)$$ where $\Theta$ is the model parameters.
+The translation probability is the probability a Machine translation model out puts the sequence $y = y_1, y_2 \dots y_n$ for the input $x=x_1, x_2 \dots x_n$. The probability is calculated by Formula \autoref{formula:translation Probability} where the probability of generating the sequence y is defined as $$ p(y)=p(y|x,\Theta)=\prod_{t=1}^T p(y_t|y_{<t}, x, \Theta)$$ where $\Theta$ is the model parameters.
 The probability $p(y_t|y_{<t}, x,\Theta)$ is the probability distribution after the decoding step of the t-th decoding step after applying the softmax.
 The $\frac{1}{T}$ is there to normalise the translation probability over the length of the translation sequence T as to minimize the effect of longer sequences getting a higher score when they shouldn't. 
 \todo{add reference? check with bayes}
@@ -31,8 +31,9 @@ The $\frac{1}{T}$ is there to normalise the translation probability over the len
 
 \subsection{Softmax Entropy}\label{sect:entropy}
 The Softmax entropy is the entropy of each element in the vocabulary at decoding step, this is a way to measure the uncertainty in the vocabulary at each decoding step.
-To compute the entropy \ref{entropy} for each element, and then sum all entropies in the Vocabulary together, this results in the entropy of the decoding step. 
-Then the sum of the entropy of all decoding steps is taken and normalised over the sequence length. \\
+To compute the entropy \autoref{entropy} for each element, and then sum all entropies in the Vocabulary together, this results in the entropy of the decoding step. 
+Then the sum of the entropy of all decoding steps is taken and normalised over the sequence length. 
+
 This results in the Formula:
 $$\text{Softmax-Entropy}=-\frac{1}{T}\sum_{t=1}^T\sum_{v=1}^V p(y_t^v)log\; p(y_t^v) \label{formula:translation entropy}$$ where V is the Vocabulary size and T is he length of the generated sequence. The minus comes from the entropy and is only moved in front of the sums for ease of computation.
 Due to how entropy works a lower value, so one closer to 0, in the score is better since then the information that the vocabulary contains less entropy when there is less uncertainty. so if there are less entries in the vocabulary that have similar probabilities during a single decoding step then the entropy of that decoding step will be lower.
@@ -53,7 +54,7 @@ The dropout measures are used on the transcription and translation part of the c
 
 \subsection{General Probability}
 \label{dropoutprob}
-The dropout probability is the mean of the regular probabilities, as done in \ref{transcription results}. 
+The dropout probability is the mean of the regular probabilities, as done in \autoref{transcription results}. 
 For this the method described above is run on the model with dropout several times and get the Probability scores for each run. 
 This results in the formula:
 $$\text{D-TP}=\frac{1}{N}\sum_{n=1}^N TP_{\hat\theta n}\label{formula:dropoutprobability}$$
@@ -65,13 +66,13 @@ The dropout variance is the variance of the different probabilities gathered dur
 Mathematically this can be described as:
 % measures the uncertainty of the N runs 
 $$\text{D-Var}=E[TP_{\hat\theta}^2]-(E[TP_{\hat\theta}])^2\label{formula:dropoutvariance}$$
-Where $TP_{\hat\theta}$ is the probability \ref{formula:translation Probability} of the runs. 
+Where $TP_{\hat\theta}$ is the probability \autoref{formula:translation Probability} of the runs. 
 If the Dropout Variance is high then the model is uncertain about the resulting sequence, and if the variance is closer to 0 it is quite certain about the sequence.
 So a low variance is to be considered better than a high score.
 
 \subsection{Combo}
 As the variance does not take into account the probability of the sequence, a combination of the dropout Probability and dropout variance is proposed by Fomicheva et al \cite{fomicheva2020unsupervised}. 
-The combination of the results from the probability and the variance is done by calculating $$D-Combo=(1-\frac{D-TP}{D-Var})\label{formula:Dropoutcombo}$$, where $D-TP$ and $D-Var$ are the Translation probability mean (\ref{dropoutprob}) and the Dropout variance (\ref{dropoutvar}).
+The combination of the results from the probability and the variance is done by calculating $$D-Combo=(1-\frac{D-TP}{D-Var})\label{formula:Dropoutcombo}$$, where $D-TP$ and $D-Var$ are the Translation probability mean (\autoref{dropoutprob}) and the Dropout variance (\autoref{dropoutvar}).
 
 
 
