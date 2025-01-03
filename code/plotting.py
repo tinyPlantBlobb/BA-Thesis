@@ -45,26 +45,30 @@ if input != "ref.txt":
                 len(stddiv),
                 len(dropprop),
                 len(dropvar),
+                len(comets),
+                len(wers),
             )
             # x = range(len(genprop))
-            plt.scatter(comets, genprop, color="red", label="Probability")
+            plt.xlabel("reference value")
+            plt.scatter(comets, genprop, color="red", ylabel="Probability")
+
             plt.savefig(base + model + "genprob.png")
             plt.clf()
-            plt.scatter(comets, dropprop, color="orange", label="Drop Probability")
+            plt.scatter(comets, dropprop, color="orange", ylabel="Dropout Probability")
             plt.savefig(base + model + "dropprob.png")
             plt.clf()
-            plt.scatter(comets, entropy, color="green", label="Entropy")
+            plt.scatter(comets, entropy, color="green", ylabel="Entropy")
             plt.savefig(base + model + "entropy.png")
             plt.clf()
-            plt.scatter(comets, stddiv, color="purple", label="Standard Deviation")
+            plt.scatter(comets, stddiv, color="purple", ylabel="Standard Deviation")
             plt.savefig(base + model + "stddiv.png")
             plt.clf()
-            plt.scatter(comets, dropvar, color="black", label="Drop Variance")
+            plt.scatter(comets, dropvar, color="black", ylabel="Dropout Variance")
             # plt.scatter(x, inps, color="gold", label="Reference")
         else:
             inps = list(map(float, inpfile.readlines()))
             plt.scatter(x, inps, color="blue", label="Reference")
 
 plt.xlabel("dataset lines")
-plt.ylabel("probability")
+plt.ylabel("dropout variance")
 plt.savefig(base + model + "dropoutvarinace.png")

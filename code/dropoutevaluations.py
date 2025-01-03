@@ -22,13 +22,18 @@ row.extend(["transcript " + str(i) for i in range(0, 30)])
 row.extend(["translation probability" + str(i) for i in range(0, 30)])
 translationindex = ["translation probability" + str(i) for i in range(0, 30)]
 row.extend(["translation " + str(i) for i in range(0, 30)])
+transcripts = []
+with open("results/test.en", "r") as file:
+    for line in file:
+        transcripts.append(line.strip())
+
+
 with open(TMPDIR + "/results/translation0.csv", "r", newline="") as file:
     reader = csv.DictReader(
         file,
         dialect="excel",
         fieldnames=row,
     )
-    transcripts = []
     translation = []
     reference_translation = []
     reference_trancsript = []
@@ -68,15 +73,12 @@ with open(TMPDIR + "/results/translation0.csv", "r", newline="") as file:
             transcriptmean.append(math.fsum([t[1] for t in transcriptionprob[-1]]) / 30)
 
             mean = [t[1] for t in transcriptionprob[-1]]
-            transcripts.append(r["transcript " + str(mean.index(max(mean)))])
+            # transcripts.append(r["transcript " + str(mean.index(min(mean)))])
             transcrptprobabiltiy.append(
                 math.fsum([i[0] for i in transcriptionprob[-1]]) / 30
             )
 
-            print(
-                len(werpy.normalize(transcripts[-1])),
-                len(werpy.normalize(r["reference transcript"])),
-            )
+            # print(len(werpy.normalize(transcripts[-1])),len(werpy.normalize(r["reference transcript"])),)
 
             qes = [
                 list(map(float, r[i].strip("([])").split(",")))
@@ -91,11 +93,12 @@ with open(TMPDIR + "/results/translation0.csv", "r", newline="") as file:
             translationstddiv.append(math.fsum([i[2] for i in qes]))
             translationstddivvariance.append(qeLogic.variance([i[2] for i in qes]))
     # print(len(transcriptmean), len(transcriptmean[0]))
+    print(len(transcripts))
+    wer = worderror(werpy.normalize(transcripts), werpy.normalize(reference_trancsript))
 
-    wer = worderror(transcripts, werpy.normalize(reference_trancsript))
-
+    print(wer)
     refscores = cometscore(reference_translation, translation, reference_translation)
-
+    # refscore = [0.5 for i in range(0, len(wer))]
     refscore = refscores["scores"]
     with open(TMPDIR + "referencescores.txt", "w") as export:
         for i in enumerate(refscore):
@@ -105,10 +108,21 @@ with open(TMPDIR + "/results/translation0.csv", "r", newline="") as file:
     # print(transcriptmean)
     meanresult = pearsoncorr(transcriptmean, wer)
     tpresult = pearsoncorr(translationdpprob, refscore)
-    softres = pearsoncorr(softmaxent, refscore)
-    stdres = pearsoncorr(stddiv, refscore)
-    transcriptresult = pearsoncorr(transcriptionprob, wer)
-
+    softres = pearsoncorr(translationEntropy, refscore)
+    stdres = pearsoncorr(translationstddiv, refscore)
+    transcriptresult = pearsoncorr(transcrptprobabiltiy, wer)
+    with open("transcriptresult.txt", "w") as export:
+        for i in enumerate(transcrptprobabiltiy):
+            export.write(
+                transcripts[i[0]]
+                + " "
+                + str(i[1])
+                + " "
+                + str(transcriptmean[i[0]])
+                + " "
+                + str(wer[i[0]])
+            )
+            export.write("\n")
     print(transcriptresult, tpresult, softres, stdres)
     with open(TMPDIR + "/results/scores.txt", "w") as resfile:
         # resfile.write("reference scores\n")
