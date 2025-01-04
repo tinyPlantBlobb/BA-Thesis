@@ -218,11 +218,21 @@ if input != "ref.txt":
 with open("results/seamlessuniscores.txt", "r") as uniscore:
     lines = uniscore.readlines()
     refs = list(
-        map(lambda x: (float(x.split("\t")[0]), float(x.split("\t")[1])), lines)
+        map(
+            lambda x: (
+                float(x.split("\t")[0]),
+                float(x.split("\t")[1]),
+                float(x.split("\t")[2]),
+            ),
+            lines,
+        )
     )
     alpha = [i[0] / 100 for i in refs]
     pearsoncorr = [i[1] for i in refs]
-    plt.plot(alpha, pearsoncorr, color="blue", label="correlation of different alphas")
+    pearsoncorr2 = [i[2] for i in refs]
+    plt.plot(alpha, pearsoncorr, color="blue", label="transcription probability")
+    plt.plot(alpha, pearsoncorr2, color="red", label="transcript probability mean")
+
     plt.xlabel("alpha")
     plt.ylabel("pearson correlation")
     plt.savefig(base + "seamlessuniscoredistribution.png")
@@ -231,11 +241,20 @@ with open("results/seamlessuniscores.txt", "r") as uniscore:
 with open("results/dlmuniscores.txt", "r") as dlmuniscore:
     lines = dlmuniscore.readlines()
     refs = list(
-        map(lambda x: (float(x.split("\t")[0]), float(x.split("\t")[1])), lines)
+        map(
+            lambda x: (
+                float(x.split("\t")[0]),
+                float(x.split("\t")[1]),
+                float(x.split("\t")[2]),
+            ),
+            lines,
+        )
     )
     alpha = [i[0] / 100 for i in refs]
     pearsoncorr = [i[1] for i in refs]
-    plt.plot(alpha, pearsoncorr, color="blue", label="correlation of different alphas")
+    pearsoncorr2 = [i[2] for i in refs]
+    plt.plot(alpha, pearsoncorr, color="blue", label="transcription probability")
+    plt.plot(alpha, pearsoncorr2, color="red", label="transcript probability mean")
     plt.xlabel("alpha")
     plt.ylabel("pearson correlation")
     plt.savefig(base + "dlmuniscoredistribution.png")
