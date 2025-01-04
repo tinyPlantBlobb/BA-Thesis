@@ -10,13 +10,17 @@ args.add_argument("--model", type=str, default="out")
 ref = args.parse_args().ref
 input = args.parse_args().inp
 splitting = args.parse_args().split
-model = args.parse_args().modq2el
+model = args.parse_args().model
 with open("results/seamlessallscores.txt", "r") as reffile:
     lines = reffile.readlines()
-    refs = list(
-        map(lambda x: (float(x.split("\t")[0]), float(x.split("\t")[1])), lines)
-    )
-    uniscor = [i[-5] for i in refs]
+    refs = [
+        [float(j.strip("qwertzuiopasdfghjklyxcvbn() ")) for j in i.split("\t")]
+        for i in lines
+    ]
+    # refs = list(map(lambda x: list(map(lambda: float(y), x.split("\t"))) , lines))
+    model = "seamless"
+
+    uniscore = [i[-5] for i in refs]
     uniscore2 = [i[-4] for i in refs]
     wers = [i[-3] for i in refs]
     comets = [i[-2] for i in refs]
@@ -36,9 +40,105 @@ with open("results/seamlessallscores.txt", "r") as reffile:
     dropouttranslationvar = [i[12] for i in refs]
     dropouttranslationcombo = [i[13] for i in refs]
 
+    plt.scatter(comets, translationprob, color="blue", label="Probability")
+    plt.ylabel("translation Probability")
+    plt.xlabel("reference score")
+    plt.savefig(base + model + "genprob.png")
+    plt.clf()
+
+    plt.scatter(comets, softmaxprob, color="blue", label="Entropy")
+    plt.ylabel("softmax entropy")
+    plt.xlabel("reference score")
+    plt.savefig(base + model + "entropy.png")
+    plt.clf()
+
+    plt.scatter(comets, stddiv, color="blue", label="Standard Deviation")
+    plt.ylabel("softmax standard deviation")
+    plt.xlabel("reference score")
+    plt.savefig(base + model + "stddiv.png")
+    plt.clf()
+
+    plt.scatter(comets, dropouttranslation, color="blue", label="Dropout Probability")
+    plt.ylabel("dropout translation Probability")
+    plt.xlabel("reference score")
+    plt.savefig(base + model + "dropprob.png")
+    plt.clf()
+
+    plt.scatter(comets, dropouttranslationvar, color="blue", label="Dropout Variance")
+    plt.ylabel("dropout variance")
+    plt.xlabel("reference score")
+    plt.savefig(base + model + "dropoutvariance.png")
+    plt.clf()
+
+    plt.scatter(comets, dropouttranslationcombo, color="blue", label="Dropout Combo")
+    plt.ylabel("dropout combo")
+    plt.xlabel("reference score")
+    plt.savefig(base + model + "dropoutcombo.png")
+    plt.clf()
+
+    plt.scatter(wers, dropouttranscript, color="blue", label="Dropout Combo")
+    plt.ylabel("dropout transcript Probability")
+    plt.xlabel("reference score")
+    plt.savefig(base + model + "dropouttranscript.png")
+    plt.clf()
+
+    plt.scatter(wers, dropouttranscriptvar, color="blue", label="Dropout Combo")
+    plt.ylabel("dropout transcript variance")
+    plt.xlabel("reference score")
+    plt.savefig(base + model + "dropouttranscriptvar.png")
+    plt.clf()
+
+    plt.scatter(wers, dropouttranscriptcombo, color="blue", label="Dropout Combo")
+    plt.ylabel("dropout transcript combo")
+    plt.xlabel("reference score")
+    plt.savefig(base + model + "dropouttranscriptcombo.png")
+    plt.clf()
+
+    plt.scatter(
+        wers, dropouttranscriptmean, color="blue", label="Dropout transcript mean"
+    )
+    plt.ylabel("dropout transcript mean")
+    plt.xlabel("reference score")
+    plt.savefig(base + model + "dropouttranscriptmean.png")
+    plt.clf()
+
+    plt.scatter(
+        wers,
+        dropouttranscriptmeanvar,
+        color="blue",
+        label="Dropout transcript mean variance",
+    )
+    plt.ylabel("dropout transcript mean variance")
+    plt.xlabel("reference score")
+    plt.savefig(base + model + "dropouttranscriptmeanvar.png")
+    plt.clf()
+
+    plt.scatter(
+        wers,
+        dropouttranscriptmeancombo,
+        color="blue",
+        label="Dropout transcript mean combo",
+    )
+    plt.ylabel("dropout transcript mean combo")
+    plt.xlabel("reference score")
+    plt.savefig(base + model + "dropouttranscriptmeancombo.png")
+    plt.clf()
+
+    plt.scatter(uniref, uniscore, color="blue", label="Uniscore")
+    plt.ylabel("uniscore")
+    plt.xlabel("reference score")
+    plt.savefig(base + model + "uniscore.png")
+    plt.clf()
+
+    plt.scatter(uniref, uniscore2, color="blue", label="Uniscore2")
+    plt.ylabel("uniscore with mean")
+    plt.xlabel("reference score")
+    plt.savefig(base + model + "uniscore2.png")
+    plt.clf()
+
     x = range(len(refs))
     # print(len(x), len(refs))
-    plt.scatter(x, wers, color="green", label="Reference")
+    plt.scatter(x, wers, color="blue", label="Reference")
     plt.savefig(base + model + "werref.png")
     plt.clf()
     plt.scatter(x, comets, color="blue", label="Comet")
@@ -47,51 +147,96 @@ with open("results/seamlessallscores.txt", "r") as reffile:
 if input != "ref.txt":
     with open("results/dlmallscores.txt", "r") as inpfile:
         if splitting:
+            model = "dlm"
             lines = inpfile.readlines()
             cases = [l.split(",") for l in lines]
-            inps = [list(map(float, i)) for i in cases]
-            genprop = [i[0] for i in inps]
-            entropy = [i[1] for i in inps]
-            stddiv = [i[2] for i in inps]
-            dropprop = [i[3] for i in inps]
-            dropvar = [i[4] for i in inps]
-            dropoutcombo = [i[5] for i in inps]
-            uniscor = [i[6] for i in inps]
-            uniscore2 = [i[7] for i in inps]
+            inps = [[float(j) for j in i.split("\t")] for i in lines]
             wers = [i[-3] for i in inps]
             comets = [i[-2] for i in inps]
             uniref = [i[-1] for i in inps]
-            print(
-                len(x),
-                len(genprop),
-                len(entropy),
-                len(stddiv),
-                len(dropprop),
-                len(dropvar),
-                len(comets),
-                len(wers),
-            )
-            # x = range(len(genprop))
-            plt.xlabel("reference value")
-            plt.scatter(comets, genprop, color="red", ylabel="Probability")
 
+            genprop = [i[0] for i in inps]
+            plt.scatter(comets, genprop, color="blue", label="Probability")
+            plt.ylabel("translation Probability")
+            plt.xlabel("reference score")
             plt.savefig(base + model + "genprob.png")
             plt.clf()
-            plt.scatter(comets, dropprop, color="orange", ylabel="Dropout Probability")
-            plt.savefig(base + model + "dropprob.png")
-            plt.clf()
-            plt.scatter(comets, entropy, color="green", ylabel="Entropy")
+
+            entropy = [i[1] for i in inps]
+            plt.scatter(comets, entropy, color="blue", label="Entropy")
+            plt.ylabel("softmax entropy")
+            plt.xlabel("reference score")
             plt.savefig(base + model + "entropy.png")
             plt.clf()
-            plt.scatter(comets, stddiv, color="purple", ylabel="Standard Deviation")
+
+            stddiv = [i[2] for i in inps]
+            plt.scatter(comets, stddiv, color="blue", label="Standard Deviation")
+            plt.ylabel("softmax standard deviation")
+            plt.xlabel("reference score")
             plt.savefig(base + model + "stddiv.png")
             plt.clf()
-            plt.scatter(comets, dropvar, color="black", ylabel="Dropout Variance")
+
+            dropprop = [i[3] for i in inps]
+            plt.scatter(comets, dropprop, color="blue", label="Dropout Probability")
+            plt.ylabel("dropout translation Probability")
+            plt.xlabel("reference score")
+            plt.savefig(base + model + "dropprob.png")
+            plt.clf()
+
+            dropvar = [i[4] for i in inps]
+            plt.scatter(comets, dropvar, color="blue", label="Dropout Variance")
+            plt.ylabel("dropout variance")
+            plt.xlabel("reference score")
+            plt.savefig(base + model + "dropoutvariance.png")
+            plt.clf()
+
+            dropoutcombo = [i[5] for i in inps]
+            plt.scatter(comets, dropoutcombo, color="blue", label="Dropout Combo")
+            plt.ylabel("dropout combo")
+            plt.xlabel("reference score")
+            plt.savefig(base + model + "dropoutcombo.png")
+            plt.clf()
+            uniscor = [i[6] for i in inps]
+            plt.scatter(uniref, uniscor, color="blue", label="Uniscore")
+            plt.ylabel("uniscore")
+            plt.xlabel("reference score")
+            plt.savefig(base + model + "uniscore.png")
+            plt.clf()
+
+            uniscore2 = [i[7] for i in inps]
+            plt.scatter(uniref, uniscore2, color="blue", label="Uniscore2")
+            plt.ylabel("uniscore with mean")
+            plt.xlabel("reference score")
+            plt.savefig(base + model + "uniscore2.png")
+            plt.clf()
             # plt.scatter(x, inps, color="gold", label="Reference")
         else:
             inps = list(map(float, inpfile.readlines()))
             plt.scatter(x, inps, color="blue", label="Reference")
 
-plt.xlabel("dataset lines")
-plt.ylabel("dropout variance")
-plt.savefig(base + model + "dropoutvarinace.png")
+
+with open("results/seamlessuniscores.txt", "r") as uniscore:
+    lines = uniscore.readlines()
+    refs = list(
+        map(lambda x: (float(x.split("\t")[0]), float(x.split("\t")[1])), lines)
+    )
+    alpha = [i[0] / 100 for i in refs]
+    pearsoncorr = [i[1] for i in refs]
+    plt.plot(alpha, pearsoncorr, color="blue", label="correlation of different alphas")
+    plt.xlabel("alpha")
+    plt.ylabel("pearson correlation")
+    plt.savefig(base + "seamlessuniscoredistribution.png")
+    plt.clf()
+
+with open("results/dlmuniscores.txt", "r") as dlmuniscore:
+    lines = dlmuniscore.readlines()
+    refs = list(
+        map(lambda x: (float(x.split("\t")[0]), float(x.split("\t")[1])), lines)
+    )
+    alpha = [i[0] / 100 for i in refs]
+    pearsoncorr = [i[1] for i in refs]
+    plt.plot(alpha, pearsoncorr, color="blue", label="correlation of different alphas")
+    plt.xlabel("alpha")
+    plt.ylabel("pearson correlation")
+    plt.savefig(base + "dlmuniscoredistribution.png")
+    plt.clf()
