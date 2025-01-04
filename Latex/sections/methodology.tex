@@ -83,6 +83,6 @@ For this the translation probability and transcription probability are multiplie
 
 $$\text{unified score}= TP_{transcript}\cdot TP_{translation}$$
 
-alternative options for a unified score are weighing the translation and transcription probabilities differently, which results in the formula $$unifiedscore_\alpha= \alpha TP_{transcript} \cdot (1-\alpha)TP_{translation}$$. 
+alternative options for a unified score are weighing the translation and transcription probabilities differently, which results in the formula $$unifiedscore_\alpha= (1-\alpha) TP_{transcript} \cdot (\alpha)TP_{translation}$$. 
 This was previously proposed in by Le et al. \cite{le2016automatic}, but in that case the quality estimation is done with classification onto good or bad translations and not scores.
 
