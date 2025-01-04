@@ -15,24 +15,34 @@ The resulting scores are then pearson correlated \cite{2020SciPy-NMeth} to comet
 %% | Example content |
 %% -------------------
 
-
 \section{Transcription evaluation}
 To evaluate how good the transcription quality estimation is the Word error rate\footnote{the used WER implementation can be found here: https://github.com/analyticsinmotion/werpy} \autoref{wer}, is used as reference score to compare the transcription quality estimation metric by correlating the WER scores with the help of the pearsoncorrelation \cite{2020SciPy-NMeth}
 As WER is case sensitive, both the model result and the reference are normalised to be all lowercase, with single spaces, no leading or trailing blank spaces and no punctuation.
-the resulting transcription probabilities plotted over the according WER values is shown in \autoref{fig:transcript scatter plot} and the pearsoncorrelation can be found in \autoref{transcription results}
-\todo{add (scatter)plot with model and reference prob plotted, expand}
-\begin{figure}
+The resulting transcription probabilities plotted over the according WER values is shown in \autoref{fig:transcript scatter plot} and the pearson correlation can be found in \autoref{transcription results}. 
+The plots in \autoref{fig:transcript scatter plot} demonstrate quite nicely the impact that normalizing the scores with the sequence length has, since \autoref{fig:transcript scatter plot base} shows less of a trend with the high model scores and low WER scores than \autoref{fig:transcript mean scatter plot}, which shows a better trend. This also overlaps with the pearson correlation score. 
+\todo{expand?}
+\begin{figure}[h]
     \centering%
-    \includegraphics[width=0.5\linewidth]{Latex/sections/images/werref.png}
-    \caption{plot over the transctiption proabilites, the transcription means and the WER scores}
+    \begin{subfigure}{0.45\linewidth}
+        \includegraphics[width=\textwidth]{Latex/sections/images/transcriptbasescore.png}
+        \caption{transcript scores over WER reference score}
+        \label{fig:transcript scatter plot base}
+    \end{subfigure}
+    \begin{subfigure}{0.45\linewidth}
+        \includegraphics[width=\textwidth]{Latex/sections/images/transcriptmeanbasescore.png}
+        \caption{transcript mean over WER reference score}
+        \label{fig:transcript mean scatter plot}
+    \end{subfigure}
+    \caption{plot over the transcription probabilites, the transcription means and the WER scores}
     \label{fig:transcript scatter plot}
 \end{figure}
 
 \section{Translation evaluation}
 For the evaluation of the translation scores the reference score is genereated with the help of comet \cite{rei-etal-2020-comet}. This way of generating the reference score means that a score close to 1 is a good translation and a score close to 0 is a bad translation that is no better than random chance.
 those reference scores are then also pearson correlated with the scores from the model. The correlated scores of the different models are found in the Translation part of \autoref{results}. 
-As can be seen in \autoref{results} the scores retrieved from the model correlate well on the cascaded models and really well on the end to end model. The drop on the DelataLM model scores could be because of model differences or due to the different score retrieval method, for this more experiments would have to be run with different models. The end-to-end scores are that much higher since there are no potential errors from the transcription part but it could also be that the model simply translates a lot better when using the seamless for spoken language translation. 
-\todo{add plots}
+As can be seen in \autoref{results} the scores retrieved from the model correlate well on the cascaded models and really well on the end to end model. The drop on the DelataLM model scores could be because of model differences or due to the different score retrieval method, for this more experiments would have to be run with different models and the different toolkits. 
+The end-to-end scores are that much higher since there are no potential errors from the transcription part but it could also be that the model simply translates a lot better when using the seamless for spoken language translation. 
+\todo{add plots for end to end?}
 
 \begin{figure}[ht]
     \centering%
@@ -45,45 +55,56 @@ As can be seen in \autoref{results} the scores retrieved from the model correlat
         \caption{spread of the translation probability scores on deltalm over the reference scores}
     \end{subfigure}
     \begin{subfigure}{0.4\linewidth}
-        \includegraphics[width=\textwidth]{Latex/sections/images/seamlessstddiv.png}
-    \end{subfigure}
-    \begin{subfigure}{0.4\linewidth}
-        \includegraphics[width=\textwidth]{Latex/sections/images/dlmstddiv.png}
-    \end{subfigure}
-    \begin{subfigure}{0.4\linewidth}
         \includegraphics[width=\textwidth]{Latex/sections/images/seamlessentropy.png}
+        \caption{seamless entropy scores over comet scores}
     \end{subfigure}
     \begin{subfigure}{0.4\linewidth}
         \includegraphics[width=\textwidth]{Latex/sections/images/dlmentropy.png}
+        \caption{deltalm entropy scores over comet scores}
     \end{subfigure}
-    \caption{Plot over the translation probabilities and the reference scores}
+    \begin{subfigure}{0.4\linewidth}
+        \includegraphics[width=\textwidth]{Latex/sections/images/seamlessstddiv.png}
+        \caption{seamless standard deviation scores over comet scores}
+    \end{subfigure}
+    \begin{subfigure}{0.4\linewidth}
+        \includegraphics[width=\textwidth]{Latex/sections/images/dlmstddiv.png}
+        \caption{deltaLM standard devation scores over comet scores}
+    \end{subfigure}
+    \caption{Model scores, which are the translation, softmax entropy and standard deviation scores over the corresponding comet scores. The left side shows the seamless scores, the right side shows the deltaLM scores}
     \label{fig:translationeval scatter plot}
 \end{figure}
 
-\todo{add (scatter)plot, expand, compare results from seamless to dlm and the end to end scores add comparison with meteor}
 The entropy scores anti-correlate with the reference scores, this is logical since the higher the entropy is the worse the translation. 
-When looking at the absolute value of the correlation, so ignoring the sign, it can be seen that they correlate less with the references than the translation scores but they still correlate well with it. \todo{more, add more judgement, why do the scores work yada yada yada, add end to end in there} 
+When looking at the absolute value of the correlation, so ignoring the sign, it can be seen that they correlate less with the references than the translation scores but they still correlate well with it. 
+The sofmax entropy scores plotted over the reference comet scores is shown in \autoref{fig:translationeval scatter plot} c) and d), which also show quite well why the seamless pearson correlation scores are so much higher than the deltaLM correlation scores. This again might be because of the score retrieval method or it might be due to model differences. 
+The end-to-end translation softmax entropy scores are once again higher than the text-to-text translation models this is most likely again due to less possible error from the transcription step.
 
 The standard deviation scores, just like the Entropy scores anti-correlate, this is also due to how the standard deviation works as a lower standard deviation means less spread in the probabilities from the mean of those probability. 
-Similarly to the softmax entropy, the absolute standard deviation correlation scores are also smaller than the translation scores but they correlate more to the reference scores than the Entropy scores. \todo{write and add end to end}
+Similarly to the softmax entropy, the absolute standard deviation correlation scores are also smaller than the translation scores but they correlate more to the reference scores than the entropy scores.
+Curiously enough the seamless end-to-end scores for the standard deviation have a higher correlation score than the translation score correlation, which is most likely from the end-to-end nature of the model.
+The standard deviation scores are plotted over the comet scores in \autoref{fig:translationeval scatter plot} e) and f) which also shows well how the scores are anti-correlated and it also shows that the scores are very similar to how the regular translation probability scores are looking plotted. 
 
 \section{Dropout evaluation}
 The dropout score is calculated by taking the mean of the dropout probabilities of the model, the variance of the dropout probabilities and a combination of both, the dropout score is then Pearson correlated with the comet scores or the word error scores in the case of the transcription. 
-The reference scores are computed with the non dropout transcriptions and translations, since the dropped out sequences can differ a lot from the non-dropout sequences, which would impact the score. 
+The reference scores are computed with the non dropout transcriptions and translations, since the dropped out sequences can differ a lot from the non-dropout sequences, which would impact the score and not accurately it represents the reference. 
 The correlation results are listed in \autoref{results} for the translation part and \autoref{transcription results} for the transcription dropout. 
-%for this the dropout probabilities are calculated by running the model 30 times with the dropout layer enabled and then taking the mean and variance of the resulting probabilities. 
-The baseline for the dropout is the dropout translation, found under that name in Table \autoref{results}, as can be seen the correlation between the seamless results, both the translation only and the end to end versions, is lower than the ones from DeltaLM, this is most likely due to how the dropout is implemented or used with the different toolsets/frameworks, but it could also be due to model differences. To properly distinguish between those possibilities more experiments would be needed where either dropout is enabled only on different parts of the model, so for example just the decoder, just the encoder, including attention and the like. Alternatively it might also stem from different versions of the input, into the dropout part of seamless but that would not explain the drastically lower score on the end to end version of seamless, since that takes the audio as an input. 
 
+\autoref{fig:dropout transcript scores} shows the differences between the transcription probabilities and transcription mean in dropout. 
+As can be seen if the scores are not normalized there is a lot less clear correlation between the low word error scores and high scores. 
 
-\begin{figure}
+The variance is a lot higher in the non mean dropout, than it is for the mean probability dropout, this is most due to a lot more variance in the length of the resulting transcripts and the impact of this variation in length on the score. The variance of the mean scores in dropout is a lot smaller this is most likely due to the normalisation and a resulting smaller impact on the scores. It should also be noted that the transcription mean variance correlation score is quite close to 0 and because of this not really statistically significant. a plot of these values can be found in \autoref{fig:dropout transcript scores} c) and d) which also shows how not correlated the transcription mean dropout variance scores are to the WER. 
+
+The combination score, which consists of the dropout transcription score and the dropout variance score, once again show decent correlation with the WER scores which are lower than the dropout transcription score correlation, but with how much lower the variance correlations are this is to be expected. The sign difference in the correlation scores comes most likely from the sign difference in the variance and the formula of how the combination score is calculated at each step. The plotted combo scores both for the transcription dropout scores and transcription mean dropout scores can found in \autoref{fig:dropout transcript scores} e) and f). 
+
+\begin{figure}[h]
     \centering
     \begin{subfigure}{0.4\linewidth}
         \includegraphics[width=\textwidth]{Latex/sections/images/seamlessdropouttranscript.png}
-        \caption{spread of the dropout transcription probability scores over the reference scores}
+        \caption{dropout transcription probability scores over the reference scores}
     \end{subfigure}
     \begin{subfigure}{0.4\linewidth}
         \includegraphics[width=\textwidth]{Latex/sections/images/seamlessdropouttranscriptmean.png}
-        \caption{spread of the dropout transcription probability scores over the reference scores}
+        \caption{dropout transcription mean scores over the reference scores}
     \end{subfigure}
     \begin{subfigure}{0.4\linewidth}
         \includegraphics[width=\textwidth]{Latex/sections/images/seamlessdropouttranscriptvar.png}
@@ -101,75 +122,89 @@ The baseline for the dropout is the dropout translation, found under that name i
         \includegraphics[width=\textwidth]{Latex/sections/images/seamlessdropouttranscriptmeancombo.png}
         \caption{spread of the dropout transcription mean combination scores over the reference scores}
     \end{subfigure}
-    \caption{Caption}
+    \caption{dropout scores plotted over the wer, left is the base scores, right half is the mean scores}
     \label{fig:dropout transcript scores}
 \end{figure}
 
-\begin{figure}
+%for this the dropout probabilities are calculated by running the model 30 times with the dropout layer enabled and then taking the mean and variance of the resulting probabilities. 
+The baseline for the dropout is the dropout translation, found under that name in Table \autoref{results}, as can be seen the correlation between the seamless results, both the translation only and the end to end versions, is lower than the ones from DeltaLM, this is most likely due to how the dropout is implemented or used with the different toolsets/frameworks, but it could also be due to model differences. To properly distinguish between those possibilities more experiments would be needed where either dropout is enabled only on different parts of the model, so for example just the decoder, just the encoder, including attention and the like. Alternatively it might also stem from different versions of the input, into the dropout part of seamless but that would not explain the drastically lower score on the end to end version of seamless, since that takes the audio as an input. 
+
+\begin{figure}[h]
     \centering
     \begin{subfigure}{0.4\linewidth}
         \includegraphics[width=\textwidth]{Latex/sections/images/seamlessdropprob.png}
-        \caption{spread of the dropout transcription probability scores over the reference scores}
+        \caption{spread of the dropout translation probability scores over the reference scores for seamless}
+    \end{subfigure}
+    \begin{subfigure}{0.4\linewidth}
+        \includegraphics[width=\textwidth]{Latex/sections/images/dlmdropprob.png}
+        \caption{spread of the dropout translation probability scores over the reference scores for deltalm}
     \end{subfigure}
     \begin{subfigure}{0.4\linewidth}
         \includegraphics[width=\textwidth]{Latex/sections/images/seamlessdropoutvariance.png}
-        \caption{spread of the dropout transcription probability scores over the reference scores}
+        \caption{spread of the dropout translation probability variance scores over the reference scores for seamless}
+    \end{subfigure}
+    \begin{subfigure}{0.4\linewidth}
+        \includegraphics[width=\textwidth]{Latex/sections/images/dlmdropoutvariance.png}
+        \caption{spread of the dropout translation probability variance scores over the reference scores for deltalm}
     \end{subfigure}
     \begin{subfigure}{0.4\linewidth}
         \includegraphics[width=\textwidth]{Latex/sections/images/seamlessdropoutcombo.png}
-        \caption{spread of the dropout transcription probability scores over the reference scores}
+        \caption{spread of the dropout translation probability combo scores over the reference scores}
     \end{subfigure}
-    \caption{Caption}
-    \label{fig:enter-label}
+    \begin{subfigure}{0.4\linewidth}
+        \includegraphics[width=\textwidth]{Latex/sections/images/dlmdropoutcombo.png}
+        \caption{spread of the dropout translation probability combo scores over the reference scores}
+    \end{subfigure}
+    \caption{dropout scores plotted over the comet scores, left is the seamless scores, right half is the deltaLM scores}
+    \label{fig:dropout translation}
 \end{figure}
-\todo{add text for variance, combo, explain results more, compare them, add scatter plot}
 
-%\begin{figure}[ht]
-%    \centering%
-%    \begin{subfigure}{0.4\linewidth}
-%    \includegraphics[width=\textwidth]{Latex/sections/images/seamlessscoresoverref.png}
-%    \end{subfigure}
-%    \begin{subfigure}{0.4\linewidth}
-%    \includegraphics[width=\linewidth]{Latex/sections/images/seamlessscores.png}
-%    \end{subfigure}
-    
-%    \caption{plot over the dropout translation probabilites, the variances and the references}
-%    \label{fig:dropout scatter plot}
-%\end{figure}
+The Variance scores are all smaller than the dropout probability scores, which as seen in the transcription part is to be expected, but while the pearson correlation of the translation dropout variance scores are smaller than the pearson correlation dropout translation probability score they are not that much smaller than them. The pearson correlation score can be found in \autoref{results} and a plot of the dropout variance scores over the reference scores can be seen in \autoref{fig:dropout translation}.
+The variance score is once again anti-correlated to the comet score, this is because of of how the variance works where a smaller score denotes a better result. 
+The end-to-end dropout variance is not anti correlated, which can very well be due to a difference in reference score or can be a result of dropout.
+As using dropout with the end-to-end model sometimes produces long stings of nonsense and because of how seamless is trained and what it can translate, those long strings do not always stick to a single language but rather switch through different ones and occasionally include characters from different alphabets. 
+%An example of this can be found in \autoref{seamlesse2enonesense}
+
+The combination score made up out of the the other dropout scores show a stronger correlation with the reference scores than the variance but less than the translation probability for the cascaded models, which considering how it is defines is to be expected. 
+The flipped sign on the correlation score for deltaLM is most likely due to the incredibly small dropout variance scores and since the dropout translation score, which is negative, is divided by this variance score and then subtracted from 1.
+However it is stronger correlated in the case of the end to end model, this is most likely due to the correlation instead of anti correlation in the variance and the very similar correlation score between the dropout translation and dropout variance scores. 
+The pearson correlation scores again can be found in \autoref{results} and a plot of the scores for seamless and deltaLM over the reference scores can be found in \autoref{fig:dropout translation} e) and f) 
+\todo{explain results more?}
+
 
 \section{One unified score}
-since several different metrics are used in the translation part of the cascaded model it is interesting which one might be the best choice to use in a unified score, from the text translation paper \cite{fomicheva2020unsupervised} we can gather that different metrics work better for different language groups, as this thesis only tested on english to german translation no definite choice can be made without looking at other languages as well.
-\todo{expand, add full judgement}
+Since several different metrics are used in the translation part of the cascaded model it is interesting which one might be the best choice to use in a unified score, from the text translation paper \cite{fomicheva2020unsupervised} we can gather that different metrics work better for different language groups, as this thesis only tested on english to german translation no definite choice can be made without looking at other languages as well.
+
 
 For a unified score the baselines, which are the translation and transcription probability, are multiplied. 
-
-The resulting pearson score that can be found in \autoref{results} is calculated by correlating this unified score, product of translation probability and transcription probability, with the the comet score multiplied by the by the WER mapped to be from 0 to 1 by dividing all WER scores by the worst, so highest, WER score in the dataset (alt. just setting it to 100) and subtracting it from 1. 
+The resulting pearson score that can be found in \autoref{results} is calculated by correlating this unified score, product of translation probability and transcription probability, with the the comet score multiplied by the by the WER mapped to be from 0 to 1 by dividing all WER scores by the worst, so highest, WER score in the dataset, if finding the highest WER score for the dataset is not possible using 100 as a value is a decent option, as most WER scores are below that, and subtracting it from 1. 
 This is can be described mathematically as 
 $$reference = cometscore*(1-\frac{WER}{max(WER)})$$
 which was choosen since the transcription probability is anti-correlated to the wer and since the best score of the WER is 0 that had to be taken into account as it ruled out just flat out dividing the comet score by the WER.
 
 Alternatively a unified score can be achieved by weighing the translation and transcription probabilities differently, which results in the formula $$unifiedscore_\alpha= \alpha TP_{transcript} \cdot (1-\alpha)TP_{translation}.$$ 
 As can be seen in \autoref{fig:uniscore correlation} changing the weight between the transcription and the translation scores has a noticeable impact on the correlation scores. 
-This also shows that the weighing for cascaded models is at least partially model dependent,if not framework dependent, but using a high $\alpha$ seems to yield good results on the non-normalised uniscores in either case. 
+This also shows that the weighing for cascaded models is at least partially model dependent, if not framework dependent, but using a high $\alpha$ seems to yield good results on the non-normalised uniscores in either case. 
 For the normalised unified score the correlations seem to differ on what the best $\alpha$ value would be, for seamless it would be in the 0.3 to 0.4 range where as for deltaLM it is around 0.98. 
 
 \begin{figure}[h]
     \centering
     \begin{subfigure}{0.4\linewidth}
-        \includegraphics[width=\linewidth]{Latex/sections/images/dlmuniscoredistribution.png}
-        \caption{deltaLM unified scores}
-    \end{subfigure}
-    \begin{subfigure}{0.4\linewidth}
         \includegraphics[width=\linewidth]{Latex/sections/images/seamlessuniscoredistribution.png}
         \caption{seamless unified scores}
     \end{subfigure}
+    \begin{subfigure}{0.4\linewidth}
+        \includegraphics[width=\linewidth]{Latex/sections/images/dlmuniscoredistribution.png}
+        \caption{deltaLM unified scores}
+    \end{subfigure}
+    
     \caption{Changes in correlation with different alpha values, the red line is for the unified score taken with the transcription mean, the blue line is the unified score gathered with the the non-normalised transcription score. }
     \label{fig:uniscore correlation}
 \end{figure}
 \todo{add graph and evaluation}
 
 %maybe a score that combines the std div with regular translation?
-\section{Pearson correlation scores}
+%\section{Pearson correlation scores}
 
 \begin{table}[ht]
 \centering%
@@ -206,14 +241,10 @@ Dropout combo & -0.163593& 0.17962061& -0.20624\\
 unified score   & -0.32965 & -0.05348 &-\\
 unfied score mean& -0.50055& 0.12587& - 
 %{transcription'pearsonr': -0.3258220972065334} transcription mean {'pearsonr': -0.27601804379827566}
-
 %dlm probabilitycorrelation {'pearsonr': 0.2828435783527934} softmaxcorrelation {'pearsonr': -0.08377165154268117 or  -0.083771} std correlation {'pearsonr': -0.2536297836740317} dp prob corr {'pearsonr': 0.2825563734152303} dp var corr {'pearsonr': -0.1628538934576183} dpcombo {'pearsonr': 0.17962061402392054}
 %seamless dropout {'pearsonr': 0.08839374531318331} {'pearsonr': -0.0962085313546643}  
-
 \end{tabular}
-
 \caption{Correlation scores for the separate models and calculated quality scores}
 \label{results}
 \end{table}
 
-other interesting values: the pearson correlation of the entropies in dropout shows a significant prediction value with a correlation of the mean of -0.23241 and 0.29450, and a correlation of -0.17032 and - 0.12806 of the variance of the entropies on seamless and deltaLM respectively.
