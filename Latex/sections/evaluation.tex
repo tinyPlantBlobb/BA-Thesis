@@ -30,17 +30,19 @@ the resulting transcription probabilities plotted over the according WER values 
 
 \section{Translation evaluation}
 For the evaluation of the translation scores the reference score is genereated with the help of comet \cite{rei-etal-2020-comet}. This way of generating the reference score means that a score close to 1 is a good translation and a score close to 0 is a bad translation that is no better than random chance.
-those reference scores are then also pearson correlated with the scores from the model. The correlated scores of the different models are found in the Translation part of Table \autoref{results}. 
-As can be seen in Table \autoref{results} the scores retrieved from the model correlate well on the cascaded models and really well on the end to end model. The drop on the DelataLM model scores could be because of model differences or due to the different score retrieval method, for this more experiments would have to be run with different models. The end-to-end scores are that much higher since there are no potential errors from the transcription part but it could also be that the model simply translates a lot better when using the seamless for spoken language translation. 
+those reference scores are then also pearson correlated with the scores from the model. The correlated scores of the different models are found in the Translation part of \autoref{results}. 
+As can be seen in \autoref{results} the scores retrieved from the model correlate well on the cascaded models and really well on the end to end model. The drop on the DelataLM model scores could be because of model differences or due to the different score retrieval method, for this more experiments would have to be run with different models. The end-to-end scores are that much higher since there are no potential errors from the transcription part but it could also be that the model simply translates a lot better when using the seamless for spoken language translation. 
 \todo{add plots}
 
 \begin{figure}[ht]
     \centering%
     \begin{subfigure}{0.4\linewidth}
         \includegraphics[width=\textwidth]{Latex/sections/images/seamlessgenprob.png}
+        \caption{spread of the translation probability scores on seamless over the reference scores}
     \end{subfigure}
     \begin{subfigure}{0.4\linewidth}
         \includegraphics[width=\textwidth]{Latex/sections/images/dlmgenprob.png}
+        \caption{spread of the translation probability scores on deltalm over the reference scores}
     \end{subfigure}
     \begin{subfigure}{0.4\linewidth}
         \includegraphics[width=\textwidth]{Latex/sections/images/seamlessstddiv.png}
@@ -100,7 +102,8 @@ which was choosen since the transcription probability is anti-correlated to the 
 
 Alternatively a unified score can be achieved by weighing the translation and transcription probabilities differently, which results in the formula $$unifiedscore_\alpha= \alpha TP_{transcript} \cdot (1-\alpha)TP_{translation}.$$ 
 As can be seen in \autoref{fig:uniscore correlation} changing the weight between the transcription and the translation scores has a noticeable impact on the correlation scores. 
-This also shows that the weighing for cascaded models is at least partially model dependent but using an $\alpha$ of about 
+This also shows that the weighing for cascaded models is at least partially model dependent,if not framework dependent, but using a high $\alpha$ seems to yield good results on the non-normalised uniscores in either case. 
+For the normalised unified score the correlations seem to differ on what the best $\alpha$ value would be, for seamless it would be in the 0.3 to 0.4 range where as for deltaLM it is around 0.98. 
 
 \begin{figure}
     \centering
