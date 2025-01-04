@@ -53,11 +53,11 @@ Those values are then processed so that the sum of the highest probabilities is 
 THere is a small difference in the resulting QE scores between the two versions but that is more noticable in the dropout version of the transcription probabilty 
 
 \subsection{Translation Probability}\label{sect:translationprob}
-The translation probability is calculated by the formula \autoref{formula:translation probability} this is, as mentioned in \autoref{ch:models}, the case because the Seamless and DeltaLM model are models that make use of Transformers. 
+The translation probability is calculated by the formula \autoref{formula:translation Probability} this is, as mentioned in \autoref{ch:models}, the case because the Seamless and DeltaLM model are models that make use of Transformers. 
 
 \todo{maybe remove subsections?}
 \subsection{Seamless Translation Probability}
-The translation probability follows the general translation probability formula \autoref{formula:translation probability}. To get the probability of the top token at each decoding step the functionality from huggingface is used, which is able to return the log-probabilities and scores, so the processed log-proabbilites, of all vocabulary entries. 
+The translation probability follows the general translation probability formula \autoref{formula:translation Probability}. To get the probability of the top token at each decoding step the functionality from huggingface is used, which is able to return the log-probabilities and scores, so the processed log-proabbilites, of all vocabulary entries. 
 Then to get the final probability of the sequence the top token of each decoding step and it's probability is picked and the then summed up and divided by the number of decoding steps that are in the sequence.
 The translation probability on seamless is, just like the transcription probability on Whisper, retrieved with the help of the pytorch and the seamless large model on huggingface. 
 there are a couple of difference model sizes of seamless that are provided by meta, the one that was used to run the experiments is the seamless M4T v2 large model that is available on huggingface. 

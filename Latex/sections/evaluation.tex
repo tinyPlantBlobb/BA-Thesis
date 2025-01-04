@@ -182,7 +182,7 @@ This is can be described mathematically as
 $$reference = cometscore*(1-\frac{WER}{max(WER)})$$
 which was choosen since the transcription probability is anti-correlated to the wer and since the best score of the WER is 0 that had to be taken into account as it ruled out just flat out dividing the comet score by the WER.
 
-Alternatively a unified score can be achieved by weighing the translation and transcription probabilities differently, which results in the formula $$unifiedscore_\alpha= \alpha TP_{transcript} \cdot (1-\alpha)TP_{translation}.$$ 
+Alternatively a unified score can be achieved by weighing the translation and transcription probabilities differently, which results in the formula $$unifiedscore_\alpha= \alpha TP_{transcript} + (1-\alpha)TP_{translation}.$$ 
 As can be seen in \autoref{fig:uniscore correlation} changing the weight between the transcription and the translation scores has a noticeable impact on the correlation scores. 
 This also shows that the weighing for cascaded models is at least partially model dependent, if not framework dependent, but using a high $\alpha$ seems to yield good results on the non-normalised uniscores in either case. 
 For the normalised unified score the correlations seem to differ on what the best $\alpha$ value would be, for seamless it would be in the 0.3 to 0.4 range where as for deltaLM it is around 0.98. 

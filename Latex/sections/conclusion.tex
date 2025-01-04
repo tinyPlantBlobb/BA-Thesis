@@ -7,6 +7,11 @@
 
 \chapter{Conclusion}
 \label{ch:Conclusion}
-The proposed metrics in \cite{fomicheva2020unsupervised} also work in cascaded Speech translation, where the translation parts are done on the translation side of the cascaded model and the dropout based metric also works and with some changes the proposed metrics work on end-to-end speech translation. 
+The proposed metrics by Fomicheva et. al \cite{fomicheva2020unsupervised} also work in cascaded Speech translation, where the translation parts are done on the translation side of the cascaded model and probability retrieval on the transcription part. The dropout based metric also work on both the transcription part of cascaded models as well as the translation part, it also works on end-to-end speech translation, with some minor changes.
+
+A unified score for cascaded models has been proposed and shown to be a decent metric however more testing would be needed to explore the impact of frameworks/toolkits used, as well as the impact of the models used. 
+
+In the future a closer look of these metrics for different languages would be interesting as most of the metrics used here work a lot better on medium or low resource translations.
+
 
 \todo{expand, add results}
