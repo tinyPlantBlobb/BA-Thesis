@@ -151,8 +151,8 @@ if input != "ref.txt":
             lines = inpfile.readlines()
             cases = [l.split(",") for l in lines]
             inps = [[float(j) for j in i.split("\t")] for i in lines]
-            wers = [i[-3] for i in inps]
-            comets = [i[-2] for i in inps]
+            wers = [i[-2] for i in inps]
+            comets = [i[-3] for i in inps]
             uniref = [i[-1] for i in inps]
 
             genprop = [i[0] for i in inps]
