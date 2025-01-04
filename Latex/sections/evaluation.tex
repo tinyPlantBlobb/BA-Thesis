@@ -23,7 +23,7 @@ the resulting transcription probabilities plotted over the according WER values 
 \todo{add (scatter)plot with model and reference prob plotted, expand}
 \begin{figure}
     \centering%
-    \includegraphics[width=0.5\linewidth]{Latex/sections/images/seamlesswerref.png}
+    \includegraphics[width=0.5\linewidth]{Latex/sections/images/werref.png}
     \caption{plot over the transctiption proabilites, the transcription means and the WER scores}
     \label{fig:transcript scatter plot}
 \end{figure}
@@ -74,20 +74,68 @@ The correlation results are listed in \autoref{results} for the translation part
 %for this the dropout probabilities are calculated by running the model 30 times with the dropout layer enabled and then taking the mean and variance of the resulting probabilities. 
 The baseline for the dropout is the dropout translation, found under that name in Table \autoref{results}, as can be seen the correlation between the seamless results, both the translation only and the end to end versions, is lower than the ones from DeltaLM, this is most likely due to how the dropout is implemented or used with the different toolsets/frameworks, but it could also be due to model differences. To properly distinguish between those possibilities more experiments would be needed where either dropout is enabled only on different parts of the model, so for example just the decoder, just the encoder, including attention and the like. Alternatively it might also stem from different versions of the input, into the dropout part of seamless but that would not explain the drastically lower score on the end to end version of seamless, since that takes the audio as an input. 
 
+
+\begin{figure}
+    \centering
+    \begin{subfigure}{0.4\linewidth}
+        \includegraphics[width=\textwidth]{Latex/sections/images/seamlessdropouttranscript.png}
+        \caption{spread of the dropout transcription probability scores over the reference scores}
+    \end{subfigure}
+    \begin{subfigure}{0.4\linewidth}
+        \includegraphics[width=\textwidth]{Latex/sections/images/seamlessdropouttranscriptmean.png}
+        \caption{spread of the dropout transcription probability scores over the reference scores}
+    \end{subfigure}
+    \begin{subfigure}{0.4\linewidth}
+        \includegraphics[width=\textwidth]{Latex/sections/images/seamlessdropouttranscriptvar.png}
+        \caption{spread of the dropout transcription variance scores over the reference scores}
+    \end{subfigure}
+    \begin{subfigure}{0.4\linewidth}
+        \includegraphics[width=\textwidth]{Latex/sections/images/seamlessdropouttranscriptmeanvar.png}
+        \caption{spread of the dropout transcription mean variance scores over the reference scores}
+    \end{subfigure}
+    \begin{subfigure}{0.4\linewidth}
+        \includegraphics[width=\textwidth]{Latex/sections/images/seamlessdropouttranscriptcombo.png}
+        \caption{spread of the dropout transcription combination scores over the reference scores}
+    \end{subfigure}
+    \begin{subfigure}{0.4\linewidth}
+        \includegraphics[width=\textwidth]{Latex/sections/images/seamlessdropouttranscriptmeancombo.png}
+        \caption{spread of the dropout transcription mean combination scores over the reference scores}
+    \end{subfigure}
+    \caption{Caption}
+    \label{fig:dropout transcript scores}
+\end{figure}
+
+\begin{figure}
+    \centering
+    \begin{subfigure}{0.4\linewidth}
+        \includegraphics[width=\textwidth]{Latex/sections/images/seamlessdropprob.png}
+        \caption{spread of the dropout transcription probability scores over the reference scores}
+    \end{subfigure}
+    \begin{subfigure}{0.4\linewidth}
+        \includegraphics[width=\textwidth]{Latex/sections/images/seamlessdropoutvariance.png}
+        \caption{spread of the dropout transcription probability scores over the reference scores}
+    \end{subfigure}
+    \begin{subfigure}{0.4\linewidth}
+        \includegraphics[width=\textwidth]{Latex/sections/images/seamlessdropoutcombo.png}
+        \caption{spread of the dropout transcription probability scores over the reference scores}
+    \end{subfigure}
+    \caption{Caption}
+    \label{fig:enter-label}
+\end{figure}
 \todo{add text for variance, combo, explain results more, compare them, add scatter plot}
 
-\begin{figure}[ht]
-    \centering%
-    \begin{subfigure}{0.4\linewidth}
-    \includegraphics[width=\textwidth]{Latex/sections/images/seamlessscoresoverref.png}
-    \end{subfigure}
-    \begin{subfigure}{0.4\linewidth}
-    \includegraphics[width=\linewidth]{Latex/sections/images/seamlessscores.png}
-    \end{subfigure}
+%\begin{figure}[ht]
+%    \centering%
+%    \begin{subfigure}{0.4\linewidth}
+%    \includegraphics[width=\textwidth]{Latex/sections/images/seamlessscoresoverref.png}
+%    \end{subfigure}
+%    \begin{subfigure}{0.4\linewidth}
+%    \includegraphics[width=\linewidth]{Latex/sections/images/seamlessscores.png}
+%    \end{subfigure}
     
-    \caption{plot over the dropout translation probabilites, the variances and the references}
-    \label{fig:dropout scatter plot}
-\end{figure}
+%    \caption{plot over the dropout translation probabilites, the variances and the references}
+%    \label{fig:dropout scatter plot}
+%\end{figure}
 
 \section{One unified score}
 since several different metrics are used in the translation part of the cascaded model it is interesting which one might be the best choice to use in a unified score, from the text translation paper \cite{fomicheva2020unsupervised} we can gather that different metrics work better for different language groups, as this thesis only tested on english to german translation no definite choice can be made without looking at other languages as well.
@@ -105,7 +153,7 @@ As can be seen in \autoref{fig:uniscore correlation} changing the weight between
 This also shows that the weighing for cascaded models is at least partially model dependent,if not framework dependent, but using a high $\alpha$ seems to yield good results on the non-normalised uniscores in either case. 
 For the normalised unified score the correlations seem to differ on what the best $\alpha$ value would be, for seamless it would be in the 0.3 to 0.4 range where as for deltaLM it is around 0.98. 
 
-\begin{figure}
+\begin{figure}[h]
     \centering
     \begin{subfigure}{0.4\linewidth}
         \includegraphics[width=\linewidth]{Latex/sections/images/dlmuniscoredistribution.png}
