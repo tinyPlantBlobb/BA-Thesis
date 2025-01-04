@@ -1,5 +1,6 @@
 import matplotlib.pyplot as plt
 import argparse
+import csv
 
 base = "/home/plantpalfynn/uni/BA/BA-Thesis/Latex/sections/images/"
 args = argparse.ArgumentParser()
@@ -11,6 +12,14 @@ ref = args.parse_args().ref
 input = args.parse_args().inp
 splitting = args.parse_args().split
 model = args.parse_args().model
+transcriptbasescore = []
+transcriptmeanbasescore = []
+with open("results/alltranscriptions.csv", "r") as transcriptfile:
+    reader = csv.DictReader(transcriptfile, dialect="excel")
+    for row in reader:
+        print(row)
+        transcriptbasescore.append(float(row["transcript prob"]))
+        transcriptmeanbasescore.append(float(row["transcript mean"]))
 with open("results/seamlessallscores.txt", "r") as reffile:
     lines = reffile.readlines()
     refs = [
@@ -39,6 +48,18 @@ with open("results/seamlessallscores.txt", "r") as reffile:
     dropouttranslation = [i[11] for i in refs]
     dropouttranslationvar = [i[12] for i in refs]
     dropouttranslationcombo = [i[13] for i in refs]
+
+    plt.scatter(wers, transcriptbasescore, color="blue", label="Probability")
+    plt.ylabel("transcript Probability")
+    plt.xlabel("reference score")
+    plt.savefig(base + "transcriptbasescore.png")
+    plt.clf()
+
+    plt.scatter(wers, transcriptmeanbasescore, color="blue", label="Probability")
+    plt.ylabel("transcript mean Probability")
+    plt.xlabel("reference score")
+    plt.savefig(base + "transcriptmeanbasescore.png")
+    plt.clf()
 
     plt.scatter(comets, translationprob, color="blue", label="Probability")
     plt.ylabel("translation Probability")
