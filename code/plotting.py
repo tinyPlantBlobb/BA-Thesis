@@ -10,14 +10,31 @@ args.add_argument("--model", type=str, default="out")
 ref = args.parse_args().ref
 input = args.parse_args().inp
 splitting = args.parse_args().split
-model = args.parse_args().model
-with open(ref, "r") as reffile:
+model = args.parse_args().modq2el
+with open("results/seamlessallscores.txt", "r") as reffile:
     lines = reffile.readlines()
     refs = list(
         map(lambda x: (float(x.split("\t")[0]), float(x.split("\t")[1])), lines)
     )
-    wers = [i[1] for i in refs]
-    comets = [i[0] for i in refs]
+    uniscor = [i[-5] for i in refs]
+    uniscore2 = [i[-4] for i in refs]
+    wers = [i[-3] for i in refs]
+    comets = [i[-2] for i in refs]
+    uniref = [i[-1] for i in refs]
+    transcriptmean = [i[1] for i in refs]
+    transcriptprob = [i[0] for i in refs]
+    translationprob = [i[2] for i in refs]
+    softmaxprob = [i[3] for i in refs]
+    stddiv = [i[4] for i in refs]
+    dropouttranscript = [i[5] for i in refs]
+    dropouttranscriptvar = [i[6] for i in refs]
+    dropouttranscriptcombo = [i[7] for i in refs]
+    dropouttranscriptmean = [i[8] for i in refs]
+    dropouttranscriptmeanvar = [i[9] for i in refs]
+    dropouttranscriptmeancombo = [i[10] for i in refs]
+    dropouttranslation = [i[11] for i in refs]
+    dropouttranslationvar = [i[12] for i in refs]
+    dropouttranslationcombo = [i[13] for i in refs]
 
     x = range(len(refs))
     # print(len(x), len(refs))
@@ -28,7 +45,7 @@ with open(ref, "r") as reffile:
     plt.savefig(base + model + "references.png")
     plt.clf()
 if input != "ref.txt":
-    with open(input, "r") as inpfile:
+    with open("results/dlmallscores.txt", "r") as inpfile:
         if splitting:
             lines = inpfile.readlines()
             cases = [l.split(",") for l in lines]
@@ -38,6 +55,12 @@ if input != "ref.txt":
             stddiv = [i[2] for i in inps]
             dropprop = [i[3] for i in inps]
             dropvar = [i[4] for i in inps]
+            dropoutcombo = [i[5] for i in inps]
+            uniscor = [i[6] for i in inps]
+            uniscore2 = [i[7] for i in inps]
+            wers = [i[-3] for i in inps]
+            comets = [i[-2] for i in inps]
+            uniref = [i[-1] for i in inps]
             print(
                 len(x),
                 len(genprop),
