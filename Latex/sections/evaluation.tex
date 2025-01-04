@@ -98,17 +98,21 @@ This is can be described mathematically as
 $$reference = cometscore*(1-\frac{WER}{max(WER)})$$
 which was choosen since the transcription probability is anti-correlated to the wer and since the best score of the WER is 0 that had to be taken into account as it ruled out just flat out dividing the comet score by the WER.
 
-Alternatively a unified score can be achieved by weighing the translation and transcription probabilities differently, which results in the formula $$unifiedscore_\alpha= \alpha TP_{transcript} \cdot (1-\alpha)TP_{translation}$$. 
-As can be seen in \autoref{fig:uniscore correlation} changing the weight between the transcription and the translation scores has a noticeable impact on the correlation scores
+Alternatively a unified score can be achieved by weighing the translation and transcription probabilities differently, which results in the formula $$unifiedscore_\alpha= \alpha TP_{transcript} \cdot (1-\alpha)TP_{translation}.$$ 
+As can be seen in \autoref{fig:uniscore correlation} changing the weight between the transcription and the translation scores has a noticeable impact on the correlation scores. 
+This also shows that the weighing for cascaded models is at least partially model dependent but using an $\alpha$ of about 
+
 \begin{figure}
     \centering
     \begin{subfigure}{0.4\linewidth}
         \includegraphics[width=\linewidth]{Latex/sections/images/dlmuniscoredistribution.png}
+        \caption{deltaLM unified scores}
     \end{subfigure}
     \begin{subfigure}{0.4\linewidth}
         \includegraphics[width=\linewidth]{Latex/sections/images/seamlessuniscoredistribution.png}
+        \caption{seamless unified scores}
     \end{subfigure}
-    \caption{Changes in correlation with different alpha values}
+    \caption{Changes in correlation with different alpha values, the red line is for the unified score taken with the transcription mean, the blue line is the unified score gathered with the the non-normalised transcription score. }
     \label{fig:uniscore correlation}
 \end{figure}
 \todo{add graph and evaluation}
