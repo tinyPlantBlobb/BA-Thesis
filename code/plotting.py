@@ -229,8 +229,12 @@ if input != "ref.txt":
             plt.ylabel("uniscore with mean")
             plt.xlabel("reference score")
             plt.savefig(base + model + "uniscore2.png")
+
             plt.clf()
-            # plt.scatter(x, inps, color="gold", label="Reference")
+            plt.scatter(x, wers, color="blue", label="Reference")
+            plt.xlabel("datasetrows")
+            plt.ylabel("wer")
+            plt.savefig(base + "werref.png")
         else:
             inps = list(map(float, inpfile.readlines()))
             plt.scatter(x, inps, color="blue", label="Reference")
