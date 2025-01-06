@@ -67,6 +67,55 @@ series = {ACL '02}
     pages = "2685--2702",
     abstract = "We present COMET, a neural framework for training multilingual machine translation evaluation models which obtains new state-of-the-art levels of correlation with human judgements. Our framework leverages recent breakthroughs in cross-lingual pretrained language modeling resulting in highly multilingual and adaptable MT evaluation models that exploit information from both the source input and a target-language reference translation in order to more accurately predict MT quality. To showcase our framework, we train three models with different types of human judgements: Direct Assessments, Human-mediated Translation Edit Rate and Multidimensional Quality Metric. Our models achieve new state-of-the-art performance on the WMT 2019 Metrics shared task and demonstrate robustness to high-performing systems.",
 }
+@inproceedings{rei-etal-2022-comet,
+    title = "{COMET}-22: Unbabel-{IST} 2022 Submission for the Metrics Shared Task",
+    author = "Rei, Ricardo  and
+      C. de Souza, Jos{\'e} G.  and
+      Alves, Duarte  and
+      Zerva, Chrysoula  and
+      Farinha, Ana C  and
+      Glushkova, Taisiya  and
+      Lavie, Alon  and
+      Coheur, Luisa  and
+      Martins, Andr{\'e} F. T.",
+    editor = {Koehn, Philipp  and
+      Barrault, Lo{\"i}c  and
+      Bojar, Ond{\v{r}}ej  and
+      Bougares, Fethi  and
+      Chatterjee, Rajen  and
+      Costa-juss{\`a}, Marta R.  and
+      Federmann, Christian  and
+      Fishel, Mark  and
+      Fraser, Alexander  and
+      Freitag, Markus  and
+      Graham, Yvette  and
+      Grundkiewicz, Roman  and
+      Guzman, Paco  and
+      Haddow, Barry  and
+      Huck, Matthias  and
+      Jimeno Yepes, Antonio  and
+      Kocmi, Tom  and
+      Martins, Andr{\'e}  and
+      Morishita, Makoto  and
+      Monz, Christof  and
+      Nagata, Masaaki  and
+      Nakazawa, Toshiaki  and
+      Negri, Matteo  and
+      N{\'e}v{\'e}ol, Aur{\'e}lie  and
+      Neves, Mariana  and
+      Popel, Martin  and
+      Turchi, Marco  and
+      Zampieri, Marcos},
+    booktitle = "Proceedings of the Seventh Conference on Machine Translation (WMT)",
+    month = dec,
+    year = "2022",
+    address = "Abu Dhabi, United Arab Emirates (Hybrid)",
+    publisher = "Association for Computational Linguistics",
+    url = "https://aclanthology.org/2022.wmt-1.52/",
+    pages = "578--585",
+    abstract = "In this paper, we present the joint contribution of Unbabel and IST to the WMT 2022 Metrics Shared Task. Our primary submission {--} dubbed COMET-22 {--} is an ensemble between a COMET estimator model trained with Direct Assessments and a newly proposed multitask model trained to predict sentence-level scores along with OK/BAD word-level tags derived from Multidimensional Quality Metrics error annotations. These models are ensembled together using a hyper-parameter search that weights different features extracted from both evaluation models and combines them into a single score. For the reference-free evaluation, we present CometKiwi. Similarly to our primary submission, CometKiwi is an ensemble between two models. A traditional predictor-estimator model inspired by OpenKiwi and our new multitask model trained on Multidimensional Quality Metrics which can also be used without references. Both our submissions show improved correlations compared to state-of-the-art metrics from last year as well as increased robustness to critical errors."
+}
+
 
 @inproceedings{blain-etal-2020-quality,
     title = "Quality In, Quality Out: Learning from Actual Mistakes",
@@ -416,9 +465,9 @@ title = {From WER and RIL to MER and WIL: improved evaluation measures for conne
     urldate={2024-12-21},
 }
 @misc{huggingfacecomet,
-    url="https://huggingface.com/spaces/evaluate-metric/comet",
-    note = "documentation of the huggingface comet implementation",
-    urldate={2024-12-21},
+    url="https://github.com/Unbabel/COMET",
+    note = "implementation of comet that was used",
+    urldate={2025-01-05},
 }
 @misc{werpy,
     url = "https://github.com/analyticsinmotion/werpy",
@@ -469,4 +518,176 @@ urldate={2025-01-02}
     urldate={2025-01-02},
 title="Introduction to Automatic speech recogintion (ASR)", 
 author="Mael Fabien"
+}
+@ARTICLE{shannonentropy,
+  author={Shannon, C. E.},
+  journal={The Bell System Technical Journal}, 
+  title={A mathematical theory of communication}, 
+  year={1948},
+  volume={27},
+  number={3},
+  pages={379-423},
+  keywords={},
+  doi={10.1002/j.1538-7305.1948.tb01338.x}}
+
+@inproceedings{Ali2018WordER,
+  title={Word Error Rate Estimation for Speech Recognition: e-WER},
+  author={Ahmed M. Ali and Steve Renals},
+  booktitle={Annual Meeting of the Association for Computational Linguistics},
+  year={2018},
+  url={https://api.semanticscholar.org/CorpusID:215542279}
+}
+@misc{ali2020worderrorrateestimation,
+      title={Word Error Rate Estimation Without ASR Output: e-WER2}, 
+      author={Ahmed Ali and Steve Renals},
+      year={2020},
+      eprint={2008.03403},
+      archivePrefix={arXiv},
+      primaryClass={eess.AS},
+      url={https://arxiv.org/abs/2008.03403}, 
+}
+@INPROCEEDINGS{e-wer3,
+  author={Chowdhury, Shammur Absar and Ali, Ahmed},
+  booktitle={ICASSP 2023 - 2023 IEEE International Conference on Acoustics, Speech and Signal Processing (ICASSP)}, 
+  title={Multilingual Word Error Rate Estimation: E-Wer3}, 
+  year={2023},
+  volume={},
+  number={},
+  pages={1-5},
+  keywords={Correlation coefficient;Error analysis;Computational modeling;Estimation;Self-supervised learning;Manuals;Predictive models;Multilingual WER estimation;End-to-End systems},
+  doi={10.1109/ICASSP49357.2023.10095888}}
+
+@misc{park2023fastworderrorrate,
+      title={Fast Word Error Rate Estimation Using Self-Supervised Representations For Speech And Text}, 
+      author={Chanho Park and Chengsong Lu and Mingjie Chen and Thomas Hain},
+      year={2023},
+      eprint={2310.08225},
+      archivePrefix={arXiv},
+      primaryClass={eess.AS},
+      url={https://arxiv.org/abs/2310.08225}, 
+}
+@misc{park2024automaticspeechrecognitionsystemindependent,
+      title={Automatic Speech Recognition System-Independent Word Error Rate Estimation}, 
+      author={Chanho Park and Mingjie Chen and Thomas Hain},
+      year={2024},
+      eprint={2404.16743},
+      archivePrefix={arXiv},
+      primaryClass={cs.CL},
+      url={https://arxiv.org/abs/2404.16743}, 
+}
+
+@inproceedings{tuan-etal-2021-quality,
+    title = "Quality Estimation without Human-labeled Data",
+    author = "Tuan, Yi-Lin  and
+      El-Kishky, Ahmed  and
+      Renduchintala, Adithya  and
+      Chaudhary, Vishrav  and
+      Guzm{\'a}n, Francisco  and
+      Specia, Lucia",
+    editor = "Merlo, Paola  and
+      Tiedemann, Jorg  and
+      Tsarfaty, Reut",
+    booktitle = "Proceedings of the 16th Conference of the European Chapter of the Association for Computational Linguistics: Main Volume",
+    month = apr,
+    year = "2021",
+    address = "Online",
+    publisher = "Association for Computational Linguistics",
+    url = "https://aclanthology.org/2021.eacl-main.50/",
+    doi = "10.18653/v1/2021.eacl-main.50",
+    pages = "619--625",
+    abstract = "Quality estimation aims to measure the quality of translated content without access to a reference translation. This is crucial for machine translation systems in real-world scenarios where high-quality translation is needed. While many approaches exist for quality estimation, they are based on supervised machine learning requiring costly human labelled data. As an alternative, we propose a technique that does not rely on examples from human-annotators and instead uses synthetic training data. We train off-the-shelf architectures for supervised quality estimation on our synthetic data and show that the resulting models achieve comparable performance to models trained on human-annotated data, both for sentence and word-level prediction."
+}
+@inproceedings{kepler-etal-2019-unbabels,
+    title = "Unbabel`s Participation in the {WMT}19 Translation Quality Estimation Shared Task",
+    author = "Kepler, Fabio  and
+      Tr{\'e}nous, Jonay  and
+      Treviso, Marcos  and
+      Vera, Miguel  and
+      G{\'o}is, Ant{\'o}nio  and
+      Farajian, M. Amin  and
+      Lopes, Ant{\'o}nio V.  and
+      Martins, Andr{\'e} F. T.",
+    editor = "Bojar, Ond{\v{r}}ej  and
+      Chatterjee, Rajen  and
+      Federmann, Christian  and
+      Fishel, Mark  and
+      Graham, Yvette  and
+      Haddow, Barry  and
+      Huck, Matthias  and
+      Yepes, Antonio Jimeno  and
+      Koehn, Philipp  and
+      Martins, Andr{\'e}  and
+      Monz, Christof  and
+      Negri, Matteo  and
+      N{\'e}v{\'e}ol, Aur{\'e}lie  and
+      Neves, Mariana  and
+      Post, Matt  and
+      Turchi, Marco  and
+      Verspoor, Karin",
+    booktitle = "Proceedings of the Fourth Conference on Machine Translation (Volume 3: Shared Task Papers, Day 2)",
+    month = aug,
+    year = "2019",
+    address = "Florence, Italy",
+    publisher = "Association for Computational Linguistics",
+    url = "https://aclanthology.org/W19-5406/",
+    doi = "10.18653/v1/W19-5406",
+    pages = "78--84",
+    abstract = "We present the contribution of the Unbabel team to the WMT 2019 Shared Task on Quality Estimation. We participated on the word, sentence, and document-level tracks, encompassing 3 language pairs: English-German, English-Russian, and English-French. Our submissions build upon the recent OpenKiwi framework: We combine linear, neural, and predictor-estimator systems with new transfer learning approaches using BERT and XLM pre-trained models. We compare systems individually and propose new ensemble techniques for word and sentence-level predictions. We also propose a simple technique for converting word labels into document-level predictions. Overall, our submitted systems achieve the best results on all tracks and language pairs by a considerable margin."
+}
+@inproceedings{sun-etal-2020-exploratory,
+    title = "An Exploratory Study on Multilingual Quality Estimation",
+    author = "Sun, Shuo  and
+      Fomicheva, Marina  and
+      Blain, Fr{\'e}d{\'e}ric  and
+      Chaudhary, Vishrav  and
+      El-Kishky, Ahmed  and
+      Renduchintala, Adithya  and
+      Guzm{\'a}n, Francisco  and
+      Specia, Lucia",
+    editor = "Wong, Kam-Fai  and
+      Knight, Kevin  and
+      Wu, Hua",
+    booktitle = "Proceedings of the 1st Conference of the Asia-Pacific Chapter of the Association for Computational Linguistics and the 10th International Joint Conference on Natural Language Processing",
+    month = dec,
+    year = "2020",
+    address = "Suzhou, China",
+    publisher = "Association for Computational Linguistics",
+    url = "https://aclanthology.org/2020.aacl-main.39/",
+    doi = "10.18653/v1/2020.aacl-main.39",
+    pages = "366--377",
+    abstract = "Predicting the quality of machine translation has traditionally been addressed with language-specific models, under the assumption that the quality label distribution or linguistic features exhibit traits that are not shared across languages. An obvious disadvantage of this approach is the need for labelled data for each given language pair. We challenge this assumption by exploring different approaches to multilingual Quality Estimation (QE), including using scores from translation models. We show that these outperform single-language models, particularly in less balanced quality label distributions and low-resource settings. In the extreme case of zero-shot QE, we show that it is possible to accurately predict quality for any given new language from models trained on other languages. Our findings indicate that state-of-the-art neural QE models based on powerful pre-trained representations generalise well across languages, making them more applicable in real-world settings."
+}
+@inproceedings{fonseca-etal-2019-findings,
+    title = "Findings of the {WMT} 2019 Shared Tasks on Quality Estimation",
+    author = "Fonseca, Erick  and
+      Yankovskaya, Lisa  and
+      Martins, Andr{\'e} F. T.  and
+      Fishel, Mark  and
+      Federmann, Christian",
+    editor = "Bojar, Ond{\v{r}}ej  and
+      Chatterjee, Rajen  and
+      Federmann, Christian  and
+      Fishel, Mark  and
+      Graham, Yvette  and
+      Haddow, Barry  and
+      Huck, Matthias  and
+      Yepes, Antonio Jimeno  and
+      Koehn, Philipp  and
+      Martins, Andr{\'e}  and
+      Monz, Christof  and
+      Negri, Matteo  and
+      N{\'e}v{\'e}ol, Aur{\'e}lie  and
+      Neves, Mariana  and
+      Post, Matt  and
+      Turchi, Marco  and
+      Verspoor, Karin",
+    booktitle = "Proceedings of the Fourth Conference on Machine Translation (Volume 3: Shared Task Papers, Day 2)",
+    month = aug,
+    year = "2019",
+    address = "Florence, Italy",
+    publisher = "Association for Computational Linguistics",
+    url = "https://aclanthology.org/W19-5401/",
+    doi = "10.18653/v1/W19-5401",
+    pages = "1--10",
+    abstract = "We report the results of the WMT19 shared task on Quality Estimation, i.e. the task of predicting the quality of the output of machine translation systems given just the source text and the hypothesis translations. The task includes estimation at three granularity levels: word, sentence and document. A novel addition is evaluating sentence-level QE against human judgments: in other words, designing MT metrics that do not need a reference translation. This year we include three language pairs, produced solely by neural machine translation systems. Participating teams from eleven institutions submitted a variety of systems to different task variants and language pairs."
 }

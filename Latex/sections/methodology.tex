@@ -2,8 +2,12 @@
 \chapter{Methodology}\todo{move around to have section with fomicheva proposed methods, and my own proposed methods, like how to apply the fomicheva methods to ASR, how to combine them etc.}
 \label{ch:methods}
 This chapter goes more in depth on how the Quality estimation scores are derived from data retrieved from the models in general, whereas chapter \autoref{ch:experiment} goes more in depth on how it was done for the specific models and some of the potential errors that were made in the experiments.
-%\todo{how to derive the QE scores from the approaches like log probability or dropout,... }
-%\todo{all in a more mathematical sense -> maybe move stuff from background here}
+\section{previously done methods}
+The following methods have been proposed by Fomicheva et al \cite{fomicheva2020unsupervised} are also employed here on the machine translation part of the cascaded models
+
+\section{own methods}
+The following methods are derived from related works, changed from Fomicheva et al. or simply applied on different models than has been proposed in the past. 
+
 
 \section{Translation and transcription}
 The general formula of both the translation and transcription probability is $$TP=-\frac{1}{T}\sum_{t=1}^T log\; p(y_t) \label{formula:translation Probability}$$
@@ -74,8 +78,6 @@ So a low variance is to be considered better than a high score.
 As the variance does not take into account the probability of the sequence, a combination of the dropout Probability and dropout variance is proposed by Fomicheva et al \cite{fomicheva2020unsupervised}. 
 The combination of the results from the probability and the variance is done by calculating $$D-Combo=(1-\frac{D-TP}{D-Var})\label{formula:Dropoutcombo}$$, where $D-TP$ and $D-Var$ are the Translation probability mean (\autoref{dropoutprob}) and the Dropout variance (\autoref{dropoutvar}).
 
-
-
 %\subsection{Lexical Simililarity}
 \section{unified score}
 The unified score is a combination score for the transcription and translation part as an attempt to approximate the quality of the whole cascaded model. 
@@ -84,5 +86,3 @@ For this the translation probability and transcription probability are multiplie
 $$\text{unified score}= TP_{transcript}\cdot TP_{translation}$$
 
 alternative options for a unified score are weighing the translation and transcription probabilities differently, which results in the formula $$unifiedscore_\alpha= (1-\alpha) TP_{transcript} \cdot (\alpha)TP_{translation}$$. 
-This was previously proposed in by Le et al. \cite{le2016automatic}, but in that case the quality estimation is done with classification onto good or bad translations and not scores.
-

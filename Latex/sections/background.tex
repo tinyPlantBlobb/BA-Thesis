@@ -60,13 +60,17 @@ this all results in the formula $$p(y|x,\Theta)=\prod_{t=1}^T p(y_t|y_{<t}, x, \
 \todo{add example? }
 
 \subsection{Softmax}
-Taking the softmax of a probability distribution maps each entry in that probability distribution to be between 0 and 1 by setting all values below 0 to 0 and scaling everything that is about 0 to fall between 0 and 1 do that that sum of all the values is 1. 
+Taking the softmax of a vector or probability distribution maps each entry in that probability distribution to a value between 0 and 1 by setting all values below 0 to 0 and scaling everything that is about 0 to fall between 0 and 1 do that that sum of all the values is 1. 
 Mathematically this can be described as $$softmax(z)_i=\frac{exp(z_i)}{\sum_j exp(z_i)}$$, where $z=(z_1\dots z_K)\in R^K$.
-\todo{add more explainations, citations and example}
+
+So an example of applying the softmax to a probability distribution is this. Let $x= (0, -1, 2, 1, -5, 5)$ be a vector or probability distribution that the softmax is to be applied on. The sum of all non 0 values is $2+1+5=8$. Applying the softmax to each element goes like this: the first element, the 0, stays a 0, the second element, the -1, is negative so the the value is set to 0. The third element, 2, is positive, so it gets scaled down by the sum of all positive values $2/8=0.25$, the fourth element 1 also gets scaled down to 0.125. The sixth element is -5 so it gets set to 0 as well and the last element in the array is 5 whihc gets scaled down to be $5/8=0.625$.
+This results in the softmaxed vector $softmax(x)=(0,0,0.25,0.125,0,0.625)$. and this fullfills the requirement that $\sum_ix_i = 0+0+0.25+0.125+0+0.625= 1$. 
+\todo{citations and example}
 
 \subsection{Entropy}
 \label{entropy}
-In Information theory the entropy is the amount of uncertainty or information that is in a probability distribution
+In Information theory the entropy is the average amount of uncertainty or information that is found in a discrete probability distribution, more specifially the entropy of a random variable measures the average amount of uncertainty that is connected to that random variable 
+The concept of Entropy was proposed by Shannon for the context of measuring the information in transmitted data \cite{shannonentropy}.
 The entropy is mathematically defined as $- \sum_{x\in \chi} p(x) log p(x)$ where p is a probability and $\chi$ is the probability distribution and x is an element from that probability distribution.
 
 \todo{add citations, more explainations}
@@ -85,27 +89,6 @@ The use of dropout to measure the models uncertainty in Automatic Speech recogni
 They have found that most uncertainty in ASR stems from noisy input data, especially since non-noisy data produces good transcriptions a lot of the time if the model knows all used words and names. 
 \todo{fully formulate, potentially graphic?}
 
-\section{Evaluation metrics}
- for the evaluation of the results a couple of terms, algorithms, methods are used. The explanation of them is in this section. 
- 
-\subsection{WER}
-\label{wer}
-The Word Error Rate, in short WER, has been proposed in \cite{woodard1982} and \cite{morris2004}.
-It's based on the Levenshtein distance but instead of working on phonemes it operates on words.
-The WER can be computed as $$WER=\frac{S+D+I}{N}=\frac{S+D+I}{S+D+C}$$ where S is the number of substitutions, D is the number of deletions, I is the number of insertions and N is the number of words in the reference and C is the number of correct words.
-
-\subsection{Comet}
-Comet, in full Crosslingual Optimized Metric for Evaluation of Translation, is a neuronal framework for machine translation evaluation that was proposed in \cite{rei-etal-2020-comet} 
-for this thesis relevant is the Estimator model which used to estimate a quality score 
-\todo{expand, explain more}
-
-\subsection{Pearson-correlation}
-method to see how correlated 2 sets of values are
-is 1 if it's correlated, so a linear relation between the 2 value sets and -1 if it's inversely correlated 
-if the pearson r value is 0 the sets are not correlated at all
-
-it's symmetric, so switchign the order of the inputs does not change teh correlation score
-\todo{citations, expand, more explainantions how it works}
 %TODO
 
 \section{Models}
@@ -295,3 +278,36 @@ This means that all of the sublayers are initialised with the pretrained weights
     \label{fig:interleaved decoder}
     %source dlm paper
 \end{figure}
+
+\section{Evaluation metrics}
+ for the evaluation of the results a couple of terms, algorithms, methods are used. The explanation of them is in this section. 
+ 
+\subsection{WER}
+\label{wer}
+The Word Error Rate, in short WER, has been proposed in \cite{woodard1982} and \cite{morris2004}.
+It's based on the Levenshtein distance but instead of working on phonemes it operates on words.
+The WER can be computed as $$WER=\frac{S+D+I}{N}=\frac{S+D+I}{S+D+C}$$ where S is the number of substitutions, D is the number of deletions, I is the number of insertions and N is the number of words in the reference and C is the number of correct words.
+
+\subsection{Comet}
+Comet, in full Cross-lingual Optimized Metric for Evaluation of Translation, is a neuronal framework for machine translation evaluation that was proposed in \cite{rei-etal-2020-comet} and improved in \cite{rei-etal-2022-comet}.
+For this thesis relevant is the Estimator model which used to estimate a quality score based off of a source sentence and a translation reference. 
+To do this the hypothesis translation, the source sentence and the reference translation are encoded independently using a pretrained encoder, that is a crosslingual model like XLM, a multilingual BERT or XLM-RoBERTa, the resulting embeddings are padded into a pooling layer where they create a sentence embedding for each segment. the Embeddings are then combinded and concatenated into a single vector that is passed into a regression layer that then regresses on reference scores from DA, MQM and HTER. 
+This model is trained to minimize the Mean Squared error. 
+
+in the original implementation this does not give a score from 0 to 1 based on how good or bad the translation is, but the impoved version does this, where a score of 1 means a perfect translation and a score of 0 means a bad translation. Besides this only hyper-parameters have been changed in comparison to the original version as well as more training has been done.
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=0.5\linewidth]{Latex//sections//images/cometestimatormodel.png}
+    \caption{overview of the comet estimator model architecture from \cite{rei-etal-2020-comet}}
+    \label{comet architecture}
+\end{figure}
+
+\todo{expand, explain more?}
+
+\subsection{Pearson-correlation}
+method to see how correlated 2 sets of values are
+is 1 if it's correlated, so a linear relation between the 2 value sets and -1 if it's inversely correlated 
+if the pearson r value is 0 the sets are not correlated at all
+
+it's symmetric, so switching the order of the inputs does not change the correlation score
+\todo{citations, expand, more explainantions how it works, formula}
