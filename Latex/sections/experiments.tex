@@ -36,10 +36,10 @@ Running the transcription once more without using dropout should be considered a
 \include{Latex/sections/Dataset}
 
 
-\section{Translation and Transcriptions}
-Since all models that are worked with are Encoder-decoder-models that use the transformer architecture the resulting formulas for the resulting probabilities are similar, for completeness the probability formula per model is listed separately. 
+%\section{Translation and Transcriptions}
+%Since all models that are worked with are Encoder-decoder-models that use the transformer architecture the resulting formulas for the resulting probabilities are similar, for completeness the probability formula per model is listed separately. 
 
-\subsection{Transcription Probability}
+\section{Transcritpion}
 the Transcription Probability is calculated in a similar manner as the translation probability, which results in the formula $$-\frac{1}{T}\sum_{t=1}^T log p(y_t)$$ where T is the number of decoding steps and p is the probability.
 Since only the token with the highest probability is looked at those probabilities are always bigger than 0 so there are no potential issues with 0 values. (as if the probabilities of all regular tokens is 0 the end of section token would have a non 0 probability)
 
@@ -50,12 +50,12 @@ The specific model version used in the experiments is the WhisperForConditionalG
 
 To retrieve the final transcription probability the huggingface model returns a tuple (or dictionary) that contains the probability of each vocabulary entry at each decoding step.
 Those values are then processed so that the sum of the highest probabilities is taken and then normalised by the number of decoding steps that were done, this gives the transcription probability mean. For reference the pure probability sum was also collected and returned during the experiments. 
-THere is a small difference in the resulting QE scores between the two versions but that is more noticable in the dropout version of the transcription probabilty 
+There is a small difference in the resulting QE scores between the two versions but that is more noticeable in the dropout version of the transcription probability 
 
-\subsection{Translation Probability}\label{sect:translationprob}
+\section{Translation Probability}\label{sect:translationprob}
 The translation probability is calculated by the formula \autoref{formula:translation Probability} this is, as mentioned in \autoref{ch:models}, the case because the Seamless and DeltaLM model are models that make use of Transformers. 
 
-\todo{maybe remove subsections?}
+\todo{remove subsections?}
 \subsection{Seamless Translation Probability}
 The translation probability follows the general translation probability formula \autoref{formula:translation Probability}. To get the probability of the top token at each decoding step the functionality from huggingface is used, which is able to return the log-probabilities and scores, so the processed log-proabbilites, of all vocabulary entries. 
 Then to get the final probability of the sequence the top token of each decoding step and it's probability is picked and the then summed up and divided by the number of decoding steps that are in the sequence.
