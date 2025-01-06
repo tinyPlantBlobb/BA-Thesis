@@ -42,7 +42,8 @@
 \end{table}
     
 
-\section{Other interesting pearson correlation scores}
+\section{Other interesting pearson correlation scores}\label{dropout softmax entropy}
+
 The pearson correlation of the entropies in dropout shows a significant prediction value with a correlation of the mean of -0.23241 and 0.29450, and a correlation of -0.17032 and - 0.12806 of the variance of the entropies on seamless and deltaLM respectively. Which is higher than just the regular translation probability and variance but it comes with a significant cost to compute as calculating the softmax entropy is very rarely implemented in frameworks.
 %% ---------------------
 %% | / Example content |
