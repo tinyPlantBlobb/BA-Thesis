@@ -1,0 +1,18 @@
+\tikzstyle{block} = [rectangle, draw, text width=3.5cm, text centered, minimum height=1.2cm, fill=blue!20]
+\tikzstyle{arrow} = [thick,->,>=stealth]
+\tikzstyle{inputoutput} = [text width = 3.5cm, minimum height=1cm, text centered]
+
+\begin{tikzpicture}
+    % Nodes
+    \node (input) [inputoutput] {Speech Input \\(Source Language)};
+    \node (asr) [block, below of=input, node distance=2cm] {Automatic Speech \\ Recognition (ASR)};
+    \node (translation) [block, right of=asr, node distance=5cm] {Text Translation \\ (e.g., MT model)};
+    \node (output) [inputoutput, below of=translation, node distance=2cm] {Speech Output \\ (Target Language)};
+
+    % Arrows (angled)
+    \draw [arrow] (input) -- (asr);
+    \draw [arrow] (asr) -- (translation);
+    \draw [arrow] (translation) -- (output);
+
+    % Labels for processes
+    \end{tikzpicture}
