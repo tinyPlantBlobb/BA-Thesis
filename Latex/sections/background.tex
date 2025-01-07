@@ -3,7 +3,20 @@
 This chapter explains the methods and concepts these are separated in 3 parts one for basic knowledge, one for the evaluation methods used and one for the used models. 
 
 \section{Basic Knowledge}
-Important knowledge for the contents of the thesis mainly the what translation, automatic Speech recognition and dropout.
+Important knowledge for understanding the contents of the thesis, this included how an Encoder-decoder model can generate an output sequence, what machine translation, automatic Speech recognition and dropout are. As well as a section about the Models used, the different basic model architectures and an explanation of the model architectures of the specific models used in the experiments.
+
+\subsection{Sequence Generation}
+An encoder-decoder model generates a sequence $y=(y_1\dots y_m)$ from an input sequence $x=(x_1\dots x_n)$, by maximizing the Probability $$P(y|x)$$.
+This probability is a conditional probability, which is used in Bayesian inference and uses Bayes rule to break such a conditional probability down into three different probabilities. Bayes rule is described as $P(a|b)=\frac{P(b|a)P(a)}{P(b)}$ 
+Because of Bayed rule the Sequence Probability can be written as $$P(y|x)= \frac{P(x|y)P(y)}{P(x)}$$ since we know that the input sequence is constant the Probability can be simplified to $P(x|y)P(y)$
+So if only the first token $y_1$ of the sequence $y$ is supposed to be generated this would be done by $$P(y_1)=argmax _{y_1\in V} P(y_1|x)$$ as the first token of the sequence only depends on the input sequence x and is the determined by the highest probability, which is what the argmax stands for, in the vocabulary. 
+The second token in the sequence in turn depends on the input sequence and the first token, so the probability is 
+$$argmax_{y_2\in V}P(y_2|y_1,x)$$. This pattern continues and because of the chain rule of probability we can write the probability for generating the whole sequence as $$P(y|x)= \prod_{i=1}^m P(y_i|x, y_{<i})$$. \cite[chapters~3, 9.5, 10, 13]{jm3}
+This behaviour of being able to generate the next token in the sequence just from the previous elements is also called autoregressive generation. 
+
+For the actual models this probability of generating the i-th token is the probability after applying the softmax to the probability distribution over the vocabulary at the last layer of the model and the model parameters $\Theta$ are also part of the conditional part of the probability $P(y_i|y_{<i}, x, \Theta)$. This means the mathematical description of the sequence probability is $$p(y|x,\Theta)=\prod_{i=1}^T p(y_i|y_{<i}, x, \Theta) $$
+%\subsection{Bayesian probabilities}
+%Bayes theorem says that the conditional probability $P(A|B)$, which is the probability that event A occurs if event B is true, can be In this $P(A|B)$ is also called the posterior probability, $P(B|A)$ is the conditional probability that the event B occurs if the event A is true. However it can also be interpreted as the likelihood that event A happens given a fixed B. $P(A)$ and $P(B)$ are the probabilities of the events A and B if there are no other conditions given and are also called the prior probabilities. A conditional probability can also be written as $P(A|B)=\frac{P(A\cap B)}{P(B)}$ if $P(B)\neq0$ this means it's the probability that the events A and B are true divided by the Probability that event B is true.
 
 \subsection{Automatic Speech Recognition}
 Automatic speech recognition systems or short ASR systems are systems that recognise and transcribe spoken language into written text.
@@ -31,33 +44,26 @@ This architecture is shown in \autoref{fig:asrencoderdecoder schmeatic}.
 Translation is the practice of translating text or language from one language into another language. 
 This can be done by hand by a human or in a very statical approach where a dictionary is used to directly translate the text. 
 Or with a machine learning approach where a Neural network learns the representations of one language and how this translates in a different language. 
-One of those Machine learning approaches is to use 
-\todo{ml approach expand, explain, formulate}
+The current standard Machine translation (MT) architecture is a encoder-decoder transformer architecture, which is explained more in depth later. 
+As most sentences can be translated independently from each other this is what is usually done in machine translation. To translate a sentence from the source language into the target language the MT system has to generate the corresponding target sentence. \cite[chapter~13.2]{jm3}
+
+For example the German source sentence: \color{blue}"Der Apfel ist grün."\color{black} would have to be translated into the English sentence \color{blue}"The apple is green"\color{black}. 
+
+For a MT model to be able to do this translation it has to be trained on on data, this data is a large amount of matched sentences in both the source and target language. The training itself is supervised machine learning, this means the system has to learn how to map the source sentences to the target sentences. To do this the input is encoded into tokens, these can be words, subwords, so parts of words, or characters. It is more useful to do this with units that are smaller than words, these are called subword tokens, as they have a bunch of advantages that get more clear later. The subword tokens have the advantage, that they make it easier to generate the vocabulary of the MT system, which is fixed in advance usually by the training. 
+In an encoder decoder architecture the encoder will take the input sentence in the source language, produce the context which is passed to the decoder which produces the decoded target language sentence. \cite[chapter~13.2]{jm3}
+
+%A really common subword tokenization method is Byte Pair Encoding (BPE) \cite[chapter~13.2]{jm3}
 
 \subsubsection{Speech translation}
 Speech translation or spoken language translation is similar to the regular translation but it has, like the name says, spoken language as the basis for the translation instead of text. 
-In Machine translation this is done either with cascaded models or end-to-end models.
-Cascaded models have been used for a long time but end-to-end models have gained quite a lot more popularity in the last years as they promise better results and ideas that have proven to work well in text-to-text neural machine translation.
+There are 2 main approaches to Speech Translation (ST) cascaded models, which consist of a ASR model and a MT model, and end-to-end models, which have are only one model, most of the time a Encoder-decoder architecture.
+Cascaded models have been used for a long time but end-to-end models have gained quite a lot more popularity in the last years as they promise better results and ideas that have proven to work well in text-to-text MT have been tested for ST, with good results.
 
-\todo{expand, maybe citations, formulations}
+To train a cascaded ST model one would have to train the ASR system and the MT system, this can be done separately as long as the ASR system is trained for the source language and the MT system is trained to translate form the source to the target language. This makes cascaded systems quite convenient to train as different datasets can be used to train both parts of the model as long as they have vocabulary overlap. 
+To train an end to end ST system on the other hand a dataset with audio and corresponding translations in the target language is needed, as the system has to learn the mapping between the audio sequences and the translated sentences. This process works very similar to the MT training process. However it is significantly more time intensive to create such datasets, especially if a more conversational and casual setting of spoken language is looked for. 
+\todo{maybe citations}
 
-\subsection{Bayesian probabilities}
-probability maths where conditional probabilities are used, esp. when working with conditional probability distributions.
-Bayes theorem says that the conditional probability $P(A|B)$, which is the probability that event A occurs if event B is true, can be described as $P(A|B)=\frac{P(B|A)P(A)}{P(B)}$ if $P(B)\neq0$. 
-In this $P(A|B)$ is also called the posterior probability, $P(B|A)$ is the conditional probability that the event B occurs if the event A is true. 
-However it can also be interpreted as the likelihood that event A happens given a fixed B. 
-$P(A)$ and $P(B)$ are the probabilities of the events A and B if there are no other conditions given and are also called the prior probabilities. 
-A conditional probability can also be written as $P(A|B)=\frac{P(A\cap B)}{P(B)}$ if $P(B)\neq0$ this means it's the probability that the events A and B are true divided by the Probability that event B is true.
 
-\todo{explain the autoregressive manner used in these models, i.e., the probability of a generated token is based on the source sentence and the previous output prefixes.}
-
-\subsection{Probabilites}
-The word probability in this thesis is primarily used to describe the probability of a token or sequence from the output of a neural network.
-The probability is obtained by taking the softmax of the input representation at the last layer of the model, which is a probability distribution over the whole vocabulary of the model. 
-If the probability of a single token is looked at it is the softmax of the last layer in the model after the output token has been determined 
-values at the last layer of the model to estimate quality (normal mode) for transctiption and transltation 
-this all results in the formula $$p(y|x,\Theta)=\prod_{t=1}^T p(y_t|y_{<t}, x, \Theta) $$ where $\Theta$ is the model parameters, x is the input sequence, the softmax is used at every decoding step.
-\todo{add example? }
 
 \subsection{Softmax}
 Taking the softmax of a vector or probability distribution maps each entry in that probability distribution to a value between 0 and 1 by setting all values below 0 to 0 and scaling everything that is about 0 to fall between 0 and 1 do that that sum of all the values is 1. 
@@ -69,15 +75,16 @@ This results in the softmaxed vector $softmax(x)=(0,0,0.25,0.125,0,0.625)$. and 
 
 \subsection{Entropy}
 \label{entropy}
-In Information theory the entropy is the average amount of uncertainty or information that is found in a discrete probability distribution, more specifially the entropy of a random variable measures the average amount of uncertainty that is connected to that random variable 
-The concept of Entropy was proposed by Shannon for the context of measuring the information in transmitted data \cite{shannonentropy}.
+In Information theory the entropy is the average amount of uncertainty or information that is found in a discrete probability distribution, more specifically the entropy of a random variable measures the average amount of uncertainty that is connected to that random variable.
+The concept of Entropy was proposed by Shannon for the context of measuring the information in transmitted data \cite{shannonentropy}. Entropy is also used in thermodynamics where is is used to denote the randomness, disorder or uncertainty of systems and it is the central point of the 2. law of thermodynamic.
+
 The entropy is mathematically defined as $- \sum_{x\in \chi} p(x) log p(x)$ where p is a probability and $\chi$ is the probability distribution and x is an element from that probability distribution.
 
-\todo{add citations, more explainations}
+\todo{more explanations?}
 
 \subsection{Dropout}
 Dropout in the context of machine learning usually refers to the process of dropping out, so omitting, units in the neural network. 
-One variation of these dropout methods is Monte-Carlo dropout \cite{gal2016dropoutbayesianapproximationrepresenting}, in short MC dropout, which is the process of masking neurons in a Deep Neural Network randomly, based on a Bayesian probability to 0. 
+One variation of these dropout methods is Monte-Carlo dropout \cite{gal2016dropoutbayesianapproximationrepresenting}, in short MC dropout, which is the process of masking neurons in a Deep Neural Network randomly, based on a Bayesian probability to 0. A graphic example of this can be seen in \autoref{fig:dropout}
 This is usually done during training to reduce the chance of the model overfitting on the trainings data and this application was first proposed by Srivastava et al. \cite{JMLR:v15:srivastava14a}. 
 
 Nowadays it is very common to use dropout in general and in particular MC dropout during training.
@@ -85,9 +92,22 @@ Monte Carlo Dropout has also been utilized in Deep Neural Networks to measure th
 This is mostly used in deep architectures but is also used to measure the uncertainty in Auto-encoders. \cite{gawlikowski2022surveyuncertaintydeepneural}
 Using dropout to measure the uncertainty has been done as most NN outputs are deterministic so masking parts of the model with 0 should lead to different results with the same input as has been done in \cite{gal2016dropoutbayesianapproximationrepresenting}
 
+\begin{figure}[ht]
+    \centering
+    \begin{subfigure}{0.45\textwidth}
+        \includegraphics[width=\linewidth]{Latex//sections//images/nondropout.png}
+    \end{subfigure}
+    \begin{subfigure}{0.45\textwidth}
+        \includegraphics[width=\linewidth]{Latex//sections//images/dropout.png}
+    \end{subfigure}
+    
+    \caption{dropout in a basic Neural Network model}
+    \label{fig:dropout}
+\end{figure}
+
 The use of dropout to measure the models uncertainty in Automatic Speech recognition has been tried by Vyas et al. \cite{8683086} before.
 They have found that most uncertainty in ASR stems from noisy input data, especially since non-noisy data produces good transcriptions a lot of the time if the model knows all used words and names. 
-\todo{fully formulate, potentially graphic?}
+\todo{fully formulate}
 
 %TODO
 
@@ -104,11 +124,11 @@ All of the models used are such encoder-decoder models.
     \label{fig:encoderdecodermodel}
 \end{figure}
 
-Encoder-Decoder Models are Models that contain a Encoder and a Decoder
-The encoder creates an embedding of the input, this embedding is also called the context or context representation. While embedding the encoder can also add additional context to the representation. 
+Encoder-Decoder Models are Models that contain a Encoder and a Decoder, the encoder creates an embedding of the input, this embedding is also called the context or context representation. While embedding the encoder can also add additional context to the representation. 
 This context representation is then input into the decoder, which decodes it into a form that is for example a human readable text. 
 The basic idea of this can be seen in \autoref{fig:encoderdecodermodel}.
 As mentioned before the Encoder-Decoder Architecture is used for Sequence-to-Sequence models, since it allows inputting a sequence and outputting a sequence that can be a different length than the input sequence. \cite[chapter~8.7]{jm3}
+
 Using an encoder-decoder architecture as a sequence to sequence translation model was first introduced by Sutskever et. al \cite{sutskever2014sequencesequencelearningneural}.
 They proposed it using LSTMs, which stands for long short Term mermory networks and are a kind of Recurrent neural networks (RNN) that can remember information longer than regular RNNs by having a more complex internal structure than RNNs, as the makeup of both the encoder and decoder. 
 A simplified example of the translation process that was proposed is pictured in \autoref{fig:encoderdecodertranslationexample}.
@@ -118,18 +138,19 @@ A simplified example of the translation process that was proposed is pictured in
     \caption{Example of a single sentence translation in a basic RNN encoder-decoder approach. the source and target sentence are concatenated with a seperator token. The decoder then uses the context information from the last hidden state of the encoder. taken from \cite{jm3}} 
     \label{fig:encoderdecodertranslationexample}
 \end{figure}
-\todo{
-expand, maybe different graphics, add basic example
-}
 
 
 \subsection{Transformer}
 Neural Network architecture that was first introduced in the paper Attention is all you need \cite{vaswani2023attentionneed} that makes use of self-attention mechanisms. 
-It has a Encoder-Decoder structure whith N encoder blocks that are made up out of Multi-Head Attention blocks and feed forward networks both of which have a add and normalization layer behind that. 
-The Decoder part consists of N blocks that contain a Masked multi-head attention block, a Multi-layer attention block and a feed forward neural network 
-in the end there is a linear layer and a softmax layer
 
-for the graphical represenation of the transformer see \autoref{fig:transformermodel}
+The attention mechanism is responsible for weighing and combining the representations from other relevant tokens in the context of the layer k-1 to create the representation for tokens in layer k. This creates contextual embeddings for words in a sequence by adding meaning from contextually relevant words to the embedding. 
+Self-attention mechanisms make use of this attention and also use information from all previous representations in the context window, depending on the model the transformers self-attention mechanism can also make use of the representations of later tokens. This all describes a single attention head, the transformer has several of these which attend to different purposes in the context.
+
+The Transformer has a Encoder-Decoder structure with N encoder blocks that are made up out of Multi-Head Attention blocks and feed forward networks both of which have a add and normalization layer behind that. 
+The N blocks can map an entire context window of input vectors $(x_1\dots x_n)$ to a of the same length window of output vectors $(h_1\dots h_n)$ 
+The Decoder part consists of N blocks that contain a Masked multi-head attention block, a Multi-layer attention block and a feed forward neural network, in the end there is a linear layer and a softmax layer. \cite[chapter~9]{jm3}
+
+The structure of the transformer architecture is pictured in \autoref{fig:transformermodel}.
 \begin{figure}
         \centering%
         \includegraphics[width=0.5\linewidth]{Latex//sections//images/transformermodel.png}
@@ -169,33 +190,13 @@ Cascaded Speech translation Models consist of 2 parts a part that is responsible
 
 \subsection{End-to-End Models}
 End-to-End Speech translation models do not have the explicit split between the Automatic Speech Recognition model and the translation, this means that such a model gets audio as an input and outputs the text in the target language. 
-End-to-End models are trained to perform a task from the raw input, which in this case is audio, to the output, in this case the corresponding translation, without any intermediate processing from outside the model or feature-engineering in sub-models. \autoref{fig:end-to-end models}
+End-to-End models are trained to perform a task from the raw input, which in the case of Speech translation case is audio, to the output, in this case the corresponding translation, without any intermediate processing from outside the model or feature-engineering in sub-models. \autoref{fig:end-to-end models}
+
 \begin{figure}
     \centering%
-    \tikzstyle{block} = [rectangle, draw, text width=3cm, text centered, minimum height=1.2cm, fill=blue!20]
-\tikzstyle{arrow} = [thick,->,>=stealth]
-\begin{tikzpicture}
-    % Nodes
-    \node(input) [align=left] {Spoken language};
-    \node(encoder) [block, right of=input, xshift=2.8cm] {Encoder};
-    \node(bottleneck) [block, below of=encoder, yshift=-1.5cm, fill=red!20] {Representation};
-    \node(decoder) [block, below of=bottleneck, yshift=-1.5cm] {Decoder};
-    \node (output) [align=right, right of=decoder, xshift=3cm] {Translated text};
+    \includegraphics{Latex/sections/images/end-to-end model.tikz}
 
-    % Arrows
-    \draw [arrow](input) -- (encoder);
-    \draw [arrow] (encoder) -- (bottleneck);
-    \draw [arrow] (bottleneck) -- (decoder);
-    \draw [arrow] (decoder) -- (output);
-
-    % Labels
-    \node[below of=encoder] {Encoding Process};
-    \node[below of=bottleneck] {Bottleneck};
-    \node[below of=decoder] {Decoding Process};
-
-\end{tikzpicture}
-
-\caption{basic overview of a encoder-decoder model architecture}
+\caption{basic overview of a end-to-end model architecture}
 \label{fig:end-to-end models}
 \end{figure}
 
@@ -218,12 +219,10 @@ and put in the Encoder blocks.
         \label{fig:whispermodel}
     \end{figure}
 
-%TODO
+
 \subsection{Seamless}
 
-Seamless is a Multimodal model 
-experiments were run on \cite{seamless2023}, specifically the v2 large version which is an improved version of the SeamlessM4T model, 
-of it both for the cascaded part and the end-to-end part
+Seamless is a Multimodal model, the experiments were run on \cite{seamless2023}, specifically the v2 large version which is an improved version of the SeamlessM4T model, both for the cascaded part and the end-to-end part of the experiments.
 
 Seamless is a multilanagual multimodal model that uses a Transformer architecture. 
 the architecture was proposed in \cite{seamless2023}
@@ -237,7 +236,7 @@ the general architecture is shown in \autoref{fig:seamlessmodel}, for this thesi
         \label{fig:seamlessmodel}
 \end{figure}
     
-v2 uses a non autoregressive text to unit decoding which is the main difference to the first version however this change does not change much for this thesis as it only operates on Text-to-Text and Speech-to-text translation. 
+Seamless v2 uses a non autoregressive text to unit decoding which is the main difference to the first version however this change does not change much for this thesis as it only operates on Text-to-Text and Speech-to-text translation. 
 The other change for v2 is that it uses a w2v-Bert 2.0 \cite{chung2021w2vbertcombiningcontrastivelearning} encoder that is trained self-supervised on 4.5 million hours of unlabled audio, as compared to the previous 1 million hours of unlabeled data. 
 SeamlessM4T has been trained on unlabeled, human-labeled, pseudo-labled and automatically aligned data, where the text-to-text-translation (T2TT) was done on NLLB data \cite{nllbteam2022languageleftbehindscaling}
 which is a method of creating low-resource language datasets with a combination of using flores \cite{guzmán2019floresevaluationdatasetslowresource} and NLLB Seed dataset, which is a set of professionally translated sentences in the wikipedia domain. 
@@ -270,7 +269,6 @@ The interleaved decoder is then initialised with the layers from the pretrained 
 The leftover components of the decoder are also initialised the same as the pretrained encoder. 
 This means that all of the sublayers are initialised with the pretrained weights and none of them use randomised names. 
 
-%TODO
 \begin{figure}
     \centering%
     \includegraphics[width=0.5\linewidth]{Latex/sections/images/interleaveddecoder.png}
@@ -278,6 +276,8 @@ This means that all of the sublayers are initialised with the pretrained weights
     \label{fig:interleaved decoder}
     %source dlm paper
 \end{figure}
+
+
 
 \section{Evaluation metrics}
  for the evaluation of the results a couple of terms, algorithms, methods are used. The explanation of them is in this section. 

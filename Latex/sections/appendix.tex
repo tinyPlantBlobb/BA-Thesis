@@ -14,37 +14,31 @@
 %% -------------------
 %% | Example content |
 %% -------------------
-\section{First Appendix Section}
+
+\section{Other interesting pearson correlation scores}\label{dropout softmax entropy}
+
+The pearson correlation of the entropies in dropout shows a significant prediction value with a correlation of the mean of -0.23241 and 0.29450, and a correlation of -0.17032 and - 0.12806 of the variance of the entropies on seamless and deltaLM respectively. Which is higher than just the regular translation probability and variance but it comes with a significant cost to compute as calculating the softmax entropy is very rarely implemented in frameworks.
+\section{references graphs}
 \label{sec:appendix:FirstSection}
-		
+Since there are a lot of plots that contain plots over the reference scores it might be intersting to see how those references fall over the data set. 
+
 \setcounter{figure}{0}
 
 \begin{figure}[ht]
     \centering
     \begin{subfigure}{0.7\textwidth}
-    \includegraphics[width=\linewidth]{Latex/sections/images/werref.png}
+    \includegraphics[width=\linewidth]{Latex/sections/images/seamlesswerref.png}
     \caption{all of the reference scores of the dataset, the x axis is the lines in teh dataset, the y axis is the WER scores}
     \end{subfigure}
     \begin{subfigure}{0.7\textwidth}
-        \includegraphics[width=\linewidth]{code/references.png}
+        \includegraphics[width=\linewidth]{Latex/sections/images/seamlessreferences.png}
+        \caption{refrence coment scores from seamless}
     \end{subfigure}
     \label{fig:reference scatterplot}
 \end{figure}
 
-\begin{table}[]
-    \centering
-    \begin{tabular}{c|c}
-         &  \\
-         & 
-    \end{tabular}
-    \caption{Caption}
-    \label{seamlesse2enonesense}
-\end{table}
-    
 
-\section{Other interesting pearson correlation scores}\label{dropout softmax entropy}
 
-The pearson correlation of the entropies in dropout shows a significant prediction value with a correlation of the mean of -0.23241 and 0.29450, and a correlation of -0.17032 and - 0.12806 of the variance of the entropies on seamless and deltaLM respectively. Which is higher than just the regular translation probability and variance but it comes with a significant cost to compute as calculating the softmax entropy is very rarely implemented in frameworks.
 %% ---------------------
 %% | / Example content |
 %% ---------------------
