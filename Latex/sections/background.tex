@@ -54,24 +54,45 @@ In an encoder decoder architecture the encoder will take the input sentence in t
 
 %A really common subword tokenization method is Byte Pair Encoding (BPE) \cite[chapter~13.2]{jm3}
 
-\subsubsection{Speech translation}
-Speech translation or spoken language translation is similar to the regular translation but it has, like the name says, spoken language as the basis for the translation instead of text. 
+\subsection{Speech translation}
+Speech translation or spoken language translation is similar to the regular translation but it has, like the name says, spoken language as the basis for the translation instead of text.
 There are 2 main approaches to Speech Translation (ST) cascaded models, which consist of a ASR model and a MT model, and end-to-end models, which have are only one model, most of the time a Encoder-decoder architecture.
 Cascaded models have been used for a long time but end-to-end models have gained quite a lot more popularity in the last years as they promise better results and ideas that have proven to work well in text-to-text MT have been tested for ST, with good results.
+\subsubsection{Cascaded Models}
 
+Cascaded Speech translation Models consist of 2 parts a part that is responsible for transcribing the audio, which is usually done with an ASR model, and a part that is responsible for translating the resulting transcription, which is done with neural machine translation or statistical machine translation. A basic overview of this can be seen in \autoref{fig:cascadedmodel}.
+
+\begin{figure}[ht]
+    \centering%
+    \includegraphics{Latex/sections/images/cascadedmodel.tikz}
+\caption{Basic overview of a cascaded speech translation model}
+\label{fig:cascadedmodel}
+\end{figure}
 To train a cascaded ST model one would have to train the ASR system and the MT system, this can be done separately as long as the ASR system is trained for the source language and the MT system is trained to translate form the source to the target language. This makes cascaded systems quite convenient to train as different datasets can be used to train both parts of the model as long as they have vocabulary overlap. 
-To train an end to end ST system on the other hand a dataset with audio and corresponding translations in the target language is needed, as the system has to learn the mapping between the audio sequences and the translated sentences. This process works very similar to the MT training process. However it is significantly more time intensive to create such datasets, especially if a more conversational and casual setting of spoken language is looked for. 
-\todo{maybe citations}
+%TODO citation and expand
 
+\subsubsection{End-to-End Models}
+End-to-End Speech translation models do not have the explicit split between the Automatic Speech Recognition model and the translation, this means that such a model gets audio as an input and outputs the text in the target language. 
+End-to-End models are trained to perform a task from the raw input, which in the case of Speech translation case is audio, to the output, in this case the corresponding translation, without any intermediate processing from outside the model or feature-engineering in sub-models. \autoref{fig:end-to-end models}
+
+\begin{figure}[ht]
+    \centering%
+    \includegraphics{Latex/sections/images/end-to-end model.tikz}
+
+\caption{basic overview of a end-to-end model architecture}
+\label{fig:end-to-end models}
+\end{figure}
+
+To train an end to end ST system on the other hand a dataset with audio and corresponding translations in the target language is needed, as the system has to learn the mapping between the audio sequences and the translated sentences. This process works very similar to the MT training process. However it is significantly more time intensive to create such datasets, especially if a more conversational and casual setting of spoken language is looked for. 
 
 
 \subsection{Softmax}
-Taking the softmax of a vector or probability distribution maps each entry in that probability distribution to a value between 0 and 1 by setting all values below 0 to 0 and scaling everything that is about 0 to fall between 0 and 1 do that that sum of all the values is 1. 
+Taking the softmax of a vector or probability distribution maps each entry in that probability distribution to a value between 0 and 1 by setting all values below 0 to 0, scaling all values that are bigger than 0 to fall between 0 and 1, as well as make sure that the sum of all the values is 1. 
 Mathematically this can be described as $$softmax(z)_i=\frac{exp(z_i)}{\sum_j exp(z_i)}$$, where $z=(z_1\dots z_K)\in R^K$.
 
 So an example of applying the softmax to a probability distribution is this. Let $x= (0, -1, 2, 1, -5, 5)$ be a vector or probability distribution that the softmax is to be applied on. The sum of all non 0 values is $2+1+5=8$. Applying the softmax to each element goes like this: the first element, the 0, stays a 0, the second element, the -1, is negative so the the value is set to 0. The third element, 2, is positive, so it gets scaled down by the sum of all positive values $2/8=0.25$, the fourth element 1 also gets scaled down to 0.125. The sixth element is -5 so it gets set to 0 as well and the last element in the array is 5 whihc gets scaled down to be $5/8=0.625$.
 This results in the softmaxed vector $softmax(x)=(0,0,0.25,0.125,0,0.625)$. and this fullfills the requirement that $\sum_ix_i = 0+0+0.25+0.125+0+0.625= 1$. 
-\todo{citations and example}
+\todo{citations}
 
 \subsection{Entropy}
 \label{entropy}
@@ -109,24 +130,23 @@ The use of dropout to measure the models uncertainty in Automatic Speech recogni
 They have found that most uncertainty in ASR stems from noisy input data, especially since non-noisy data produces good transcriptions a lot of the time if the model knows all used words and names. 
 \todo{fully formulate}
 
-%TODO
-
 \section{Models}
 \label{ch:models}
 All the models used in this thesis use a encoder-decoder architecture and more specifically transformer architecture models, which is a subsection of encoder-decoder models. Encoder-Decoder models are also sometimes called sequence-to-sequence models as they are able to generate sequences of arbitrary length based on the input sequence.
 All of the models used are such encoder-decoder models. 
 
 \subsection{Decoder-Encoder}
-\begin{figure}[]
+
+Encoder-Decoder Models are Models that contain a Encoder and a Decoder, the encoder creates an embedding of the input, this embedding is also called the context or context representation. While embedding the encoder can also add additional context to the representation. 
+This context representation is then input into the decoder, which decodes it into a form that is for example a human readable text. 
+The basic idea of this can be seen in \autoref{fig:encoderdecodermodel}.
+\begin{figure}[ht]
     \centering%
     \includegraphics{Latex/sections/images/encoderdecoder.tikz}
     \caption{basic overview of a encoder-decoder model architecture}
     \label{fig:encoderdecodermodel}
 \end{figure}
 
-Encoder-Decoder Models are Models that contain a Encoder and a Decoder, the encoder creates an embedding of the input, this embedding is also called the context or context representation. While embedding the encoder can also add additional context to the representation. 
-This context representation is then input into the decoder, which decodes it into a form that is for example a human readable text. 
-The basic idea of this can be seen in \autoref{fig:encoderdecodermodel}.
 As mentioned before the Encoder-Decoder Architecture is used for Sequence-to-Sequence models, since it allows inputting a sequence and outputting a sequence that can be a different length than the input sequence. \cite[chapter~8.7]{jm3}
 
 Using an encoder-decoder architecture as a sequence to sequence translation model was first introduced by Sutskever et. al \cite{sutskever2014sequencesequencelearningneural}.
@@ -146,59 +166,16 @@ Neural Network architecture that was first introduced in the paper Attention is 
 The attention mechanism is responsible for weighing and combining the representations from other relevant tokens in the context of the layer k-1 to create the representation for tokens in layer k. This creates contextual embeddings for words in a sequence by adding meaning from contextually relevant words to the embedding. 
 Self-attention mechanisms make use of this attention and also use information from all previous representations in the context window, depending on the model the transformers self-attention mechanism can also make use of the representations of later tokens. This all describes a single attention head, the transformer has several of these which attend to different purposes in the context.
 
-The Transformer has a Encoder-Decoder structure with N encoder blocks that are made up out of Multi-Head Attention blocks and feed forward networks both of which have a add and normalization layer behind that. 
+The Transformer has a Encoder-Decoder structure with N encoder blocks that are made up out of Multi-Head Attention blocks and feed forward networks both of which have a add and normalization layer behind that, which each take the input token $x_i$, where i is the position of the token, put it through the Multi-Head Attention add it back to $x_i$, this is then put into the feed forward network and addad back onto the previous result. This process can be seen in \autoref{fig:transformermodel} along with the general architecture of the transformer. 
 The N blocks can map an entire context window of input vectors $(x_1\dots x_n)$ to a of the same length window of output vectors $(h_1\dots h_n)$ 
 The Decoder part consists of N blocks that contain a Masked multi-head attention block, a Multi-layer attention block and a feed forward neural network, in the end there is a linear layer and a softmax layer. \cite[chapter~9]{jm3}
 
-The structure of the transformer architecture is pictured in \autoref{fig:transformermodel}.
-\begin{figure}
+\begin{figure}[ht]
         \centering%
         \includegraphics[width=0.5\linewidth]{Latex//sections//images/transformermodel.png}
         \caption{Transformer model architecture Vaswani et. all 2017}
         \label{fig:transformermodel}
     \end{figure}
-\todo{add more, esp. more explainations}
-
-\subsection{Cascaded Models}
-\tikzstyle{block} = [rectangle, draw, text width=3.5cm, text centered, minimum height=1.2cm, fill=blue!20]
-\tikzstyle{arrow} = [thick,->,>=stealth]
-\tikzstyle{inputoutput} = [ellipse, draw, text width = 3.5cm, minimum height=1cm, text centered, fill=green!20]
-
-\begin{figure}
-    \centering%
-    \begin{tikzpicture}
-    % Nodes
-    \node (input) [inputoutput] {Speech Input \\(Source Language)};
-    \node (asr) [block, below of=input, node distance=3cm] {Automatic Speech \\ Recognition (ASR)};
-    \node (translation) [block, right of=asr, node distance=5cm] {Text Translation \\ (e.g., MT model)};
-    \node (output) [inputoutput, below of=translation, node distance=3cm] {Speech Output \\ (Target Language)};
-
-    % Arrows (angled)
-    \draw [arrow] (input) -- (asr);
-    \draw [arrow] (asr) -- (translation);
-    \draw [arrow] (translation) -- (output);
-
-    % Labels for processes
-    \node[below of=asr] {Speech Recognition};
-    \node[below of=translation] {Text Translation};
-    \end{tikzpicture}
-\caption{Basic overview of a cascaded speech translation model}
-\label{fig:cascadedmodel}
-\end{figure}
-Cascaded Speech translation Models consist of 2 parts a part that is responsible for transcribing the audio, which is usually done with an ASR model, and a part that is responsible for translating the resulting transcription, which is done with neural machine translation or statistical machine translation. A basic overview of this can be seen in \autoref{fig:cascadedmodel}.
-%TODO citation and expand
-
-\subsection{End-to-End Models}
-End-to-End Speech translation models do not have the explicit split between the Automatic Speech Recognition model and the translation, this means that such a model gets audio as an input and outputs the text in the target language. 
-End-to-End models are trained to perform a task from the raw input, which in the case of Speech translation case is audio, to the output, in this case the corresponding translation, without any intermediate processing from outside the model or feature-engineering in sub-models. \autoref{fig:end-to-end models}
-
-\begin{figure}
-    \centering%
-    \includegraphics{Latex/sections/images/end-to-end model.tikz}
-
-\caption{basic overview of a end-to-end model architecture}
-\label{fig:end-to-end models}
-\end{figure}
 
 
 \todo{split out specific model stuff?}
@@ -290,14 +267,15 @@ The WER can be computed as $$WER=\frac{S+D+I}{N}=\frac{S+D+I}{S+D+C}$$ where S i
 
 \subsection{Comet}
 Comet, in full Cross-lingual Optimized Metric for Evaluation of Translation, is a neuronal framework for machine translation evaluation that was proposed in \cite{rei-etal-2020-comet} and improved in \cite{rei-etal-2022-comet}.
-For this thesis relevant is the Estimator model which used to estimate a quality score based off of a source sentence and a translation reference. 
+For this thesis relevant is the Estimator model which used to estimate a quality score based off of a source sentence and a translation reference. The estimator model architecture is pictured in \autoref{comet architecture}.
+
 To do this the hypothesis translation, the source sentence and the reference translation are encoded independently using a pretrained encoder, that is a crosslingual model like XLM, a multilingual BERT or XLM-RoBERTa, the resulting embeddings are padded into a pooling layer where they create a sentence embedding for each segment. the Embeddings are then combinded and concatenated into a single vector that is passed into a regression layer that then regresses on reference scores from DA, MQM and HTER. 
 This model is trained to minimize the Mean Squared error. 
 
 in the original implementation this does not give a score from 0 to 1 based on how good or bad the translation is, but the impoved version does this, where a score of 1 means a perfect translation and a score of 0 means a bad translation. Besides this only hyper-parameters have been changed in comparison to the original version as well as more training has been done.
 \begin{figure}[ht]
     \centering
-    \includegraphics[width=0.5\linewidth]{Latex//sections//images/cometestimatormodel.png}
+    \includegraphics[width=0.3\linewidth]{Latex//sections//images/cometestimatormodel.png}
     \caption{overview of the comet estimator model architecture from \cite{rei-etal-2020-comet}}
     \label{comet architecture}
 \end{figure}
@@ -305,9 +283,15 @@ in the original implementation this does not give a score from 0 to 1 based on h
 \todo{expand, explain more?}
 
 \subsection{Pearson-correlation}
-method to see how correlated 2 sets of values are
-is 1 if it's correlated, so a linear relation between the 2 value sets and -1 if it's inversely correlated 
-if the pearson r value is 0 the sets are not correlated at all
+The Pearson correlation, or Pearson correlation coefficient (PCC) is a method to see how correlated 2 sets of values are. The r value is the covariance of the 2 sets divided by the product of their standard deviations $$PCC(x,y) =\frac{\sum_{i=1}^n (x_i-\overline{x})(y_i-\overline{y})}{\sqrt{\sum_{i=1}^n (x_i-\overline{x})^2}\sqrt{\sum_{i=1}^n(y_i-\overline{y}})^2}$$ where $\overline{x},  \overline{y}$ are the means of the sets of values, $x_i, y_i$ are individual elements of the set of values, n is the sample size. 
+Due to this definition the possible values for the PCC are between -1 and 1, where a value of 1 means the sets are correlated, so a linear relation between the 2 value sets exists. A value of -1 is the result of the PCC if it's inversely correlated. 
+If the value is 0 calculated this means the sets are not correlated at all. A graphical representation of these scores can be found in \autoref{fig:pearosncorr}
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=0.7\linewidth]{Latex//sections//images/pearson correlation.png}
+    \caption{graphical representation of different pearson correlation scores \cite{pearsoncorrimage}}
+    
+    \label{fig:pearosncorr}
+\end{figure}
 
-it's symmetric, so switching the order of the inputs does not change the correlation score
-\todo{citations, expand, more explainantions how it works, formula}
+The PCC has the advantage that it's symmetric, so switching the order of the inputs does not change the correlation score, but it has the draw back that it can be numerically unstable, this means that if the values in the sets are right the pearson correlation the most significant digits are eliminated and digits that are prone to rounding errors are the new most significant digits. 
