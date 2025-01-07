@@ -5,7 +5,7 @@ This chapter explains the methods and concepts these are separated in 3 parts on
 \section{Basic Knowledge}
 Important knowledge for understanding the contents of the thesis, this included how an Encoder-decoder model can generate an output sequence, what machine translation, automatic Speech recognition and dropout are. As well as a section about the Models used, the different basic model architectures and an explanation of the model architectures of the specific models used in the experiments.
 
-\subsection{Sequence Generation}
+\subsection{Sequence Generation}\label{sect: sequence generation}
 An encoder-decoder model generates a sequence $y=(y_1\dots y_m)$ from an input sequence $x=(x_1\dots x_n)$, by maximizing the Probability $$P(y|x)$$.
 This probability is a conditional probability, which is used in Bayesian inference and uses Bayes rule to break such a conditional probability down into three different probabilities. Bayes rule is described as $P(a|b)=\frac{P(b|a)P(a)}{P(b)}$ 
 Because of Bayed rule the Sequence Probability can be written as $$P(y|x)= \frac{P(x|y)P(y)}{P(x)}$$ since we know that the input sequence is constant the Probability can be simplified to $P(x|y)P(y)$
@@ -32,7 +32,7 @@ This mel-log spectrogram encodes the audio frequencies onto the mel-scale which 
 The input features are then put into the encoder after being subsampled down to a shorter sequence, as the input feature sequence is quite long. 
 As per how an encoder-decoder architecture works the decoder then takes the encoder representation and decodes it into a text sequence. 
 This architecture is shown in \autoref{fig:asrencoderdecoder schmeatic}.
-\begin{figure}[h]
+\begin{figure}[ht]
     \centering
     \includegraphics[width=\linewidth]{Latex//sections//images/asrencoderdecoder.png}
     \caption{Schematic architecture for an encoder-decoder speech recognizer from \cite{jm3}}
@@ -58,8 +58,8 @@ In an encoder decoder architecture the encoder will take the input sentence in t
 Speech translation or spoken language translation is similar to the regular translation but it has, like the name says, spoken language as the basis for the translation instead of text.
 There are 2 main approaches to Speech Translation (ST) cascaded models, which consist of a ASR model and a MT model, and end-to-end models, which have are only one model, most of the time a Encoder-decoder architecture.
 Cascaded models have been used for a long time but end-to-end models have gained quite a lot more popularity in the last years as they promise better results and ideas that have proven to work well in text-to-text MT have been tested for ST, with good results.
-\subsubsection{Cascaded Models}
 
+\subsubsection{Cascaded Models}
 Cascaded Speech translation Models consist of 2 parts a part that is responsible for transcribing the audio, which is usually done with an ASR model, and a part that is responsible for translating the resulting transcription, which is done with neural machine translation or statistical machine translation. A basic overview of this can be seen in \autoref{fig:cascadedmodel}.
 
 \begin{figure}[ht]
@@ -91,8 +91,7 @@ Taking the softmax of a vector or probability distribution maps each entry in th
 Mathematically this can be described as $$softmax(z)_i=\frac{exp(z_i)}{\sum_j exp(z_i)}$$, where $z=(z_1\dots z_K)\in R^K$.
 
 So an example of applying the softmax to a probability distribution is this. Let $x= (0, -1, 2, 1, -5, 5)$ be a vector or probability distribution that the softmax is to be applied on. The sum of all non 0 values is $2+1+5=8$. Applying the softmax to each element goes like this: the first element, the 0, stays a 0, the second element, the -1, is negative so the the value is set to 0. The third element, 2, is positive, so it gets scaled down by the sum of all positive values $2/8=0.25$, the fourth element 1 also gets scaled down to 0.125. The sixth element is -5 so it gets set to 0 as well and the last element in the array is 5 whihc gets scaled down to be $5/8=0.625$.
-This results in the softmaxed vector $softmax(x)=(0,0,0.25,0.125,0,0.625)$. and this fullfills the requirement that $\sum_ix_i = 0+0+0.25+0.125+0+0.625= 1$. 
-\todo{citations}
+This results in the softmaxed vector $softmax(x)=(0,0,0.25,0.125,0,0.625)$. and this fullfills the requirement that $\sum_ix_i = 0+0+0.25+0.125+0+0.625= 1$. \cite[chapter~5.3.1]{jm3}
 
 \subsection{Entropy}
 \label{entropy}
@@ -101,17 +100,12 @@ The concept of Entropy was proposed by Shannon for the context of measuring the 
 
 The entropy is mathematically defined as $- \sum_{x\in \chi} p(x) log p(x)$ where p is a probability and $\chi$ is the probability distribution and x is an element from that probability distribution.
 
-\todo{more explanations?}
 
 \subsection{Dropout}
 Dropout in the context of machine learning usually refers to the process of dropping out, so omitting, units in the neural network. 
-One variation of these dropout methods is Monte-Carlo dropout \cite{gal2016dropoutbayesianapproximationrepresenting}, in short MC dropout, which is the process of masking neurons in a Deep Neural Network randomly, based on a Bayesian probability to 0. A graphic example of this can be seen in \autoref{fig:dropout}
+One variation of these dropout methods is Monte-Carlo dropout \cite{gal2016dropoutbayesianapproximationrepresenting}, in short MC dropout, which is the process of masking neurons in a Deep Neural Network randomly, based on a Bayesian probability to 0. A graphic example of this masking values to 0 can be seen in \autoref{fig:dropout}
 This is usually done during training to reduce the chance of the model overfitting on the trainings data and this application was first proposed by Srivastava et al. \cite{JMLR:v15:srivastava14a}. 
-
-Nowadays it is very common to use dropout in general and in particular MC dropout during training.
-Monte Carlo Dropout has also been utilized in Deep Neural Networks to measure the uncertainty of the Network.   
-This is mostly used in deep architectures but is also used to measure the uncertainty in Auto-encoders. \cite{gawlikowski2022surveyuncertaintydeepneural}
-Using dropout to measure the uncertainty has been done as most NN outputs are deterministic so masking parts of the model with 0 should lead to different results with the same input as has been done in \cite{gal2016dropoutbayesianapproximationrepresenting}
+Nowadays it is very common to use dropout in general and in particular MC dropout during training for this exact reason.
 
 \begin{figure}[ht]
     \centering
@@ -126,9 +120,12 @@ Using dropout to measure the uncertainty has been done as most NN outputs are de
     \label{fig:dropout}
 \end{figure}
 
+Monte Carlo Dropout has also been utilized in Deep Neural Networks to measure the uncertainty of the Network.   
+This applications of it has been shown in \cite{gal2016dropoutbayesianapproximationrepresenting}. Gal et. al also demonstrate in this that using dropout can be interpreted as a bayesian approximation of Gaussian processes. To obtain the model uncertainty from this bayesian approximation they only use the predictive mean and uncertainty of stochastic forward passes. Both the predictive mean and the uncertainty that this delivers are part of the methods used to retrieved quality estimation scores in \autoref{ch:methods} and thus are explained more there.
+
+This use of Monte Carlo dropout is mostly used in deep architectures but is also used to measure the uncertainty in Auto-encoders. \cite{gawlikowski2022surveyuncertaintydeepneural}
 The use of dropout to measure the models uncertainty in Automatic Speech recognition has been tried by Vyas et al. \cite{8683086} before.
 They have found that most uncertainty in ASR stems from noisy input data, especially since non-noisy data produces good transcriptions a lot of the time if the model knows all used words and names. 
-\todo{fully formulate}
 
 \section{Models}
 \label{ch:models}
@@ -180,14 +177,13 @@ The Decoder part consists of N blocks that contain a Masked multi-head attention
 
 \todo{split out specific model stuff?}
 \subsection{Whisper}
-Whisper is a multilingual multitask Model that is focused on speech processing and was proposes in the Robust Speech Recogintion via Large-Scale Weak Supervsion paper \cite{radford2022robust}. 
-It's architecture is based on a classical Transformer Encoder-Decoder Architecture where the Transformer Encoder Blocks consist of self attention blocks and Multilayer perception blocks. 
+Whisper is a multilingual multitask Model that is focused on speech processing and was proposed in the Robust Speech Recogintion via Large-Scale Weak Supervsion paper \cite{radford2022robust}. 
+It's architecture is based on a classical Transformer Architecture where the Transformer Encoder Blocks consist of self attention blocks and Multilayer perception blocks. 
 The Transformer Decoder blocks use the learned position embeddings and tied input-output token representations. 
-The encoder and decoder have the same number of transformer blocks .
-The audio pre-processing is done by making sure the audio chunks that are then given to the model are 30 seconds long have ben sampled to 16,000 Hz and have a 80-channel log-magnitude Mel spectrogram representation, this log-mel spectrogramm is then computed with 25-milliseconf windows and a stride of 10 milliseconds. 
+The encoder and decoder have the same number of transformer blocks.
+The audio pre-processing is done by making sure the audio chunks that are then given to the model are 30 seconds long have ben sampled to 16,000 Hz and have a 80-channel log-magnitude Mel spectrogram representation, this log-mel spectrogramm is then computed with 25-millisecond windows and a stride of 10 milliseconds. If a audio chunk is shorter than 30 seconds it gets padded up to 30 seconds, if it is longer the audio gets split up. 
 This input is then scaled to be between -1 and 1 and is but through 2 convolutional layers that have a filter width of 3 and use the GELU function as activation function, the second of those 2 layers has a stride of 2. 
-The resulting data is then embedded with a sinusodial position embedding, which means %TODO
-and put in the Encoder blocks. 
+The resulting data is then added to a sinusoidal position embedding, which is a positional encoding embedding that uses sinusoidal functions, so the sine and cosine \cite{vaswani2023attentionneed}, and then forwarded into the Encoder blocks.
 
 \begin{figure}
         \centering%
@@ -197,31 +193,28 @@ and put in the Encoder blocks.
     \end{figure}
 
 
+
 \subsection{Seamless}
-
-Seamless is a Multimodal model, the experiments were run on \cite{seamless2023}, specifically the v2 large version which is an improved version of the SeamlessM4T model, both for the cascaded part and the end-to-end part of the experiments.
-
-Seamless is a multilanagual multimodal model that uses a Transformer architecture. 
-the architecture was proposed in \cite{seamless2023}
-as the Transformer it is using a Encoder-Decoder architecture that in the v2 version uses a w2v-Bert speech encoder which was pretrained on unlabeled audio data. 
-the general architecture is shown in \autoref{fig:seamlessmodel}, for this thesis only the left half up to the Transformer Text decoder of the figure is relevant. 
+Seamless \cite{seamless2023} is a multilingual, multimodal model that uses a transformer architecture for the text translation part and, in the v2 version which is used in the experiments, it uses a w2v-Bert speech encoder which was pretrained on unlabeled audio data. 
+The general architecture of Seamless is shown in \autoref{fig:seamlessmodel}, for this thesis only the left half up to the Transformer Text decoder of the figure is relevant, the other parts of it are used for speech synthesis.
 
 \begin{figure}
         \centering%
-        \includegraphics[width=0.5\linewidth]{Latex//sections/images/seamlessmodel.png}
+        \includegraphics[width=0.7\linewidth]{Latex//sections/images/seamlessmodel.png}
         \caption{Overview of SeamlessM4T. (1) shows the pre-trained models used when finetuning multitasking UnitY. (2) outlines multitasking UnitY with its two encoders, text decoder, T2U encoder-decoder, and the supporting vocoders for synthesizing output speech in S2ST. \cite{seamless2023}(figure 4)}
         \label{fig:seamlessmodel}
 \end{figure}
-    
-Seamless v2 uses a non autoregressive text to unit decoding which is the main difference to the first version however this change does not change much for this thesis as it only operates on Text-to-Text and Speech-to-text translation. 
-The other change for v2 is that it uses a w2v-Bert 2.0 \cite{chung2021w2vbertcombiningcontrastivelearning} encoder that is trained self-supervised on 4.5 million hours of unlabled audio, as compared to the previous 1 million hours of unlabeled data. 
+
+Seamless v2 improves upon the original model by introducing non-autoregressive text-to-unit decoding. However, this modification has minimal impact on this thesis since it primarily focuses on text-to-text (T2TT) and speech-to-text (S2TT) translation. 
+The other change for v2 is that it uses a w2v-Bert 2.0 \cite{chung2021w2vbertcombiningcontrastivelearning} encoder that is trained self-supervised on 4.5 million hours of unlabled audio, as compared to the previous 1 million hours of unlabeled data.
 SeamlessM4T has been trained on unlabeled, human-labeled, pseudo-labled and automatically aligned data, where the text-to-text-translation (T2TT) was done on NLLB data \cite{nllbteam2022languageleftbehindscaling}
-which is a method of creating low-resource language datasets with a combination of using flores \cite{guzmán2019floresevaluationdatasetslowresource} and NLLB Seed dataset, which is a set of professionally translated sentences in the wikipedia domain. 
+which is a method of creating low-resource language datasets with a combination of using flores \cite{guzmán2019floresevaluationdatasetslowresource} and no language left behind (NLLB) Seed dataset, which is a set of professionally translated sentences in the wikipedia domain. 
 % from seamless v2 paper
 The X2T model, which can do T2TT, ASE and Speech to Text translation(S2TT), is trained on different sources of S2TT data that is human-labeled, pseudo-labeled and automatically aligned and is a combines the v2w-Bert model and the Text encoder from the NLLB T2TT model and the corresponding decoder.
-It was trained in 2 steps on this data, the first one forcuses on supervised English ASR and S2TT data where the target langauge is English. 
-The 2. step then focuses on english to X S2TT and non-English ASR data.
+It was trained in 2 steps on this data, the first one focuses on supervised English ASR and S2TT data where the target language is English. 
+The 2. step in training then focuses on english to X S2TT and non-English ASR data.
 
+The experiments were run on the v2 large version, both for the cascaded part and the end-to-end part of the experiments, no additional training was used.
 
 %TODO read further
 \subsection{SentencePiece}
@@ -235,16 +228,14 @@ As the SentencePiece model is self-contained it also leads to better reproducibi
 
 \subsection{DeltaLM}
 DeltaLM is one of the current state of the art Neural Machine Translation models and the architectures that was proposed in \cite{ma2021deltalm}. 
-It is based off of the classical Encoder-Decoder structure but both the encoder and decoder are initialised with the pretrained multilingual encoder. 
-The training happens in a self-supervised manner. 
+It is based off of the classical Encoder-Decoder structure but both the encoder and decoder are initialised with the pretrained multilingual encoder and then trained in a self-supervised manner. In classical pretrained Encoder-Decoder architectured only the encoder is initialized with a pretrained Encoder and the decoder in initialized with random values.
 
-DeltaLM is considered one of the best text to text translation models. 
-
-In addition to this is the Decoder a Interleaved Transformer Decoder, which is not the same architecture as the encoder and differs from the standard Transformer decoder in that the Transformerblocks now consist of a self-attention layer, two feed-forward networks and a cross-attention layer which are arranged as seen in \autoref{fig:interleaved decoder}. 
+In addition to this is the Decoder a Interleaved Transformer Decoder, which is not the same architecture as the encoder and differs from the standard Transformer decoder in that the Transformer blocks now consist of a self-attention layer, two feed-forward networks and a cross-attention layer which are arranged as seen in \autoref{fig:interleaved decoder}. 
 This way of building the decoder is more similar to the structure of the encoder and makes it easier to leverage the pretrained encoder. 
+
 The interleaved decoder is then initialised with the layers from the pretrained encoder, which is the InfoXLM \cite{chi2021infoxlminformationtheoreticframeworkcrosslingual}, in the following way, the self-attention and the bottom FFN layers are initialised wiht the odd layers of the InfoXLM encoder and the cross-attention and top FFN layers are initialised with the even layers. 
 The leftover components of the decoder are also initialised the same as the pretrained encoder. 
-This means that all of the sublayers are initialised with the pretrained weights and none of them use randomised names. 
+This means that all of the sublayers are initialised with the pretrained weights and none of them use randomised values. 
 
 \begin{figure}
     \centering%
@@ -262,14 +253,14 @@ This means that all of the sublayers are initialised with the pretrained weights
 \subsection{WER}
 \label{wer}
 The Word Error Rate, in short WER, has been proposed in \cite{woodard1982} and \cite{morris2004}.
-It's based on the Levenshtein distance but instead of working on phonemes it operates on words.
+It's based on the Levenshtein distance\cite{Levenshtein1965BinaryCC} but instead of working on phonemes it operates on words.
 The WER can be computed as $$WER=\frac{S+D+I}{N}=\frac{S+D+I}{S+D+C}$$ where S is the number of substitutions, D is the number of deletions, I is the number of insertions and N is the number of words in the reference and C is the number of correct words.
 
 \subsection{Comet}
 Comet, in full Cross-lingual Optimized Metric for Evaluation of Translation, is a neuronal framework for machine translation evaluation that was proposed in \cite{rei-etal-2020-comet} and improved in \cite{rei-etal-2022-comet}.
 For this thesis relevant is the Estimator model which used to estimate a quality score based off of a source sentence and a translation reference. The estimator model architecture is pictured in \autoref{comet architecture}.
 
-To do this the hypothesis translation, the source sentence and the reference translation are encoded independently using a pretrained encoder, that is a crosslingual model like XLM, a multilingual BERT or XLM-RoBERTa, the resulting embeddings are padded into a pooling layer where they create a sentence embedding for each segment. the Embeddings are then combinded and concatenated into a single vector that is passed into a regression layer that then regresses on reference scores from DA, MQM and HTER. 
+To do this the hypothesis translation, the source sentence and the reference translation are encoded independently using a pretrained encoder, that is a crosslingual model like XLM, a multilingual BERT or XLM-RoBERTa, the resulting embeddings are padded into a pooling layer where they create a sentence embedding for each segment. the Embeddings are then combinded and concatenated into a single vector that is passed into a regression layer that then regresses on reference scores from DA, MQM and HTER. \todo{citations!}
 This model is trained to minimize the Mean Squared error. 
 
 in the original implementation this does not give a score from 0 to 1 based on how good or bad the translation is, but the impoved version does this, where a score of 1 means a perfect translation and a score of 0 means a bad translation. Besides this only hyper-parameters have been changed in comparison to the original version as well as more training has been done.
@@ -280,12 +271,11 @@ in the original implementation this does not give a score from 0 to 1 based on h
     \label{comet architecture}
 \end{figure}
 
-\todo{expand, explain more?}
 
 \subsection{Pearson-correlation}
 The Pearson correlation, or Pearson correlation coefficient (PCC) is a method to see how correlated 2 sets of values are. The r value is the covariance of the 2 sets divided by the product of their standard deviations $$PCC(x,y) =\frac{\sum_{i=1}^n (x_i-\overline{x})(y_i-\overline{y})}{\sqrt{\sum_{i=1}^n (x_i-\overline{x})^2}\sqrt{\sum_{i=1}^n(y_i-\overline{y}})^2}$$ where $\overline{x},  \overline{y}$ are the means of the sets of values, $x_i, y_i$ are individual elements of the set of values, n is the sample size. 
 Due to this definition the possible values for the PCC are between -1 and 1, where a value of 1 means the sets are correlated, so a linear relation between the 2 value sets exists. A value of -1 is the result of the PCC if it's inversely correlated. 
-If the value is 0 calculated this means the sets are not correlated at all. A graphical representation of these scores can be found in \autoref{fig:pearosncorr}
+If the value is 0 calculated this means the sets are not correlated at all. A graphical representation of these scores can be found in \autoref{fig:pearosncorr}. \cite{pearsoncorr}
 \begin{figure}[ht]
     \centering
     \includegraphics[width=0.7\linewidth]{Latex//sections//images/pearson correlation.png}
