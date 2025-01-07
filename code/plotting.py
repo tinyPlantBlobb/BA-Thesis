@@ -1,6 +1,7 @@
 import matplotlib.pyplot as plt
 import argparse
 import csv
+from scipy.stats import pearsonr
 
 base = "/home/plantpalfynn/uni/BA/BA-Thesis/Latex/sections/images/"
 args = argparse.ArgumentParser()
@@ -17,7 +18,7 @@ transcriptmeanbasescore = []
 with open("results/alltranscriptions.csv", "r") as transcriptfile:
     reader = csv.DictReader(transcriptfile, dialect="excel")
     for row in reader:
-        print(row)
+        # print(row)
         transcriptbasescore.append(float(row["transcript prob"]))
         transcriptmeanbasescore.append(float(row["transcript mean"]))
 with open("results/seamlessallscores.txt", "r") as reffile:
@@ -156,6 +157,32 @@ with open("results/seamlessallscores.txt", "r") as reffile:
     plt.xlabel("reference score")
     plt.savefig(base + model + "uniscore2.png")
     plt.clf()
+    print(
+        model,
+        pearsonr(uniref, [i[0] + i[1] for i in zip(translationprob, transcriptprob)]),
+        pearsonr(uniref, [i[0] + i[1] for i in zip(translationprob, transcriptmean)]),
+    )
+
+    plt.scatter(
+        uniref,
+        [i[0] + i[1] for i in zip(translationprob, transcriptprob)],
+        color="blue",
+        label="Reference",
+    )
+    plt.ylabel("translation + transcript")
+    plt.xlabel("reference score")
+    plt.savefig(base + model + "transcripttranslation.png")
+    plt.clf()
+    plt.scatter(
+        uniref,
+        [i[0] + i[1] for i in zip(translationprob, transcriptmean)],
+        color="blue",
+        label="Reference",
+    )
+    plt.ylabel("translation + transcript mean")
+    plt.xlabel("reference score")
+    plt.savefig(base + model + "transcripttranslationmean.png")
+    plt.clf()
 
     x = range(len(refs))
     # print(len(x), len(refs))
@@ -231,10 +258,42 @@ if input != "ref.txt":
             plt.savefig(base + model + "uniscore2.png")
 
             plt.clf()
+            plt.scatter(
+                uniref,
+                [i[0] + i[1] for i in zip(genprop, transcriptprob)],
+                color="blue",
+                label="Reference",
+            )
+            plt.ylabel("translation + transcript")
+            plt.xlabel("reference score")
+            plt.savefig(base + model + "transcripttranslation.png")
+            plt.clf()
+            plt.scatter(
+                uniref,
+                [i[0] + i[1] for i in zip(genprop, transcriptmean)],
+                color="blue",
+                label="Reference",
+            )
+            plt.ylabel("translation + transcript mean")
+            plt.xlabel("reference score")
+            plt.savefig(base + model + "transcripttranslationmean.png")
+            print(
+                model,
+                pearsonr(uniref, [i[0] + i[1] for i in zip(genprop, transcriptprob)]),
+                pearsonr(uniref, [i[0] + i[1] for i in zip(genprop, transcriptmean)]),
+            )
+            plt.clf()
             plt.scatter(x, wers, color="blue", label="Reference")
             plt.xlabel("datasetrows")
             plt.ylabel("wer")
             plt.savefig(base + "werref.png")
+            plt.clf()
+            plt.scatter(x, comets, color="blue", label="Comet")
+            plt.xlabel("datasetrows")
+            plt.ylabel("comet scores")
+            plt.savefig(base + "references.png")
+            plt.clf()
+
         else:
             inps = list(map(float, inpfile.readlines()))
             plt.scatter(x, inps, color="blue", label="Reference")
