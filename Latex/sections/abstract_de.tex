@@ -7,9 +7,11 @@
 
 \Abstract
 Diese Bachelorarbeit untersucht die unüberwachte Qualitätsschätzung für gesprochene Sprachübersetzung (Spoken Language Translation, SLT) unter Verwendung von Glasbox-Merkmalen aus neuronalen Modellen. 
-Mit der zunehmenden Nutzung von maschineller Übersetzung und automatischer Spracherkennung (Automatic Speech Recognition, ASR) wird eine präzise Qualitätseinschätzung entscheidend, um den menschlichen Nachbearbeitungsaufwand zu minimieren. 
-Die Studie passt etablierte, unüberwachte Metriken aus textbasierter maschineller Übersetzung an, um SLT-Systeme zu bewerten, und konzentriert sich dabei auf kaskadierte und End-to-End-Modelle. 
-Methoden wie Transkriptionswahrscheinlichkeit, Softmax-Entropie und Unsicherheit durch Dropout werden verwendet, um die Qualität von Transkriptionen und Übersetzungen zu schätzen. 
+Angesichts der zunehmenden Abhängigkeit von maschineller Übersetzung und Technologien zur automatischen Spracherkennung (Automatic Speech Recognition, ASR) wird eine präzise Qualitätseinschätzung entscheidend, um den menschlichen Nachbearbeitungsaufwand zu minimieren.
+
+Die Studie passt etablierte, unüberwachte Metriken aus textbasierter maschineller Übersetzung an, um SLT-Systeme zu bewerten, und konzentriert sich dabei auf kaskadierte Modelle wobei ein End-to-End-Modell betrachtet wird. 
+Methoden wie Transkriptionswahrscheinlichkeit, Softmax-Entropie und Unsicherheit Quantifikation durch Dropout werden verwendet, um die Qualität von Transkriptionen und Übersetzungen zu schätzen. 
 Darüber hinaus wird ein einheitlicher Bewertungsansatz vorgeschlagen, um die Gesamtleistung kaskadierter SLT-Systeme zu bewerten. 
-Experimente mit modernen Modellen wie Whisper, SeamlessM4T und DeltaLM zeigen die Wirksamkeit der vorgeschlagenen Metriken in der Korrelation mit standardisierten Evaluationsmethoden. 
-Diese Arbeit bietet ein Framework für eine effiziente Qualitätsschätzung, das Verbesserungen in SLT-Systemen ermöglicht, ohne auf umfangreiche gelabelte Daten angewiesen zu sein.
+Experimente mit modernen Modellen wie Whisper, SeamlessM4T und DeltaLM zeigen die Wirksamkeit der vorgeschlagenen Metriken in der Korrelation mit Evaluationsmethoden. 
+
+Wir kommen zu dem Schluss, dass der Transkriptionsmittelwert, die Übersetzungswahrscheinlichkeit und die Standardabweichung der Token-Wahrscheinlichkeiten gute Metriken zur Schätzung der Qualität von gesprochenen Sprachübersetzungen in kaskadierten Modellen sind, während Übersetzungswahrscheinlichkeit und Standardabweichung gute Metriken für End-to-End-Modelle sind.

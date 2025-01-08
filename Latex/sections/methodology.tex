@@ -40,7 +40,7 @@ The dropout probability is the mean of the regular probabilities, as done in \au
 For this the method described above is run on the model with dropout several times to get the Probability scores for each run. 
 This results in the formula:
 $$\text{D-TP}=\frac{1}{N}\sum_{n=1}^N TP_{\hat\theta n}\label{formula:dropoutprobability}$$
-This method works to estimate the quality because if the masked neurons affect the result sequence and resulting probability, especially if the model is very uncertain about the resulting sequence. 
+This method works to estimate the quality because if the masked neurons affect the result sequence and resulting probability will change, especially if the model is very uncertain about the resulting sequence. 
 If the model is certain about the resulting sequence then masking neurons to 0 will not affect the resulting sequence and probability as much. 
 
 \subsection{Variance}
