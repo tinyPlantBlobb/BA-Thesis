@@ -5,10 +5,10 @@
 %% Prof. Dr. Jan Niehues
 %% Lab's website https://ai4lt.anthropomatik.kit.edu/english/index.php
 
-\chapter{Experiments}\todo{move around things, put implementations specific things into appendix ig?, split up things for different models? }
+\chapter{Experiments}
 \label{ch:experiment}
 This chapter details the dataset and the experiments that have been run on Whisper \cite{radford2022robust}, Seamless \cite{seamless2023} and DeltaLM \cite{ma2021deltalm}.
-The experiments on whisper and seamless have been made with the help of the huggingface \cite{huggingfaceseamless}\cite{huggingfacewhisper}\footnote{huggingface can be found here: \url{https://huggingface.co/}, the whisper model documentation here: \url{https://huggingface.co/docs/transformers/model_doc/whisper} and the Seamless M4T v2 documentation here: \url{https://huggingface.co/docs/transformers/main/model_doc/seamless_m4t_v2}} models and frame works, where as DeltaLM\footnote{the code for deltaLM can be found here: \url{https://github.com/microsoft/unilm/tree/master/deltalm}} has been used with the fairseq toolkit \cite{ott2019fairseqfastextensibletoolkit}\footnote{the documentation for fairseq can be found here: \url{https://fairseq.readthedocs.io/en/v0.10.2} and the github repo is found here: \url{https://github.com/facebookresearch/fairseq}}.
+The experiments on whisper and seamless have been made with the help of the huggingface \cite{huggingfaceseamless}\cite{huggingfacewhisper}\footnote{huggingface can be found here: \url{https://huggingface.co/}, the whisper model documentation here: \url{https://huggingface.co/docs/transformers/model_doc/whisper} and the Seamless M4T v2 documentation here: \url{https://huggingface.co/docs/transformers/main/model_doc/seamless_m4t_v2}} models and frameworks, whereas DeltaLM\footnote{the code for deltaLM can be found here: \url{https://github.com/microsoft/unilm/tree/master/deltalm}} has been used with the fairseq toolkit \cite{ott2019fairseqfastextensibletoolkit}\footnote{the documentation for fairseq can be found here: \url{https://fairseq.readthedocs.io/en/v0.10.2} and the github repo is found here: \url{https://github.com/facebookresearch/fairseq}}.
 
 For the cascaded models the transcription from the ASR model is passed into the translation model. 
 In the case of the dropout quality estimators the decision of which transcript to put into translation model has been made based on the quality estimations of those transcriptions.
@@ -35,93 +35,45 @@ Running the transcription once more without using dropout should be considered a
 
 \include{Latex/sections/Dataset}
 
+\section{Models}
+More details on the models used in the experiments. More information of the implementations, like how the scores are retrieved in specific, can be found in \autoref{ch:implementation information}. For Whisper and seamless the scores are retrieved with the help of functionality from huggingface or pytorch, for DeltaLM it's functionality from fairseq where available, but more on that is found in the models text.
 
-%\section{Translation and Transcriptions}
-%Since all models that are worked with are Encoder-decoder-models that use the transformer architecture the resulting formulas for the resulting probabilities are similar, for completeness the probability formula per model is listed separately. 
-
-\section{Transcritpion}
-the Transcription Probability is calculated in a similar manner as the translation probability, which results in the formula $$-\frac{1}{T}\sum_{t=1}^T log p(y_t)$$ where T is the number of decoding steps and p is the probability.
-Since only the token with the highest probability is looked at those probabilities are always bigger than 0 so there are no potential issues with 0 values. (as if the probabilities of all regular tokens is 0 the end of section token would have a non 0 probability)
-
+\subsection{Whisper}
 The Transcription step is only done on the Whisper model.
-Whisper \cite{radford2022robust} is a multitask and multilanguage model for Automatic speech recognition as well as speech translation. 
-Open AI gives several different sizes for whisper models, in this thesis the medium model is used, specifically the pretrained model that is available on huggingface, which provides a processor and a few different whisper models that have different head on top of it, the basic Whisper model on huggingface outputs the raw hidden states without a specific head on-top of it. 
-The specific model version used in the experiments is the WhisperForConditionalGeneration, as it has a language modelling head, and is recommended for automatic speech recognition, there are also ones that have heads for audio classification or a language modelling head that is a linear layer with weights tied to the input embeddings. 
+Open AI gives several different sizes for whisper models, in this thesis the medium model is used, specifically the pretrained model that is available on huggingface, which provides a processor and a few different whisper models that have different head on top of it.
+The basic Whisper model on huggingface outputs the raw hidden states without a specific head on-top of it. 
+The specific model version used in the experiments is the WhisperForConditionalGeneration, as it has a language modelling head, and is recommended for automatic speech recognition. There are also ones that have heads for audio classification or a language modelling head that is a linear layer with weights tied to the input embeddings. 
+ 
+\subsection{DeltaLM}
+The experiments \cite{ma2021deltalm} were done on a finetuned large version of it that was finetuned using the training data from the IWSLT 2023 constrained category, for this only the english german part was used.
 
-To retrieve the final transcription probability the huggingface model returns a tuple (or dictionary) that contains the probability of each vocabulary entry at each decoding step.
-Those values are then processed so that the sum of the highest probabilities is taken and then normalised by the number of decoding steps that were done, this gives the transcription probability mean. For reference the pure probability sum was also collected and returned during the experiments. 
-There is a small difference in the resulting QE scores between the two versions but that is more noticeable in the dropout version of the transcription probability 
+The Text was preprocessed with the pretrained senctencepiece model and dictionary that has been provided on the DeltaLM github page \cite{deltalmurl} after that it is preprocessed with faireq preprocess. the result of this is then put into fairseq generate with batch size and beam size 1. 
 
-\section{Translation Probability}\label{sect:translationprob}
-The translation probability is calculated by the formula \autoref{formula:translation Probability} this is, as mentioned in \autoref{ch:models}, the case because the Seamless and DeltaLM model are models that make use of Transformers. 
+ Running the experiments was done with the help of the fairseq toolkit \cite{ott2019fairseqfastextensibletoolkit} which returns the probability of the specific translation along with the translation hypothesis and prints the softmax probabilities of the top token after each decoding step. by default these probabilities are in the base 2 logarithm. 
 
-\todo{remove subsections?}
-\subsection{Seamless Translation Probability}
-The translation probability follows the general translation probability formula \autoref{formula:translation Probability}. To get the probability of the top token at each decoding step the functionality from huggingface is used, which is able to return the log-probabilities and scores, so the processed log-proabbilites, of all vocabulary entries. 
-Then to get the final probability of the sequence the top token of each decoding step and it's probability is picked and the then summed up and divided by the number of decoding steps that are in the sequence.
-The translation probability on seamless is, just like the transcription probability on Whisper, retrieved with the help of the pytorch and the seamless large model on huggingface. 
-there are a couple of difference model sizes of seamless that are provided by meta, the one that was used to run the experiments is the seamless M4T v2 large model that is available on huggingface. 
+ 
+\subsection{Seamless}
+There are a couple of difference model sizes of seamless that are provided by meta, the one that was used to run the experiments is the seamless M4T v2 large model that is available on huggingface. Similarly to the Whisper model the seamless models on huggingface also have several more specialized models. 
+For the text translation the used seamless v2 large model is the SeamlessM4Tv2TextToText model.
+For the end-to-end translation the SeamlessM4Tv2SpeechToText model is used. 
 
-\subsection{DeltaLM translation probability}
-the experiments \cite{ma2021deltalm} were done on a finetuned large version of it that was finetuned using the training data from the IWSLT 2023 constrained category, for this only the english german part was used.
+\section{Dropoutless Experiments}
+The First of the experiments is to retrieve the non dropout scores from the different models, for the cascaded models this means retrieving or calculating both of the transcription scores, the translation score, the softmax entropy and the standard deviation for the token probabilities. 
+For the spoken language translation end-to-end model this means calculating the translation probability, the softmax entropy and the standard deviation of the token probabilities.
 
-the Text was preprocessed with the pretrained senctencepiece model and dictionary that has been provided on the DeltaLM github page \cite{deltalmurl} after that it is preprocessed with faireq preprocess. the result of this is then put into fairseq generate with batch size and beam size 1 for the softmax entropy 
- dthe running of the experiments was done with the help of the fairseq toolkit \cite{ott2019fairseqfastextensibletoolkit} which gives the probability of the specific translation along with the translation hypothesis and prints the softmax probabilities after each decoding step. by default these probabilites are in the base 2 logarithm. 
+%In the end-to-end translation there is no intermediate step between the audio and text part so the resulting probability is a single score for the whole process.
+%The resulting probability formula comes from the architecture, which in this case is a encoder decoder architecture which results in the formula: $$-\frac{1}{T}\sum_{t=1}^T log\; p(y_t)$$ which is the same as the translation probability and the transcription probability.
 
-\subsection{End-to-End translation probability}
-In end-to-end translation there is no intermediate step between the audio and text part so the resulting probability is a single score for the whole process.
-The resulting probability formula comes from the architecture, which in this case is a encoder decoder architecture which results in the formula: $$-\frac{1}{T}\sum_{t=1}^T log\; p(y_t)$$ which is the same as the translation probability and the transcription probability.
-The translation probabilities have once again been retrieved with the help of the huggingface implementation and pytorch. 
-
-\section{Softmax Entropy}
-in the formicheva \cite{fomicheva2020unsupervised} paper the Softmax entropy meassure was proposed as $$-\frac{1}{T}\sum_{t=1}^T\sum_{v=1}^Vp(y_t^v)logp(y_t^v)$$ with V being the Vocabulary size and T being the length of the translation. Which in this definition doesn't work with the data that the models produce as there are quite a lot of 0 values for the vocabulary after using the softmax, which means that the result of the sum like that would not be defined, as the log of 0 is undefined but approaches $-\infty$. To mitigate this the 0 values are masked for the log and by extend the sum, so those values are essentially ignored. 
-
-To get the vocabulary values at each decoding stem from the seamless model basic code has been written that iterates over all vocabulary tokens, which are returned by the model generation by the huggingface model and calculated the entropy of each decoding step.
-To get them from DeltaLm the fairseq source code was adapted to do the same as the huggingface model, as the fairseq toolkit is unable to do so natively so far. 
-In both cases the batch and beam size are set to 1 as otherwise the resulting tensors make it more difficult to pick out which is the right entropy for the resulting batch. 
-
-%softmax entropy from the transcription part? maybe in the future 
-\section{Standard Deviation}
-The standard deviation is calculated over the top token probability at each decoding step. 
-Those probabilities are the same ones that are retrieved in the translation probability part \autoref{sect:translationprob}.
-On seamless this is done on the translation probability retrieved from the hugginface implementation with the help of pytorch. 
-On those results the numpy implementations of the standard deviation\cite{numpystddiv} was then used to retrieve the score.
-On DLM it's done with the help of the numpy implementation on the probabilities that have been output by fairseq. 
-The numpy implementation of the standard deviation takes an array like data structure and if it is not given, calculates the mean of the values in the array and then with that the deviation of the values from the mean. 
-The standard deviation used in numpy is defined as $$\sqrt{\frac{\sum_i |a_i-\overline{a}|}{N}}$$ where $\overline{a}$ is the mean and $a_i$ is the i-th element in the array.
-\todo{explain implementation, formula how the results are gotten that are put in}
-%->which doesn't quite match the word probabilities but is close enough 
+To get the softmax entropy from the models the batch and beam size are set to 1 as otherwise the resulting tensors make it more difficult to pick out which is the right entropy for the resulting batch. 
 
 
 \section{Dropout}\label{experiment:dropout}
-the dropout based metrics are obtained by doing 30 passes with the same input through the models. 
-Each time neurons in the model are masked to 0 by some probability, which is usually the same probability as was used in training, or set to 0.1 when no information about that was available, as both whisper and seamless are using this during training. 
+To run the the dropout based experiments 30 forward passes with the same input are used on the models. 
+Each time neurons in the model are masked to 0 by some probability, which is usually the same probability as was used in training, or set to 0.1 when no information about that was available. The 0.1 dropout probability is used on both whisper and seamless during training, so using the same probability on DeltaLM only makes sense. The dropout 
 
-\subsection{Whisper Dropout}
-for the dropout based uncertainty quantification the model transcribes the same bit of audio 30 times and for each pass the transcription probability and mean probability is computed, in each pass the model randomly masks some nodes to 0
-this results in some short and some faulty transcriptions but this also gives information about how certain the model is in it's transcription. The used dropout probability is 0.1, which is enabled on the whole model.
+Due to the nature of pytorch and huggingface models the dropout has to be done in training mode, as the evaluation mode turns off any dropout layers that are in the model. Due to this and a bug in the implementation for caching during forward passes in the seamless models on huggingface, which leads to a tuple index out of range error that only appears in train mode with dropout turned on, the caching was turned off caching in the seamless configurationss for the dropout based experiments. This means caching is turned off on both the text translation and speech translation system.
 
-
-\subsection{Seamless Dropout}
-for the dropout based approach the transcription with the best qe score, so the min/max score from the whisper step, is used 
-and then put into seamless which then translates this 30 times with a dropout probabiltity of 0.1.
-% potentially remove if finding a better solution
-Due to the nature of pytorch and huggingface models the dropout has to be done in training mode, as the evaluation mode turns off any dropout layers that are in the model. Due to this and a bug in the implementation for caching during forward passes in the seamless model on huggingface, which leads to a tuple index out of range error that only appears in train mode with dropout turned on, the caching was turned off caching in the seamless config. 
-
-\subsection{Deltalm Dropout}
-The dropout with the DeltaLM model is handled over fairseq, with the --retain-dropout flag which enables the dropout during interference.
-The used dropout probability is 0.1 and is applied on all modules that is was applies on during training, this includes the encoder and the decoder, it does not include attention dropout. 
-The resulting scores
-\todo{finish sentence}
-
-\subsection{End-To-End Seamless Dropout}
-The dropout for the end-to-end approach is once again applies on the model and as with the translation part of seamless the caching in the model has been turned off. 
-The dropout probability is 0.1, same as in the translation part. 
-The batch size used for running this is once again 1 and the beam size is also set to 1. 
-The Probabilities are retrieved with the functionality of huggingface and then processed with the help of pytorch.
-The resulting dropout probabilities and variances apply for the whole model, as the model does not have separate parts for transcription and translation, as it is used as an end-to-end model. \todo{add more stuff, citation?}
-
-
-The caching also has been turned off to avoid the error that also appears in the plain machine translation part. 
-%\section{lexsim}
-%the lexical similarity between 2 sentences from the dropout experiments are computed with the help of meteor \cite{banerjee-lavie-2005-meteor}
+\section{unified scores}
+Different unified scores are calculated with the scores that have been retrieved in the previous 2 experiments for the cascaded models. To calculate the scores the unified score methods proposed in \autoref{methods:unified scores} are used. 
+For this both the transcript probability score and the transcript mean score are paired with each of the regular translation scores. 
+The gathered dropout scores are also combined, where the dropout transcription probability score and the dropout transcription mean are combined with the dropout translation probability, the dropout transcription variance scores are combined with the dropout translation variance score and the dropout transcription combination scores are combined with the dropout translation combination score.

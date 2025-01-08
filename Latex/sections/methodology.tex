@@ -1,46 +1,47 @@
 
 \chapter{Methodology}
 \label{ch:methods}
-This chapter goes more in depth on how the Quality estimation scores are derived from data retrieved from the models in general, whereas chapter \autoref{ch:experiment} goes more in depth on how it was done for the specific models and some of the potential errors that were made in the experiments.
+This chapter goes more in depth on how the Quality estimation scores are derived from data retrieved from the models in general, whereas chapter \autoref{ch:experiment} goes more in depth on how this was done for the specific models and some of the potential errors that were made in the experiments.
 
 
 \section{Previously proposed}
-The following methods have been proposed by Fomicheva et al \cite{fomicheva2020unsupervised} are also employed here on the machine translation part of the cascaded models.
+The following methods have been proposed by Fomicheva et al \cite{fomicheva2020unsupervised} and are also employed here on the machine translation part of the cascaded models.
 
 \subsection{Translation probability}
-The translation probability is the probability a Machine translation model out puts the sequence $y = y_1, y_2 \dots y_n$ for the input $x=x_1, x_2 \dots x_n$. The probability is calculated by Formula $$TP=-\frac{1}{T}\sum_{t=1}^T log\; p(y_t) \label{formula:translation Probability}$$ where the probability of generating the sequence y is defined as $$ p(y)=p(y|x,\Theta)=\prod_{t=1}^T p(y_t|y_{<t}, x, \Theta)$$ where $\Theta$ is the model parameters.
+The translation probability is the probability a Machine translation model outputs the sequence $y = y_1, y_2 \dots y_n$ for the input $x=x_1, x_2 \dots x_n$. The probability is calculated by formula $$TP=-\frac{1}{T}\sum_{t=1}^T log\; p(y_t) \label{formula:translation Probability}$$ where the probability of generating the sequence y is defined as $$ p(y)=p(y|x,\Theta)=\prod_{t=1}^T p(y_t|y_{<t}, x, \Theta)$$ where $\Theta$ is the model parameters.
 The probability $p(y_t|y_{<t}, x,\Theta)$ is the probability distribution after the decoding step of the t-th decoding step after applying the softmax.
 The $\frac{1}{T}$ is there to normalise the translation probability over the length of the translation sequence T as to minimize the effect of longer sequences getting a higher score when they shouldn't. 
 
-The general formula for the log-probability of the model generating a sequnce is $$TP=-\frac{1}{T}\sum_{t=1}^T log\; p(y_t)$$
-where p is the log-probability of generating the t-th token in the output sequence, so to get the probability of the whole sequence log-probabilities the log-probabilities of each token are added together, and then normalized with the length of the sequence T. This fromula can be directly derived from the formula given in \autoref{sect: sequence generation} by applying the logarithm. 
+The general formula for the log-probability of the model generating a sequence is $$TP=-\frac{1}{T}\sum_{t=1}^T log\; p(y_t)$$
+where p is the log-probability of generating the t-th token in the output sequence. So to get the probability of the whole sequence log-probabilities the log-probabilities of each token are added together, and then normalized with the length of the sequence T. This formula can be directly derived from the formula given in \autoref{sect: sequence generation} by applying the logarithm. 
 These log-probabilities are the probabilities after applying the softmax to the decoding probability distribution and then applying the logarithm to the highest probability.
 
 \subsection{Softmax Entropy}\label{sect:entropy}
-The Softmax entropy is the entropy of each element in the vocabulary at decoding step, this is a way to measure the uncertainty in the vocabulary at each decoding step.
-To compute the entropy \autoref{entropy} for each element, and then sum all entropies in the Vocabulary together, this results in the entropy of the decoding step. 
+The Softmax entropy is the entropy of each element in the vocabulary at decoding step. This is a way to measure the uncertainty in the vocabulary at each decoding step.
+To compute the softmax entropy of a decoding step, the entropy (see \autoref{entropy}) for each element in the Vocabulary together is summed together. 
 Then the sum of the entropy of all decoding steps is taken and normalised over the sequence length. 
 
 This results in the Formula:
-$$\text{Softmax-Entropy}=-\frac{1}{T}\sum_{t=1}^T\sum_{v=1}^V p(y_t^v)log\; p(y_t^v) \label{formula:translation entropy}$$ where V is the Vocabulary size and T is he length of the generated sequence. The minus comes from the entropy and is only moved in front of the sums for ease of computation.
-Due to how entropy works a lower value, so one closer to 0, in the score is better since then the information that the vocabulary contains less entropy when there is less uncertainty. so if there are less entries in the vocabulary that have similar probabilities during a single decoding step then the entropy of that decoding step will be lower.
+$$\text{Softmax-Entropy}=-\frac{1}{T}\sum_{t=1}^T\sum_{v=1}^V p(y_t^v)log\; p(y_t^v) \label{formula:translation entropy}$$ where V is the Vocabulary size and T is the length of the generated sequence. The minus comes from the entropy and is only moved in front of the sums for ease of computation.
+Due to how entropy works a lower value, so one closer to 0, in the score is better. So if there are fewer entries in the vocabulary that have similar probabilities during a single decoding step, then the entropy of that decoding step will be lower.
 
 
 
 \section{Dropout}
-Dropout, in particular the Monte Carlo dropout \cite{gal2016dropoutbayesianapproximationrepresenting}, which is the masking of neurons to 0 based on a Bernoulli distribution, aims to measure the uncertainty in a Deep Neural network. 
-For this the same input is run N times through the model, due to the potential masking of neurons different results can be observed from the model. Based on how much these results differ from each other and a reference that was obtained without dropout conclusions can be made as to how certain the original result is. 
-The following measures have been used in the past to minimize the effect of low quality outputs on neural machine translation training with back translation \cite{wang-etal-2018-alibaba}
-The dropout measures are used on the transcription and translation part of the cascaded models. 
+Dropout, as explained in \autoref{bg:dropout}, aims to measure the uncertainty in a Deep Neural network. 
+For this the same input is run N times through the model; due to the potential masking of neurons different results can be observed from the model. Based on how much these results differ from each other, and a reference that was obtained without dropout, conclusions can be made as to how certain the original result is. 
+The following measures have been used in the past to minimize the effect of low quality outputs on neural machine translation training with back translation \cite{wang-etal-2018-alibaba}.
+The dropout measures are used on the transcription and translation part of the cascaded models, as well as the end-to-end model.
 
 
 \subsection{General Probability}
 \label{dropoutprob}
 The dropout probability is the mean of the regular probabilities, as done in \autoref{transcription results}. 
-For this the method described above is run on the model with dropout several times and get the Probability scores for each run. 
+For this the method described above is run on the model with dropout several times to get the Probability scores for each run. 
 This results in the formula:
 $$\text{D-TP}=\frac{1}{N}\sum_{n=1}^N TP_{\hat\theta n}\label{formula:dropoutprobability}$$
-This method works to estimate the quality because if the masked neurons affect the result sequence and resulting probability, especially if the model is very uncertain about the resulting sequence. if the model is certain about the resulting sequence then masking neurons to 0 will not affect the resulting sequence and probability as much. 
+This method works to estimate the quality because if the masked neurons affect the result sequence and resulting probability, especially if the model is very uncertain about the resulting sequence. 
+If the model is certain about the resulting sequence then masking neurons to 0 will not affect the resulting sequence and probability as much. 
 
 \subsection{Variance}
 \label{dropoutvar}
@@ -48,48 +49,48 @@ The dropout variance is the variance of the different probabilities gathered dur
 Mathematically this can be described as:
 % measures the uncertainty of the N runs 
 $$\text{D-Var}=E[TP_{\hat\theta}^2]-(E[TP_{\hat\theta}])^2\label{formula:dropoutvariance}$$
-Where $TP_{\hat\theta}$ is the probability \autoref{formula:translation Probability} of the runs. 
+Where $TP_{\hat\theta}$ is the probability (see \autoref{formula:translation Probability}) of the runs. 
 If the Dropout Variance is high then the model is uncertain about the resulting sequence, and if the variance is closer to 0 it is quite certain about the sequence.
-So a low variance is to be considered better than a high score.
+So a low variance is to be considered better than a high variance.
 
 \subsection{Combo}
 As the variance does not take into account the probability of the sequence, a combination of the dropout Probability and dropout variance is proposed by Fomicheva et al \cite{fomicheva2020unsupervised}. 
-The combination of the results from the probability and the variance is done by calculating $$D-Combo=(1-\frac{D-TP}{D-Var})\label{formula:Dropoutcombo}$$, where $D-TP$ and $D-Var$ are the Translation probability mean (\autoref{dropoutprob}) and the Dropout variance (\autoref{dropoutvar}).
+The combination of the results from the probability and the variance is done by calculating $$D-Combo=(1-\frac{D-TP}{D-Var})\label{formula:Dropoutcombo}$$ where $D-TP$ and $D-Var$ are the Translation probability mean (\autoref{dropoutprob}) and the Dropout variance (\autoref{dropoutvar}).
 
-\section{own methods}
-The following methods are derived from related works, changed from Fomicheva et al. or simply applied on different models than has been proposed in the past. 
+\section{Proposed Methods}
+The following methods are derived from related works, changed from Fomicheva et al., or simply applied on different models than has been proposed in the past. 
 
 \subsection{Transcription probability}
-The transcription probability is the probability that the ASR component transcribes the audio to this sequence of text $y_1\dots y_n$. 
-In encoder-decoder models this is most commonly done by encoding the audio signal in the encoder and then, using attention mechanisms to get the context for the current next output token and then using previous predicted tokens to decode the current token. 
-That next output token has a certain probability that, after applying the softmax to the whole probability distribution of the Vocabulary is between 0 and 1. This probability is on the last layer of the decoder and retrieved from the model. 
-This probability can be mathematically described in the formula $$p(y|x,\Theta)=\prod_{t=1}^T p(y_t|y_{<t}, x, \Theta) $$ where $\Theta$ is the model parameters, x is the audio input sequence, the softmax is used after every decoding step t on the resulting probability distribution $p(y_t|y_{<t}, x,\Theta)$. 
+The transcription probability is the probability that the ASR component transcribes the audio to the sequence of text $y_1\dots y_n$. 
+In encoder-decoder models this is most commonly done by encoding the audio signal in the encoder, using attention mechanisms to get the context for the current next output token, and then using previous predicted tokens to decode the current token. 
+That next output token has a certain probability that, after applying the softmax to the whole probability distribution of the Vocabulary, is between 0 and 1. This probability is on the last layer of the decoder and retrieved from the model. 
+This probability can be mathematically described in the formula $$p(y|x,\Theta)=\prod_{t=1}^T p(y_t|y_{<t}, x, \Theta) $$ where $\Theta$ is the model parameters, $x$ is the audio input sequence, and the softmax is used after every decoding step $t$ on the resulting probability distribution $p(y_t|y_{<t}, x,\Theta)$. 
 It is also common practice to use the log probability instead of the raw probabilities after applying the softmax. This gives the total probability formula the form: $$TP=-\frac{1}{T}\sum_{t=1}^T log\; p(y_t) \label{formula:transcriptionProbability}$$
-where p is the log-probability of generating the t-th token in the output sequence after applying the softmax, so to get the probability of the whole sequence log-probabilities the log-probabilities of each token are added together, and then normalized with the length of the sequence T. 
+where $p$ is the log-probability of generating the t-th token in the output sequence after applying the softmax. So to get the probability of the whole sequence log-probabilities, the log-probabilities of each token are added together, and then normalized with the length of the sequence T. 
 These log-probabilities are the probabilities after applying the softmax to the decoding probability distribution and then applying the logarithm to the highest probability.
 
 
 \subsection{Standard Deviation}\label{sect:stddiv}
-The standard deviation, similarly to the Softmax entropy aims to measure the uncertainty by looking at the dispersion of the probabilities in the sequence. 
-The idea of using the standard deviation was proposed by Fomicheva et al. however they use it on a word level where as the experiments in this thesis employ it on a token level instead. 
-This is done for ease of gathering the scores during the inference on some models, as it is easier to only work on the probabilities gathered, which are for tokens and due to this subwords, without having to recalculate with information from the sequence. 
+The standard deviation, similarly to the Softmax entropy, aims to measure the uncertainty by looking at the dispersion of the probabilities in the sequence. 
+The idea of using the standard deviation was proposed by Fomicheva et al., however they use it on a word level whereas the experiments in this thesis employ it on a token level instead. 
+This is done for ease of gathering the scores during the inference on some models, as it is easier to only work on the probabilities gathered, which are for tokens and therefore subwords, without having to recalculate with information from the sequence. 
 
-Since the mean that is the probability score does not account for the different behaviour that for example [0.1,0.9] and [0.5,0.5] have even though the have the same mean. 
+The mean that is the probability score does not account for the different behaviour that, for example [0.1,0.9] and [0.5,0.5] have, even though the have the same mean. 
 To obtain this quality estimator the standard deviation over the top token at each decoding step of a sequence is computed.
 This means the mathematical formula is: $$\text{Seq-Std}=\sqrt{\mathbf{E}[P^2]-(\mathbf{E}[P])^2}$$ where $P=p(y_1) , \dots p(y_T)$ is the token-level log-probabilities for the sequence.
 
 
 \subsection{Dropout on ASR systems}
-The Dropout metrics that have been proposed by Fomicheva et al. have also been used on the ASR system, exactly the same as it is used on the MT systems. This is possible because of the structure of the model used is that of a Deep Neural Network. 
+The Dropout metrics that have been proposed by Fomicheva et al. have also been used on the ASR system, exactly the same as it is used on the MT systems. This is possible because the structure of the model used is that of a Deep Neural Network. 
 
-This means that the Dropout probability for ASR can also be described as $$\text{D-TP}=\frac{1}{N}\sum_{n=1}^N TP_{\hat\theta n}$$.
+This means that the Dropout probability for ASR can also be described as $$\text{D-TP}=\frac{1}{N}\sum_{n=1}^N TP_{\hat\theta n}$$
 
-The Variance of the transcription is described as $$\text{D-Var}=E[TP_{\hat\theta}^2]-(E[TP_{\hat\theta}])^2$$. 
+The Variance of the transcription is described as $$\text{D-Var}=E[TP_{\hat\theta}^2]-(E[TP_{\hat\theta}])^2$$
 
-And the Combination of the 2 dropout metrics is also used, which is described by the fromula $$D-Combo=(1-\frac{D-TP}{D-Var})$$
+And the Combination of the 2 dropout metrics is also used, which is described by the formula $$D-Combo=(1-\frac{D-TP}{D-Var})$$
 
 %\subsection{Lexical Simililarity}
-\subsection{unified score}
+\subsection{Unified Score}\label{methods:unified scores}
 The unified score is a combination score for the transcription and translation part as an attempt to approximate the quality of the whole cascaded model. 
 For this the translation probability and transcription probability are multiplied together as both the translation and transcription probabilities fall between 0 and 1. 
 
@@ -98,6 +99,14 @@ $$\text{unified score}_{prod}= TP_{transcript}\cdot TP_{translation}$$
 Another really naive variant would be to simply add the scores together
 $$\text{unified score}_{sum}= TP_{transcript}+TP_{translation}$$
 
-An alternative option for a unified sum score is weighing the translation and transcription probabilities differently, one was to do this is with the formula $$unifiedscore_\alpha= (1-\alpha) TP_{transcript} \cdot (\alpha)TP_{translation}$$. This is a linear interpolation of the different model scores, this is done 
+An alternative option for a unified sum score is weighing the translation and transcription probabilities differently. One way to do this with linear interpolation which is described the formula $$unifiedscore_\alpha= (1-\alpha) TP_{transcript} \cdot (\alpha)TP_{translation}$$.
 
 \subsection{Spoken language methods}
+The methods used for the end-to-end model are all the same as the Machine translation model.
+This means the employed methods are the translation Probability, calculated by the formula $$TP=-\frac{1}{T}\sum_{t=1}^T log\; p(y_t)$$
+
+The softmax entropy calculated by this formula: $$\text{Softmax-Entropy}=-\frac{1}{T}\sum_{t=1}^T\sum_{v=1}^V p(y_t^v)log\; p(y_t^v)$$
+
+The Standard deviation of the top token probabilities: $$\text{Seq-Std}=\sqrt{\mathbf{E}[P^2]-(\mathbf{E}[P])^2}$$
+
+As well as all of the dropout related methods like the Dropout Probability: $$D-TP=\frac{1}{N}\sum_{n=1}^N TP_{\hat\theta n}$$ the Dropout variance: $$\text{D-Var}=E[TP_{\hat\theta}^2]-(E[TP_{\hat\theta}])^2$$ and the combination out of those 2 scores: $$D-Combo=(1-\frac{D-TP}{D-Var})$$
