@@ -1,8 +1,9 @@
 \section{Dataset}
 \label{ch:Dataset}
 The used dataset for all the scores is the benchmark section of the IWSLT2023 \cite{sperber2024evaluating}, which is a parallel dataset that consists of TED talks, the english transcriptions of those TED talks and contains reference translations, as well as a segmentation for the transcriptions, which matches roughly the translation reference segmentation, and thus can be used in the evaluation without needing to resegment those before evaluating.
-\todo{add statistics of the data set, maybe comment about datasets used for training}
+
 The benchmark section of the Dataset consists of 42 TED talks, each of which is the wav file that corresponds to the youtube videos, that result in 2255 segments. 
+
 \subsection{Segmentation}
 \label{sec:FirstContent:Segmentation}
 Since most ASR models and end-to-end speech translation models only take audio up to a certain length as input the given audio files have to be segemented into smaller chunks. 
@@ -14,5 +15,8 @@ The timestamps given in the dataset correspond to the source language transcript
 the segments in the dataset were generated with the help of mwerSegmenter \footnote{https:
 //www-i6.informatik.rwth-aachen.de/web/Software/mwerSegmenter.tar.gz} for the IWSLT 2023, but it can also be used to align the model outputs to the references as it minimizes the word error rate between model translation and one or more references.
 
+\subsection{Training}
+The seamless and Whisper models are not trained or fine tuned for the experiments besides the pretraining that has been already done for the base models. 
+The DeltaLM model however has been finetuned using the training dataset from the IWSLT 2023 constrained category, specifically the english-german part of this. 
 %For the segments that do not overlap properly or are shifted by a segment in the given xml, mwerSegementer is used to align the outputs with the references properly, so the comet scores can be calculated on those alrigned sentences and the computed reference scores fit. 
 %mwerSegmenter minimises the WER between 2 segments,  for this the model transcription or translation is used as the gold segmentation to which the reference is aligned n
