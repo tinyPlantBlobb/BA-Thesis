@@ -1,37 +1,20 @@
 
-\chapter{Methodology}\todo{move around to have section with fomicheva proposed methods, and my own proposed methods, like how to apply the fomicheva methods to ASR, how to combine them etc.}
+\chapter{Methodology}
 \label{ch:methods}
 This chapter goes more in depth on how the Quality estimation scores are derived from data retrieved from the models in general, whereas chapter \autoref{ch:experiment} goes more in depth on how it was done for the specific models and some of the potential errors that were made in the experiments.
-\section{previously done methods}
-The following methods have been proposed by Fomicheva et al \cite{fomicheva2020unsupervised} are also employed here on the machine translation part of the cascaded models
-
-\section{own methods}
-The following methods are derived from related works, changed from Fomicheva et al. or simply applied on different models than has been proposed in the past. 
 
 
-\section{Translation and transcription}
-The general formula of both the translation and transcription probability is $$TP=-\frac{1}{T}\sum_{t=1}^T log\; p(y_t) \label{formula:translation Probability}$$
-where p is the log-probability of generating the t-th token in the output sequence, so to get the probability of the whole sequence log-probabilities the log-probabilities of each token are added together, and then normalized with the length of the sequence T. 
-This is the case since the architectures are the same.
-These log-probabilities are the probabilities after applying the softmax to the decoding probability distribution and then applying the logarithm to the highest probability.
-The sum of those values is then used as the quality estimation, especially as a baseline to compare the other estimators to.
-%- this is the baseline and the easiest measure to acquire
-%- take the softmax values at the last layer of the model to estimate quality (normal mode) for transcription and translation 
-
-
-\subsection{Transcription probability}
-The transcription probability is the probability that the ASR component transcribes the audio to this sequence of text $y_1\dots y_n$. 
-In encoder-decoder models this is most commonly done by encoding the audio signal in the encoder and then, using attention mechanisms to get the context for the current next output token and then using previous predicted tokens to decode the current token. 
-That next output token has a certain probability that, after applying the softmax to the whole probability distribution of the Vocabulary is between 0 and 1. This probability is on the last layer of the decoder and retrieved from the model. 
-This probability can be mathematically described in the formula $$p(y|x,\Theta)=\prod_{t=1}^T p(y_t|y_{<t}, x, \Theta) $$ where $\Theta$ is the model parameters, x is the audio input sequence, the softmax is used after every decoding step t on the resulting probability distribution $p(y_t|y_{<t}, x,\Theta)$. 
-\todo {add reference?, check with bayes in background}
+\section{Previously proposed}
+The following methods have been proposed by Fomicheva et al \cite{fomicheva2020unsupervised} are also employed here on the machine translation part of the cascaded models.
 
 \subsection{Translation probability}
-The translation probability is the probability a Machine translation model out puts the sequence $y = y_1, y_2 \dots y_n$ for the input $x=x_1, x_2 \dots x_n$. The probability is calculated by Formula \autoref{formula:translation Probability} where the probability of generating the sequence y is defined as $$ p(y)=p(y|x,\Theta)=\prod_{t=1}^T p(y_t|y_{<t}, x, \Theta)$$ where $\Theta$ is the model parameters.
+The translation probability is the probability a Machine translation model out puts the sequence $y = y_1, y_2 \dots y_n$ for the input $x=x_1, x_2 \dots x_n$. The probability is calculated by Formula $$TP=-\frac{1}{T}\sum_{t=1}^T log\; p(y_t) \label{formula:translation Probability}$$ where the probability of generating the sequence y is defined as $$ p(y)=p(y|x,\Theta)=\prod_{t=1}^T p(y_t|y_{<t}, x, \Theta)$$ where $\Theta$ is the model parameters.
 The probability $p(y_t|y_{<t}, x,\Theta)$ is the probability distribution after the decoding step of the t-th decoding step after applying the softmax.
 The $\frac{1}{T}$ is there to normalise the translation probability over the length of the translation sequence T as to minimize the effect of longer sequences getting a higher score when they shouldn't. 
-\todo{add reference? check with bayes}
 
+The general formula for the log-probability of the model generating a sequnce is $$TP=-\frac{1}{T}\sum_{t=1}^T log\; p(y_t)$$
+where p is the log-probability of generating the t-th token in the output sequence, so to get the probability of the whole sequence log-probabilities the log-probabilities of each token are added together, and then normalized with the length of the sequence T. This fromula can be directly derived from the formula given in \autoref{sect: sequence generation} by applying the logarithm. 
+These log-probabilities are the probabilities after applying the softmax to the decoding probability distribution and then applying the logarithm to the highest probability.
 
 \subsection{Softmax Entropy}\label{sect:entropy}
 The Softmax entropy is the entropy of each element in the vocabulary at decoding step, this is a way to measure the uncertainty in the vocabulary at each decoding step.
@@ -42,12 +25,7 @@ This results in the Formula:
 $$\text{Softmax-Entropy}=-\frac{1}{T}\sum_{t=1}^T\sum_{v=1}^V p(y_t^v)log\; p(y_t^v) \label{formula:translation entropy}$$ where V is the Vocabulary size and T is he length of the generated sequence. The minus comes from the entropy and is only moved in front of the sums for ease of computation.
 Due to how entropy works a lower value, so one closer to 0, in the score is better since then the information that the vocabulary contains less entropy when there is less uncertainty. so if there are less entries in the vocabulary that have similar probabilities during a single decoding step then the entropy of that decoding step will be lower.
 
-\subsection{Standard Deviation}\label{sect:stddiv}
-The standard deviation, similarly to the Softmax entropy aims to measure the uncertainty by looking at the dispersion of the probabilities in the sequence. 
-Since the mean that is the probability score does not account for the different behaviour that for example [0.1,0.9] and [0.5,0.5] have even though the have the same mean. 
-To obtain this quality estimator the standard deviation over the top token at each decoding step of a sequence is computed.
-This means the mathematical formula is: $$\text{Seq-Std}=\sqrt{\mathbf{E}[P^2]-(\mathbf{E}[P])^2}$$ where $P=p(y_1) , \dots p(y_T)$ is the token-level log-probabilities for the sequence.
-\todo{expand? explain how the std div works?}
+
 
 \section{Dropout}
 Dropout, in particular the Monte Carlo dropout \cite{gal2016dropoutbayesianapproximationrepresenting}, which is the masking of neurons to 0 based on a Bernoulli distribution, aims to measure the uncertainty in a Deep Neural network. 
@@ -78,11 +56,48 @@ So a low variance is to be considered better than a high score.
 As the variance does not take into account the probability of the sequence, a combination of the dropout Probability and dropout variance is proposed by Fomicheva et al \cite{fomicheva2020unsupervised}. 
 The combination of the results from the probability and the variance is done by calculating $$D-Combo=(1-\frac{D-TP}{D-Var})\label{formula:Dropoutcombo}$$, where $D-TP$ and $D-Var$ are the Translation probability mean (\autoref{dropoutprob}) and the Dropout variance (\autoref{dropoutvar}).
 
+\section{own methods}
+The following methods are derived from related works, changed from Fomicheva et al. or simply applied on different models than has been proposed in the past. 
+
+\subsection{Transcription probability}
+The transcription probability is the probability that the ASR component transcribes the audio to this sequence of text $y_1\dots y_n$. 
+In encoder-decoder models this is most commonly done by encoding the audio signal in the encoder and then, using attention mechanisms to get the context for the current next output token and then using previous predicted tokens to decode the current token. 
+That next output token has a certain probability that, after applying the softmax to the whole probability distribution of the Vocabulary is between 0 and 1. This probability is on the last layer of the decoder and retrieved from the model. 
+This probability can be mathematically described in the formula $$p(y|x,\Theta)=\prod_{t=1}^T p(y_t|y_{<t}, x, \Theta) $$ where $\Theta$ is the model parameters, x is the audio input sequence, the softmax is used after every decoding step t on the resulting probability distribution $p(y_t|y_{<t}, x,\Theta)$. 
+It is also common practice to use the log probability instead of the raw probabilities after applying the softmax. This gives the total probability formula the form: $$TP=-\frac{1}{T}\sum_{t=1}^T log\; p(y_t) \label{formula:transcriptionProbability}$$
+where p is the log-probability of generating the t-th token in the output sequence after applying the softmax, so to get the probability of the whole sequence log-probabilities the log-probabilities of each token are added together, and then normalized with the length of the sequence T. 
+These log-probabilities are the probabilities after applying the softmax to the decoding probability distribution and then applying the logarithm to the highest probability.
+
+
+\subsection{Standard Deviation}\label{sect:stddiv}
+The standard deviation, similarly to the Softmax entropy aims to measure the uncertainty by looking at the dispersion of the probabilities in the sequence. 
+The idea of using the standard deviation was proposed by Fomicheva et al. however they use it on a word level where as the experiments in this thesis employ it on a token level instead. 
+This is done for ease of gathering the scores during the inference on some models, as it is easier to only work on the probabilities gathered, which are for tokens and due to this subwords, without having to recalculate with information from the sequence. 
+
+Since the mean that is the probability score does not account for the different behaviour that for example [0.1,0.9] and [0.5,0.5] have even though the have the same mean. 
+To obtain this quality estimator the standard deviation over the top token at each decoding step of a sequence is computed.
+This means the mathematical formula is: $$\text{Seq-Std}=\sqrt{\mathbf{E}[P^2]-(\mathbf{E}[P])^2}$$ where $P=p(y_1) , \dots p(y_T)$ is the token-level log-probabilities for the sequence.
+
+
+\subsection{Dropout on ASR systems}
+The Dropout metrics that have been proposed by Fomicheva et al. have also been used on the ASR system, exactly the same as it is used on the MT systems. This is possible because of the structure of the model used is that of a Deep Neural Network. 
+
+This means that the Dropout probability for ASR can also be described as $$\text{D-TP}=\frac{1}{N}\sum_{n=1}^N TP_{\hat\theta n}$$.
+
+The Variance of the transcription is described as $$\text{D-Var}=E[TP_{\hat\theta}^2]-(E[TP_{\hat\theta}])^2$$. 
+
+And the Combination of the 2 dropout metrics is also used, which is described by the fromula $$D-Combo=(1-\frac{D-TP}{D-Var})$$
+
 %\subsection{Lexical Simililarity}
-\section{unified score}
+\subsection{unified score}
 The unified score is a combination score for the transcription and translation part as an attempt to approximate the quality of the whole cascaded model. 
 For this the translation probability and transcription probability are multiplied together as both the translation and transcription probabilities fall between 0 and 1. 
 
-$$\text{unified score}= TP_{transcript}\cdot TP_{translation}$$
+$$\text{unified score}_{prod}= TP_{transcript}\cdot TP_{translation}$$
 
-alternative options for a unified score are weighing the translation and transcription probabilities differently, which results in the formula $$unifiedscore_\alpha= (1-\alpha) TP_{transcript} \cdot (\alpha)TP_{translation}$$. 
+Another really naive variant would be to simply add the scores together
+$$\text{unified score}_{sum}= TP_{transcript}+TP_{translation}$$
+
+An alternative option for a unified sum score is weighing the translation and transcription probabilities differently, one was to do this is with the formula $$unifiedscore_\alpha= (1-\alpha) TP_{transcript} \cdot (\alpha)TP_{translation}$$. This is a linear interpolation of the different model scores, this is done 
+
+\subsection{Spoken language methods}
