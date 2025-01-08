@@ -15,9 +15,9 @@ In the case of the dropout quality estimators the decision of which transcript t
 One option is taking the transcript with the highest transcription probability mean to be the basis for the dropout of the translation. 
 This is not the best way of obtaining the best transcription as the basis for the translations but it is a very good method if only the dropout part of the quality estimation is run. 
 An example of this can be seen in \autoref{tab:transcriptshift}.
-This is the case as there some transcriptions with dropout that have a higher score at the end than the regular transcript would have but have obvious signs of the dropout being enabled, like a lot of repeated letters.
+This is the case as there are some transcriptions with dropout that have a higher score at the end than the regular transcript would have, but have obvious signs of the dropout being enabled, like a lot of repeated letters.
 So taking the transcript with the highest score can propagate unwanted errors in the transcription to the translation section.
-The other and better method of obtaining a good transcript is running the transcription once without the dropout turned on, as that would result in the regular transcript that the model would output but this method is fairly likely to return such a transcription due to the way of how the dropout is used, more on that is described in \autoref{experiment:dropout}.
+The other and better method of obtaining a good transcript is running the transcription once without the dropout turned on, as that would result in the regular transcript that the model would output, but this method is fairly likely to return such a transcription due to the way of how the dropout is used. More on that is described in \autoref{experiment:dropout}.
 Running the transcription once more without using dropout should be considered as compared to the number of runs that is done for the dropout it does not add a lot more time to the runtime of a single sequence.
 \begin{table}[ht]
     \centering
@@ -29,37 +29,37 @@ Running the transcription once more without using dropout should be considered a
          -0.094421 &Not a model, not a replica.\\
          -0.644232&  Not a model, not a replica.
     \end{tabularx}
-    \caption{example of differing transcript results, the top is an example where the transcript with dropout (first line) that has the highest quality estimation score is the same as the transcript without dropout. compared to an example where the transcription withe highest score is vastly different from the non dropout transcription, 2. to last line. The last line is a different result from the dropout runs that is essentially the non dropout result. The left column is the corresponding quality score, the quality score shows is the transcription mean}
+    \caption{Example of differing transcript results, the top is an example where the transcript with dropout (first line) that has the highest quality estimation score is the same as the transcript without dropout. Compared to an example where the transcription withe highest score is vastly different from the non dropout transcription, 2. to last line. The last line is a different result from the dropout runs that is essentially the non dropout result. The left column is the corresponding quality score; the quality score shown is the transcription mean.}
     \label{tab:transcriptshift}
 \end{table}
 
 \include{Latex/sections/Dataset}
 
 \section{Models}
-More details on the models used in the experiments. More information of the implementations, like how the scores are retrieved in specific, can be found in \autoref{ch:implementation information}. For Whisper and seamless the scores are retrieved with the help of functionality from huggingface or pytorch, for DeltaLM it's functionality from fairseq where available, but more on that is found in the models text.
+More details on the models used in the experiments. More information on the implementations, like how the scores are retrieved in specific, can be found in \autoref{ch:implementation information}. For Whisper and seamless the scores are retrieved with the help of functionality from huggingface or pytorch; for DeltaLM it's functionality from fairseq where available. More on that is found in the models section.
 
 \subsection{Whisper}
 The Transcription step is only done on the Whisper model.
-Open AI gives several different sizes for whisper models, in this thesis the medium model is used, specifically the pretrained model that is available on huggingface, which provides a processor and a few different whisper models that have different head on top of it.
-The basic Whisper model on huggingface outputs the raw hidden states without a specific head on-top of it. 
+Open AI gives several different sizes for Whisper models. In this thesis the medium model is used, specifically the pretrained model that is available on huggingface, which provides a processor and a few different Whisper models that have a different head on top of it.
+The basic Whisper model on huggingface outputs the raw hidden states without a specific head on top of it. 
 The specific model version used in the experiments is the WhisperForConditionalGeneration, as it has a language modelling head, and is recommended for automatic speech recognition. There are also ones that have heads for audio classification or a language modelling head that is a linear layer with weights tied to the input embeddings. 
  
 \subsection{DeltaLM}
-The experiments \cite{ma2021deltalm} were done on a finetuned large version of it that was finetuned using the training data from the IWSLT 2023 constrained category, for this only the english german part was used.
+The experiments \cite{ma2021deltalm} were done on a fine tuned large version of DeltaLM that was fine tuned using the training data from the IWSLT 2023 constrained category. For this only the English-German part was used.
 
-The Text was preprocessed with the pretrained senctencepiece model and dictionary that has been provided on the DeltaLM github page \cite{deltalmurl} after that it is preprocessed with faireq preprocess. the result of this is then put into fairseq generate with batch size and beam size 1. 
+The text was preprocessed with the pretrained SenctencePiece model and dictionary that has been provided on the DeltaLM github page \cite{deltalmurl}. After that it is preprocessed with faireq preprocess. The result of this is then put into fairseq generate with batch size and beam size 1. 
 
- Running the experiments was done with the help of the fairseq toolkit \cite{ott2019fairseqfastextensibletoolkit} which returns the probability of the specific translation along with the translation hypothesis and prints the softmax probabilities of the top token after each decoding step. by default these probabilities are in the base 2 logarithm. 
+ Running the experiments was done with the help of the fairseq toolkit \cite{ott2019fairseqfastextensibletoolkit} which returns the probability of the specific translation along with the translation hypothesis, and prints the softmax probabilities of the top token after each decoding step. By default these probabilities are in the base 2 logarithm. 
 
  
 \subsection{Seamless}
-There are a couple of difference model sizes of seamless that are provided by meta, the one that was used to run the experiments is the seamless M4T v2 large model that is available on huggingface. Similarly to the Whisper model the seamless models on huggingface also have several more specialized models. 
-For the text translation the used seamless v2 large model is the SeamlessM4Tv2TextToText model.
+There are a couple of difference model sizes of seamless that are provided by Meta. The one that was used to run the experiments is the seamless M4T v2 large model that is available on huggingface. Similarly to the Whisper model, the seamless models on huggingface also have several more specialized models. 
+For the text translation the seamless v2 large model used is the SeamlessM4Tv2TextToText model.
 For the end-to-end translation the SeamlessM4Tv2SpeechToText model is used. 
 
 \section{Dropoutless Experiments}
-The First of the experiments is to retrieve the non dropout scores from the different models, for the cascaded models this means retrieving or calculating both of the transcription scores, the translation score, the softmax entropy and the standard deviation for the token probabilities. 
-For the spoken language translation end-to-end model this means calculating the translation probability, the softmax entropy and the standard deviation of the token probabilities.
+The first of the experiments is to retrieve the non dropout scores from the different models. For the cascaded models this means retrieving or calculating both of the transcription scores, the translation score, the softmax entropy, and the standard deviation for the token probabilities. 
+For the spoken language translation end-to-end model this means calculating the translation probability, the softmax entropy, and the standard deviation of the token probabilities.
 
 %In the end-to-end translation there is no intermediate step between the audio and text part so the resulting probability is a single score for the whole process.
 %The resulting probability formula comes from the architecture, which in this case is a encoder decoder architecture which results in the formula: $$-\frac{1}{T}\sum_{t=1}^T log\; p(y_t)$$ which is the same as the translation probability and the transcription probability.
@@ -69,11 +69,11 @@ To get the softmax entropy from the models the batch and beam size are set to 1 
 
 \section{Dropout}\label{experiment:dropout}
 To run the the dropout based experiments 30 forward passes with the same input are used on the models. 
-Each time neurons in the model are masked to 0 by some probability, which is usually the same probability as was used in training, or set to 0.1 when no information about that was available. The 0.1 dropout probability is used on both whisper and seamless during training, so using the same probability on DeltaLM only makes sense. The dropout 
+Each time, neurons in the model are masked to 0 by some probability, which is usually the same probability as was used in training, or set to 0.1 when no information about that was available. The 0.1 dropout probability is used on both Whisper and seamless during training, so using the same probability on DeltaLM only makes sense. 
 
-Due to the nature of pytorch and huggingface models the dropout has to be done in training mode, as the evaluation mode turns off any dropout layers that are in the model. Due to this and a bug in the implementation for caching during forward passes in the seamless models on huggingface, which leads to a tuple index out of range error that only appears in train mode with dropout turned on, the caching was turned off caching in the seamless configurationss for the dropout based experiments. This means caching is turned off on both the text translation and speech translation system.
+Due to the nature of pytorch and huggingface models, the dropout has to be done in training mode, as the evaluation mode turns off any dropout layers that are in the model. Due to this and a bug in the implementation for caching during forward passes in the seamless models on huggingface, which leads to a tuple index out of range error that only appears in training mode with dropout turned on, the caching was turned off in the seamless configurations for the dropout based experiments. This means caching is turned off on both the text translation and speech translation system.
 
-\section{unified scores}
+\section{Unified Scores}
 Different unified scores are calculated with the scores that have been retrieved in the previous 2 experiments for the cascaded models. To calculate the scores the unified score methods proposed in \autoref{methods:unified scores} are used. 
 For this both the transcript probability score and the transcript mean score are paired with each of the regular translation scores. 
-The gathered dropout scores are also combined, where the dropout transcription probability score and the dropout transcription mean are combined with the dropout translation probability, the dropout transcription variance scores are combined with the dropout translation variance score and the dropout transcription combination scores are combined with the dropout translation combination score.
+The gathered dropout scores are also combined, where the dropout transcription probability score and the dropout transcription mean are combined with the dropout translation probability, the dropout transcription variance scores are combined with the dropout translation variance score, and the dropout transcription combination scores are combined with the dropout translation combination score.
