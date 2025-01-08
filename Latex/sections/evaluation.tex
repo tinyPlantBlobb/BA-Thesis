@@ -71,15 +71,14 @@ Translation & 0.37592 & 0.28284 & 0.656299\\
 Softmax Entropy (-)& 0.30604&0.18071 & 0.60334 \\
 Standard deviation (-)& 0.32905  & 0.25363& 0.67148 \\ \hline
 Dropout translation & 0.150755& 0.282556& 0.14194\\
-Dropout Variance &-0.106986 & -0.16285& 0.13080\\
-Dropout combo & -0.163593& 0.179621& -0.20624\\ \hline
-unified score (-)& 0.32965 & 0.05348 &\\
-unfied score mean& -0.50055& 0.12587&  
-%{transcription'pearsonr': -0.3258220972065334} transcription mean {'pearsonr': -0.27601804379827566}
-%dlm probabilitycorrelation {'pearsonr': 0.2828435783527934} softmaxcorrelation {'pearsonr': -0.08377165154268117 or  -0.083771} std correlation {'pearsonr': -0.2536297836740317} dp prob corr {'pearsonr': 0.2825563734152303} dp var corr {'pearsonr': -0.1628538934576183} dpcombo {'pearsonr': 0.17962061402392054}
-%seamless dropout {'pearsonr': 0.08839374531318331} {'pearsonr': -0.0962085313546643}  
+Dropout Variance (-)&-0.106986 & -0.16285& 0.13080\\
+Dropout combo (-)& -0.163593& 0.179621& -0.20624\\ \hline
+unified score$_{prod}$ (-)& 0.32965 & 0.05348 &\\
+unfied score mean$_{prod}$(-)& -0.50055& 0.12587& \\
+unified score$_{add}$&0.31837& 0.06600&\\
+unified score mean$_{add}$&0.56032&0.168710&\\
 \end{tabular}
-\caption{Correlation scores for the separate models and calculated quality scores}
+\caption{Correlation scores for the separate models and calculated quality scores the sign on the left denotes weather the expected correlation value is supposed to positive or negative. If no signs are added to the values in a row then all of the values have the expected sign}
 \label{results}
 \end{table}
 Those reference scores are then also pearson correlated with the scores from the model. The correlated scores for the translation part of the cascaded model and the speech translation part of the end-to-end model are found in \autoref{results}. 
@@ -263,8 +262,9 @@ This is can be described mathematically as
 $$reference = cometscore*(1-\frac{WER}{max(WER)})$$
 which was choosen since the transcription probability is anti-correlated to the wer and since the best score of the WER is 0 that had to be taken into account as it ruled out just flat out dividing the comet score by the WER.
 
-The correlated scores for this simple version show that this works better with the scores from seamless which has a correlation score of 0.329 with the non normalized transcription scores and a score of 0.501 with the normalized scores. where as the unified scores calculated with the translation scores from deltalm are much lower with the unified score with non normalized transcription scores beeing only 0.053 correlated and the correlation being 0.126 if the normalized transcription scores are used. 
-\todo{plot uniscores?}
+The correlated scores for the multiplion version of the uni score show that this works better with the scores from seamless which has a correlation score of 0.329 with the non normalized transcription scores and a score of 0.501 with the normalized scores. where as the unified scores calculated with the translation scores from deltalm are much lower with the unified score with non normalized transcription scores being only 0.053 correlated and the correlation being 0.126 if the normalized transcription scores are used. 
+
+For the added together unified scores a very similar correlation scores are achived, however with the main difference that it is correlated instead of anti correlated for all of them. Seamless also again has the higher correlation scores with 0.328 for the not normalized transcription unified score and a correlation of 0.560 for the score that uses the length normalized  transcription score. Whereas DeltaLM has a correlation score of 0.066 for the non normalized score and a score of 0.169 for the normalized one, which is 0.04 higher than the multiplied score. 
 
 Alternatively a unified score can be achieved by weighing the translation and transcription probabilities differently, which results in the formula $$unifiedscore_\alpha= \alpha TP_{transcript} + (1-\alpha)TP_{translation}.$$ 
 As can be seen in \autoref{fig:uniscore correlation} changing the weight between the transcription and the translation scores has a noticeable impact on the correlation scores. 
@@ -286,9 +286,7 @@ For the normalised unified score the correlations seem to differ on what the bes
     \label{fig:uniscore correlation}
 \end{figure}
 
-This shows that using the translation and length normalized transcription probabilities from cascaded models is a viable quality estimation, even more so if the translation and transcription are only used in differing amounts during the score calculation, but to find out the right weights testing would have to be done as it seems to differ by model.
-%maybe a score that combines the std div with regular translation?
-%\section{Pearson correlation scores}
+This shows that using the translation and length normalized transcription probabilities from cascaded models is a viable quality estimation, no matter if the translation and transcription scores are added together, multiplied or linearly interpolated for the score calculation. It also shows that finding the right weights for the transcription and translation parts can improve the correlation even more than simply adding or multiplying them together but to find out the right weights testing would have to be done as it seems to differ on a model basis.
 
 
 
