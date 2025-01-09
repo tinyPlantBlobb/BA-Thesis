@@ -133,7 +133,7 @@ All of the models used are such encoder-decoder models.
 
 \subsection{Decoder-Encoder}
 
-Encoder-decoder Models are Models that contain an Encoder and a Decoder. The encoder creates an embedding of the input; this embedding is also called the context or context representation. While embedding the encoder can also add additional context to the representation. 
+Encoder-decoder Models are Models that contain an encoder and a decoder. The encoder creates an embedding of the input; this embedding is also called the context or context representation. While embedding the encoder can also add additional context to the representation. 
 This context representation is then input into the decoder, which decodes it into a form that is for example a human readable text. 
 The basic idea of this can be seen in \autoref{fig:encoderdecodermodel}.
 \begin{figure}[ht]
@@ -164,7 +164,7 @@ Self-attention mechanisms make use of this attention and also use information fr
 
 The Transformer has an encoder-decoder structure with N encoder blocks that are made up out of Multi-Head Attention blocks and feed forward networks. Both of these have an add and normalization layer behind that, which each take the input token $x_i$, where i is the position of the token, put it through the Multi-Head Attention add it back to $x_i$. This is then put into the feed forward network and added back onto the previous result. This process can be seen in \autoref{fig:transformermodel} along with the general architecture of the transformer. 
 The N blocks can map an entire context window of input vectors $(x_1\dots x_n)$ to a of the same length window of output vectors $(h_1\dots h_n)$. 
-The Decoder part consists of N blocks that contain a Masked multi-head attention block, a Multi-layer attention block, and a feed forward neural network. In the end there is a linear layer and a softmax layer. \cite[chapter~9]{jm3}
+The decoder part consists of N blocks that contain a Masked multi-head attention block, a Multi-layer attention block, and a feed forward neural network. In the end there is a linear layer and a softmax layer. \cite[chapter~9]{jm3}
 
 \begin{figure}[ht]
         \centering%
@@ -176,12 +176,12 @@ The Decoder part consists of N blocks that contain a Masked multi-head attention
 
 \subsection{Whisper}
 Whisper is a multilingual multitask Model that is focused on speech processing and was proposed in the Robust Speech Recognition via Large-Scale Weak Supervision paper \cite{radford2022robust}. 
-Its architecture is based on a classical Transformer Architecture where the Transformer Encoder Blocks consist of self attention blocks and Multilayer perception blocks. 
-The Transformer Decoder blocks use the learned position embeddings and tied input-output token representations. 
+Its architecture is based on a classical Transformer Architecture where the Transformer encoder Blocks consist of self attention blocks and Multilayer perception blocks. 
+The Transformer decoder blocks use the learned position embeddings and tied input-output token representations. 
 The encoder and decoder have the same number of transformer blocks.
 The audio pre-processing is done by making sure the audio chunks that are given to the model are 30 seconds long, have ben sampled to 16,000 Hz, and have a 80-channel log-magnitude Mel spectrogram representation. This log-mel spectrogram is then computed with 25-millisecond windows and a stride of 10 milliseconds. If an audio chunk is shorter than 30 seconds it gets padded up to 30 seconds; if it is longer the audio gets split up. 
 This input is then scaled to be between -1 and 1 and is put through 2 convolutional layers that have a filter width of 3 and use the GELU function as activation function. The second of those 2 layers has a stride of 2. 
-The resulting data is then added to a sinusoidal position embedding, which is a positional encoding embedding that uses sinusoidal functions, so the sine and cosine \cite{vaswani2023attentionneed}, and then forwarded into the Encoder blocks.
+The resulting data is then added to a sinusoidal position embedding, which is a positional encoding embedding that uses sinusoidal functions, so the sine and cosine \cite{vaswani2023attentionneed}, and then forwarded into the encoder blocks.
 
 \begin{figure}
         \centering%
@@ -216,8 +216,8 @@ The experiments were run on the v2 large version, both for the cascaded part and
 %TODO read further
 \subsection{SentencePiece}
 SentencePiece \cite{kudo-richardson-2018-sentencepiece} is a tokenizer and detokenizer that allows for subword units, especially byte pair-encoding \cite{sennrich-etal-2016-neural}, that are language independent, as the sentences are treated as unicode character sequences and preprocessing is not always needed. 
-It's comprised of a Normalizer, a Trainer, an Encoder, and a Decoder. 
-The Encoder uses the Normalizer to normalize the Test and then tokenizes the sentence. 
+It's comprised of a Normalizer, a Trainer, an encoder, and a decoder. 
+The encoder uses the Normalizer to normalize the Test and then tokenizes the sentence. 
 In the SentencePiece implementation the Decoding is considered the inverse operation of Encoding of normalized text. This results in a lossless tokenization, so there is no information loss over the process of encoding and decoding. 
 To achieve this SentencePiece encodes white spaces with a meta-symbol that can be reverted. 
 SentencePiece also manages the Vocabulary that is used in preprocessing as it also outputs a dictionary and can output a ID sequence to text and vice versa mapping. 
@@ -225,9 +225,9 @@ As the SentencePiece model is self-contained it also leads to better reproducibi
 
 \subsection{DeltaLM}
 DeltaLM \cite{ma2021deltalm} is one of the current state of the art Neural Machine Translation models. 
-It is based off of the classical encoder-decoder structure but both the encoder and decoder are initialised with the pretrained multilingual encoder and then trained in a self-supervised manner. In classical pretrained encoder-decoder architectures only the encoder is initialized with a pretrained Encoder and the decoder is initialized with random values.
+It is based off of the classical encoder-decoder structure but both the encoder and decoder are initialised with the pretrained multilingual encoder and then trained in a self-supervised manner. In classical pretrained encoder-decoder architectures only the encoder is initialized with a pretrained encoder and the decoder is initialized with random values.
 
-In addition to this is the Decoder a Interleaved Transformer Decoder, which is not the same architecture as the encoder and differs from the standard Transformer decoder in that the Transformer blocks now consist of a self-attention layer, two feed-forward networks, and a cross-attention layer which are arranged as seen in \autoref{fig:interleaved decoder}. 
+In addition to this is the decoder a Interleaved Transformer decoder, which is not the same architecture as the encoder and differs from the standard Transformer decoder in that the Transformer blocks now consist of a self-attention layer, two feed-forward networks, and a cross-attention layer which are arranged as seen in \autoref{fig:interleaved decoder}. 
 This way of building the decoder is more similar to the structure of the encoder and makes it easier to leverage the pretrained encoder. 
 
 The interleaved decoder is then initialised with the layers from the pretrained encoder, which is the InfoXLM \cite{chi2021infoxlminformationtheoreticframeworkcrosslingual}, in the following way: the self-attention and the bottom FFN layers are initialised with the odd layers of the InfoXLM encoder and the cross-attention and top FFN layers are initialised with the even layers. 
@@ -237,7 +237,7 @@ This means that all of the sublayers are initialised with the pretrained weights
 \begin{figure}
     \centering%
     \includegraphics[width=0.5\linewidth]{Latex/sections/images/interleaveddecoder.png}
-    \caption{Vanilla Transformer Decoder (left) compared to the interleaved Transformer decoder(right) from Ma et. al 2021}
+    \caption{Vanilla Transformer decoder (left) compared to the interleaved Transformer decoder(right) from Ma et. al 2021}
     \label{fig:interleaved decoder}
     %source dlm paper
 \end{figure}
