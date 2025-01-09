@@ -140,9 +140,9 @@ The standard deviation scores are plotted over the comet scores in \autoref{fig:
     \end{subfigure}
     \begin{subfigure}{0.4\linewidth}
         \includegraphics[width=\textwidth]{Latex/sections/images/dlmstddiv.png}
-        \caption{deltaLM standard deviation scores over comet scores}
+        \caption{DeltaLM standard deviation scores over comet scores}
     \end{subfigure}
-    \caption{Model standard deviation scores over the corresponding comet scores. The left side shows the seamless scores, the right side shows the deltaLM scores}
+    \caption{Model standard deviation scores over the corresponding comet scores. The left side shows the seamless scores, the right side shows the DeltaLM scores}
     \label{fig:translationeval scatter plot stddiv}
 \end{figure}
 
@@ -220,17 +220,17 @@ A plot of these scores can be seen in \autoref{fig:dropout translation probabili
     \end{subfigure}
     \begin{subfigure}{0.4\linewidth}
         \includegraphics[width=\textwidth]{Latex/sections/images/dlmdropprob.png}
-        \caption{spread of the dropout translation probability scores over the reference scores for deltalm}
+        \caption{spread of the dropout translation probability scores over the reference scores for DeltaLM}
     \end{subfigure}
-        \caption{dropout probability scores plotted over the comet scores, left is the seamless scores, right half is the deltaLM scores}
+        \caption{dropout probability scores plotted over the comet scores, left is the seamless scores, right half is the DeltaLM scores}
         \label{fig:dropout translation probability scores}
     \end{figure}
 
 The variance scores are all smaller than the dropout probability scores, which as seen in the transcription part is to be expected. While the pearson correlation of the translation dropout variance scores are smaller than the pearson correlation of the dropout translation probability score, they are not that much smaller than them. The pearson correlation score can be found in \autoref{results} and a plot of the dropout variance scores over the reference scores can be seen in \autoref{fig:dropout translation variance score}.
 
-The variance score is once again anti-correlated to the comet score, this is because of of how the variance works where a smaller score denotes a better result. 
-The end-to-end dropout variance is not anti correlated, which can very well be due to a difference in reference score or can be a result of dropout.
-As using dropout with the end-to-end model sometimes produces long stings of nonsense and because of how seamless is trained and what it can translate, those long strings do not always stick to a single language but rather switch through different ones and occasionally include characters from different alphabets. 
+The variance score is once again anti-correlated to the comet score. This is because of of how the variance works, where a smaller score denotes a better result. 
+The end-to-end dropout variance is not anti correlated, which can very well be due to a difference in reference score, or can be a result of dropout.
+As using dropout with the end-to-end models sometimes produces long stings of nonsense, and because of how seamless is trained and what it can translate, those long strings do not always stick to a single language but rather switch through different ones and occasionally include characters from different alphabets. 
 %An example of this can be found in \autoref{seamlesse2enonesense}
 \begin{figure}[ht]
         \centering%
@@ -240,16 +240,17 @@ As using dropout with the end-to-end model sometimes produces long stings of non
     \end{subfigure}
     \begin{subfigure}{0.4\linewidth}
         \includegraphics[width=\textwidth]{Latex/sections/images/dlmdropoutvariance.png}
-        \caption{spread of the dropout translation probability variance scores over the reference scores for deltalm}
+        \caption{spread of the dropout translation probability variance scores over the reference scores for DeltaLM}
     \end{subfigure}
-        \caption{dropout variance scores plotted over the comet scores, left is the seamless scores, right half is the deltaLM scores}
+        \caption{dropout variance scores plotted over the comet scores, left is the seamless scores, right half is the DeltaLM scores}
         \label{fig:dropout translation variance score}
 \end{figure}
     
-The combination score made up out of the the other dropout scores show a stronger correlation with the reference scores than the variance but less than the translation probability for the cascaded models, with scores of -0.163 for seamless t2t and 0.180 for DeltaLM, which considering how it is defines is to be expected. 
+The combination score made up out of the the other dropout scores shows a stronger correlation with the reference scores than the variance, but less than the translation probability for the cascaded models, with scores of -0.163 for seamless t2t and 0.180 for DeltaLM. Considering how it is defined this is to be expected. 
+
 The flipped sign on the correlation score for DeltaLM is most likely due to the incredibly small dropout variance scores and since the dropout translation score, which is negative, is divided by this variance score and then subtracted from 1.
-However it is stronger correlated in the case of the end to end model with a correlation score of -0.206, this is most likely due to the correlation instead of anti correlation in the variance and the very similar correlation score between the dropout translation and dropout variance scores. 
-The an overview over the pearson correlation scores again can be found in \autoref{results} and a plot of the scores for seamless t2t and DeltaLM over the reference scores can be found in \autoref{fig:dropout translation combo}. 
+However it is stronger correlated in the case of the end to end model with a correlation score of -0.206. This is most likely due to the correlation instead of anti correlation in the variance and the very similar correlation score between the dropout translation and dropout variance scores. 
+The overview of the pearson correlation scores again can be found in \autoref{results} and a plot of the scores for seamless t2t and DeltaLM over the reference scores can be found in \autoref{fig:dropout translation combo}. 
 
 \begin{figure}[ht]
         \centering%
@@ -261,18 +262,20 @@ The an overview over the pearson correlation scores again can be found in \autor
         \includegraphics[width=\textwidth]{Latex/sections/images/dlmdropoutcombo.png}
         \caption{spread of the dropout translation probability combo scores over the reference scores}
     \end{subfigure}
-    \caption{dropout combo scores plotted over the comet scores, left is the seamless scores, right half is the deltaLM scores}
+    \caption{Dropout combo scores plotted over the comet scores; left is the seamless scores, right is the DeltaLM scores}
     \label{fig:dropout translation combo}
 \end{figure}
 
 \section{One unified score}
-Since several different metrics are used in the translation part of the cascaded model it is interesting which one might be the best choice to use in a unified score. from the text translation paper \cite{fomicheva2020unsupervised} we can gather that different metrics work better for different language groups, as this thesis only tested on english to german translation no definite choice can be made without looking at other languages as well.
+Since several different metrics are used in the translation part of the cascaded model it is interesting which one might be the best choice to use in a unified score. From the text translation paper \cite{fomicheva2020unsupervised} we can gather that different metrics work better for different language groups. As this thesis only tested on English to German translation, no definite choice can be made without looking at other languages as well.
 
 For a unified score the baselines, which are the translation and transcription probability, are multiplied. 
-The resulting pearson score that can be found in \autoref{results} is calculated by correlating this unified score, product of translation probability and transcription probability, with the the comet score multiplied by the by the WER mapped to be from 0 to 1 by dividing all WER scores by the worst, so highest, WER score in the dataset, if finding the highest WER score for the dataset is not possible using 100 as a value is a decent option, as most WER scores are below that, and subtracting it from 1. 
+The resulting pearson score that can be found in \autoref{results}. 
+It is calculated by correlating this unified score, the product of translation probability and transcription probability, with the unified reference score. 
+The unified reference score is calculated by multiplying the comet score with the WER mapped to be from 0 to 1. This is done by dividing all WER scores by the worst, so highest, WER score in the dataset. If finding the highest WER score for the dataset is not possible, using 100 as a value is a decent option, as most WER scores are below that, and subtracting it from 1. 
 This is can be described mathematically as 
 $$reference = cometscore*(1-\frac{WER}{max(WER)})$$
-which was chosen since the transcription probability is anti-correlated to the WER and since the best score of the WER is 0 that had to be taken into account as it ruled out just flat out dividing the comet score by the WER.
+which was chosen since the transcription probability is anti-correlated to the WER, and since the best score of the WER is 0 that had to be taken into account as it ruled out just flat out dividing the comet score by the WER.
 
 
 \begin{table}[ht]
@@ -286,20 +289,23 @@ dropout probability &-0.368084&  -0.1526369 &-0.465468  &-0.227128 \\
 dropout variance& -0.134160&  -0.048070&  0.021499 & -0.159075\\
  combo &0.01635226&  0.1689276&  -0.296981 & 0.138246 \\
     \end{tabular}
-    \caption{pearson correlations of multiplicative scores for various other metrics. The columns are separated by weather the transcript probability, denoted with base, or the transcription mean was used to calculate the score as well as which translation model.}
+    \caption{pearson correlations of multiplicative scores for various other metrics. The columns are separated by whether the transcript probability, denoted with base, or the transcription mean was used to calculate the score, as well as the translation model.}
     \label{tab:multi uni scores}
 \end{table}
 
-The correlation scores for the multiplication version of the unified scores are shown shown in \autoref{tab:multi uni scores}. The translation probability based score, which can be seen as a baseline for the other correlation scores, has a correlation of 0.329 for the non normalized transcription scores and a score of 0.501 with the normalized scores on seamless, where as the unified scores calculated with the translation probability scores from DeltaLM have a much lower correlation score with the reference score of only 0.053 with non normalized transcription scores and a correlation of 0.126 if the normalized transcription scores are used. 
+The correlation scores for the multiplication version of the unified scores are shown shown in \autoref{tab:multi uni scores}. The translation probability based score, which can be seen as a baseline for the other correlation scores, has a correlation of 0.329 for the non normalized transcription scores and a score of 0.501 with the normalized scores on seamless. Whereas the unified scores calculated with the translation probability scores from DeltaLM have a much lower correlation score with the reference score of only 0.053 with non normalized transcription scores and a correlation of 0.126 if the normalized transcription scores are used. 
 
-The softmax entropy based score has the highest correlation of 0.559 on seamless for the mean score and a correlation score of 0.37 for the transcription probability, where as the DeltaLM correlation scores are 0.133 for the non normalized score and 0.13 for the transcription mean score. The difference in correlation between the models is most likely due to the difference in correlation scores of the softmax entropy scores in the first place. The higher correlation than the baseline with the translation scores is most likely because of how the reference score is calculated but it could also be a difference in the entropy scores that the different models produce.
+The softmax entropy based score has the highest correlation of 0.559 on seamless for the mean score and a correlation score of 0.37 for the transcription probability, whereas the DeltaLM correlation scores are 0.133 for the non normalized score and 0.13 for the transcription mean score. The difference in correlation between the models is most likely due to the difference in correlation scores of the softmax entropy scores in the first place. The higher correlation than the baseline with the translation scores is most likely because of how the reference score is calculated but it could also be a difference in the entropy scores that the different models produce.
 
-The standard deviation correlation scores are lower than the translation correlation for seamless with correlation scores of 0.267 and 0.471, in the case of DeltaLM the correlation scores are higher like the score that was calculated with the transcription probability going up by 0.1 in correlation and the transcription mean unified score going up by 0.02. These highest scores are most likely due to the anti-correlation property of the standard deviation score in the MT part of the model. 
+The standard deviation correlation scores are lower than the translation correlation for seamless with correlation scores of 0.267 and 0.471. In the case of DeltaLM the correlation scores are higher, such as the score that was calculated with the transcription probability going up by 0.1 in correlation and the transcription mean unified score going up by 0.02. These higher scores are most likely due to the anti-correlation property of the standard deviation score in the MT part of the model. 
 
-The dropout based scores show a very similar behaviour as the dropout of the different components where the dropout probability has a correlation score that is similar to the non dropout correlation score, in this case scores of 0.36 and 0.46 for seamless and 0.15 and 0.23 for DeltaLM. 
-The Variance scores are worse or significantly worse scores. The really interesting thing is the fact that it changes which transcription score gives a bad correlation score in combination with the translation model. The scores retrieved from seamless and multiplied with the transcription mean are significantly worse, with a correlation of 0.021, at predicting the reference score than if it was multiplies with the non normalised transcription probability, which has a correlation of 0.13, where as on DeltaLM this is the other way around and the  non mean score only has a correlation of 0.04 where as with the variance of the mean transcription it has a correlation of 0.15. Because of how the Combination score is calculated this also reflects in the correlations of those scores where the bad correlation scores on the variance create better correlation scores in the combo score and the other way around for the good correlation scores.
+The dropout based scores show a very similar behaviour as the dropout of the different components, where the dropout probability has a correlation score that is similar to the non dropout correlation score, in this case scores of 0.36 and 0.46 for seamless and 0.15 and 0.23 for DeltaLM. 
+The variance scores are worse or significantly worse scores. 
 
-This once again shows that the seamless scores are on average about 2 times more correlated than the DeltaLM scores. It also shows that using the transcription mean in scores like this gives better results all around and that using the dropout probability, the translation probability and the standard deviation of the token probability to estimate the quality are all good metrics that can be calculated in a reasonable time frame. 
+The really interesting thing is the fact that it changes which transcription score gives a bad correlation score in combination with the translation model. 
+The scores retrieved from seamless and multiplied with the transcription mean are significantly worse, with a correlation of 0.021, at predicting the reference score than if it was multiplied with the non normalised transcription probability, which has a correlation of 0.13. On DeltaLM this is the other way around, and the non mean score only has a correlation of 0.04, whereas with the variance of the mean transcription it has a correlation of 0.15. Because of how the combination score is calculated this also reflects in the correlations of those scores, where the bad correlation scores on the variance create better correlation scores in the combo score and the other way around for the good correlation scores.
+
+This once again shows that the seamless scores are on average about 2 times more correlated than the DeltaLM scores. It also shows that using the transcription mean in scores like this gives better results all around, and that using the dropout probability, the translation probability, and the standard deviation of the token probability to estimate the quality are all good metrics that can be calculated in a reasonable time frame. 
 
 
 \begin{table}[ht]
@@ -313,7 +319,7 @@ softmax entropy &0.171143 &0.099865 &0.1048499 &0.205844 \\
  dropout variance& -0.242118 &  -0.028931 &0.325615& 0.019440\\
  combo & -0.090351 & 0.189254 &-0.090917& 0.188630\\
     \end{tabular}
-    \caption{pearson correlation scores that are added together from the different scores in the translation transcription categories. The columns are separated by weather the transcript probability, denoted with base, or the transcription mean was used to calculate the score as well as which translation model.}
+    \caption{pearson correlation scores that are added together from the different scores in the translation transcription categories. The columns are separated by whether the transcript probability, denoted with base, or the transcription mean was used to calculate the score, as well as the translation model.}
     \label{tab:add uni scores}
 \end{table}
 
@@ -331,18 +337,18 @@ softmax entropy& -0.377987 &-0.099865  &-0.513472& -0.205843\\
     \label{tab:add abs uni score }
 \end{table}
 
-The correlation scores for the added together scores are shown in \autoref{tab:add uni scores}.
-For the added together unified scores a very similar correlation scores are achieved when using the translation probability, however with the main difference that it is correlated instead of anti correlated for all of them. Seamless also again has the higher correlation scores with 0.328 for the not normalized transcription unified score and a correlation of 0.560 for the score that uses the length normalized  transcription score. Whereas DeltaLM has a correlation score of 0.066 for the non normalized score and a score of 0.169 for the normalized one, which is 0.04 higher than the multiplied score. A plot of these scores can be seen in \autoref{fig:uniscore add plot}. This difference in scores could very well be because of a difference in the original scores or sign differences in the scores. 
+The correlation scores for the sums of the scores are shown in \autoref{tab:add uni scores}.
+For the summed unified scores, very similar correlation scores are achieved when using the translation probability, with the main difference that it is correlated instead of anti correlated for all of them. Seamless also again has the higher correlation scores with 0.328 for the not normalized transcription unified score and a correlation of 0.560 for the score that uses the length normalized  transcription score. Whereas DeltaLM has a correlation score of 0.066 for the non normalized score and a score of 0.169 for the normalized one, which is 0.04 higher than the multiplied score. A plot of these scores can be seen in \autoref{fig:uniscore add plot}. This difference in scores could very well be because of a difference in the original scores or sign differences in the scores. 
 
-If the raw softmax entropy is used in the calculation of the unified score the scores look quite different, for seamless the non normalized transcription version of the score has a higher correlation than if the mean was used where as for seamless the opposite is the case. However the fact that the correlation scores are quite similar between the translation and softmax based scores might indicate that this might be due to a difference in the model scores, the signs of the scores. If the absolute of the scores is taken then the correlation scores are 0.378 with no transcript score normalization, 0.513 with transcript score normalisation on seamless and the same for DeltaLM. 
+If the raw softmax entropy is used in the calculation of the unified score the scores look quite different. For seamless the non normalized transcription version of the score has a higher correlation than if the mean was used, whereas for DeltaLM the opposite is the case. However the fact that the correlation scores are quite similar between the translation and softmax based scores might indicate that this might be due to a difference in the model scores, or the signs of the scores. If the absolute of the scores is taken then the correlation scores are 0.378 with no transcript score normalization, 0.513 with transcript score normalisation on seamless, and the same for DeltaLM. 
 
-For the standard deviation based scores the correlation scores follow the same trend of the seamless scores being higher than the DeltaLM scores, adding together the raw scores gives correlation scores of 0.28 and 0.49 for seamless and on DeltaLM the scores are 0.01 and 0.05, however taking a look at the correlation of the absolute input scores this again gives better correlation results or 0.059 with transcription probability and 0.148 with the transcription mean. This is the case because the separate scores have different signs and the scores are in the same size range absolutely seen, especially the transcription mean. The seamless correlation scores also increase when taking the absolute to 0.306 and 0.545 respectively. 
+For the standard deviation based scores the correlation scores follow the same trend of the seamless scores being higher than the DeltaLM scores. Adding together the raw scores gives correlation scores of 0.28 and 0.49 for seamless, and on DeltaLM the scores are 0.01 and 0.05. However taking a look at the correlation of the absolute input scores this again gives better correlation results of 0.059 with transcription probability and 0.148 with the transcription mean. This is the case because the separate scores have different signs and the scores are in the same size range absolutely seen, especially the transcription mean. The seamless correlation scores also increase when taking the absolute to 0.306 and 0.545 respectively. 
 
- The dropout based scores show essentially the same effects as when multiplied where the seamless scores are a lot higher in correlation but in this case the non normalized dropout probability score is higher correlated than the mean dropout probability score, with correlation scores of 0.4 and 0.23 respectively. The correlation scores for DeltaLM are 0.04 on the non normalized scores and 0.107 on the normalized scores, which is most likely due to the same effects as on the translation probability version of the score, where they are simply not a good estimation and as has been seen before the dropout correlation is usually lower than the baseline anyway. The scores are also the same weather the raw scores are taken or the absolute. The dropout variance correlation score show a similar behaviour but for seamless the mean score once again has the higher correlation where as for DeltaLM the non normalized scores have a higher correlation. However it should be noted that the dropout variance scores for DeltaLM are very low with 0.029 and 0.019. 
+ The dropout based scores show essentially the same effects as when multiplied where the seamless scores are a lot higher in correlation. In this case the non normalized dropout probability score is higher correlated than the mean dropout probability score, with correlation scores of 0.4 and 0.23 respectively. The correlation scores for DeltaLM are 0.04 on the non normalized scores and 0.107 on the normalized scores, which is most likely due to the same effects as on the translation probability version of the score, where they are simply not a good estimation and as has been seen before the dropout correlation is usually lower than the baseline anyway. The scores are also the same whether the raw scores are taken or the absolute. The dropout variance correlation scores show a similar behaviour but for seamless the mean score once again has the higher correlation whereas for DeltaLM the non normalized scores have a higher correlation. However it should be noted that the dropout variance scores for DeltaLM are very low with 0.029 and 0.019. 
 
- The correlation of dropout combination score shows that if both of the previous scores are well correlated the resulting scores is not correlated well and vice versa, this means that the seamless based scores are close to 0, with scores of 0.09 in both versions, where as the DeltaLM based scores have a correlation scores of 0.189 each. 
+ The correlation of dropout combination score shows that if both of the previous scores are well correlated the resulting scores are not correlated well and vice versa. This means that the seamless based scores are close to 0, with scores of 0.09 in both versions, whereas the DeltaLM based scores have a correlation scores of 0.189 each. 
 
-This shows that simply adding the scores gathered together is a possible way to get a unified score however due to different signs in scores, the absolutes should be used instead of the raw scores. And similarly to the version above the translation and standard deviation based scores are among the best correlated and seem to be the most reliable when used with the transcription mean. 
+This shows that simply adding the scores gathered together is a possible way to get a unified score. However due to different signs in scores, the absolutes should be used instead of the raw scores. And similarly to the version above the translation and standard deviation based scores are among the best correlated and seem to be the most reliable when used with the transcription mean. 
 \begin{figure}[ht]
     \centering
     \begin{subfigure}{0.4\textwidth}
@@ -359,16 +365,16 @@ This shows that simply adding the scores gathered together is a possible way to 
     \end{subfigure}
     \begin{subfigure}{0.4\textwidth}
         \includegraphics[width=\linewidth]{Latex/sections/images/dlmtranscripttranslationmean.png}
-        \caption{deltalm unified scores with normalized transcription scores}
+        \caption{DeltaLM unified scores with normalized transcription scores}
     \end{subfigure}
     \caption{Plot of the unified scored calculated by adding the translation and transcription scores together, a) and b) are calculated with the non normalized transcription scores, c) and d) with the normalized transcription scores}
     \label{fig:uniscore add plot}
 \end{figure}
 
-As for the linear interpolated a unified score made up of the translation and transcription probabilities differently, which is given in the formula $$unifiedscore_\alpha= \alpha TP_{transcript} + (1-\alpha)TP_{translation}.$$ 
+As for the linear interpolated a unified score made up of the translation and transcription probabilities differently, which is given in the formula $$unifiedscore_\alpha= \alpha TP_{transcript} + (1-\alpha)TP_{translation}$$. 
 As can be seen in \autoref{fig:uniscore correlation} changing the weight between the transcription and the translation scores has a noticeable impact on the correlation scores. 
 This also shows that the weighing for cascaded models is at least partially model dependent, if not framework dependent, but using a high $\alpha$ seems to yield good results on the non-normalised unified scores in either case. 
-For the normalised unified score the correlations seem to differ on what the best $\alpha$ value would be, for seamless it would be in the 0.3 to 0.4 range where as for DeltaLM it is around 0.98. 
+For the normalised unified score the correlations seem to differ on what the best $\alpha$ value would be; for seamless it would be in the 0.3 to 0.4 range, whereas for DeltaLM it is around 0.98. 
 
 \begin{figure}[ht]
     \centering
@@ -378,16 +384,16 @@ For the normalised unified score the correlations seem to differ on what the bes
     \end{subfigure}
     \begin{subfigure}{0.4\linewidth}
         \includegraphics[width=\linewidth]{Latex/sections/images/dlmuniscoredistribution.png}
-        \caption{deltaLM unified scores}
+        \caption{DeltaLM unified scores}
     \end{subfigure}
     
-    \caption{Changes in correlation with different alpha values, the red line is for the unified score taken with the transcription mean, the blue line is the unified score gathered with the the non-normalised transcription score. }
+    \caption{Changes in correlation with different alpha values: the red line is for the unified score taken with the transcription mean, the blue line is the unified score gathered with the the non-normalised transcription score. }
     \label{fig:uniscore correlation}
 \end{figure}
 
-This shows that using the translation and length normalized transcription probabilities from cascaded models is a viable quality estimation, no matter if the translation and transcription scores are added together, multiplied or linearly interpolated for the score calculation. It also shows that finding the right weights for the transcription and translation parts can improve the correlation even more than simply adding or multiplying them together but to find out the right weights testing would have to be done as it seems to differ on a model basis.
+This shows that using the translation and length normalized transcription probabilities from cascaded models is a viable quality estimation, no matter if the translation and transcription scores are added together, multiplied, or linearly interpolated for the score calculation. It also shows that finding the right weights for the transcription and translation parts can improve the correlation even more than simply adding or multiplying them together, but to find the right weights testing would have to be done, as it seems to differ on a model basis.
 
-But when compared to the end-to-end model these scores compare really well in terms of correlation, especially the added together cores where the transcription mean has been used. 
+When compared to the end-to-end model these scores compare really well in terms of correlation, especially the added together scores where the transcription mean has been used. 
 
 
 

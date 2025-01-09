@@ -7,12 +7,13 @@
 
 \chapter{Conclusion}
 \label{ch:Conclusion}
-The proposed metrics by Fomicheva et. al \cite{fomicheva2020unsupervised} also work in cascaded Speech translation, where the translation parts, like softmax entropy and standard deviation calculation, are done on the translation side of the cascaded model and probability retrieval on the transcription part. 
+The proposed metrics by Fomicheva et. al \cite{fomicheva2020unsupervised} also work in cascaded Speech translation, where the translation parts, like softmax entropy and standard deviation calculation, are done on the translation side of the cascaded model, and probability retrieval on the transcription part. 
 
-The dropout based metrics also deliver good correlation results with the reference scores  for both the transcription part of cascaded models as well as the translation part, it also works on end-to-end speech translation.
+The dropout based metrics, like the dropout translation and transcription probability as well as the combination score of the probability and variance,  also deliver good correlation results with the reference scores for both the transcription part of cascaded models as well as the translation part. It also works on end-to-end speech translation.
 
 Two unified score versions for cascaded models has been proposed and tried with the separate metrics as the basis for the single score. Several of these have been shown to be a well correlated metric to reference scores, for which a formula also has been proposed. The main ones that are simple to implement and well correlated are the transcript probability mean on the ASR side and the translation probability, as well as the standard deviation of the token probabilities on the MT side of the model.
 
-An additional change to the unified score has also been proposed where the different scores are weighed differently in the computation however finding a good value for a general value of this would require more testing with several more models and frameworks or tool kits. To explore the impact of there frameworks or toolkits used, as well as the impact of the models used on this score. 
+An additional version of the unified score has also been proposed where the different scores are weighed differently in the computation. However, finding a good value for a general value of this would require more testing with several more models and frameworks or toolkits. 
+To explore the impact of the frameworks or toolkits used, as well as the impact of the models used on this score further experiments would be needed. 
 
-Future works could take a closer look at these metrics for different spoken language pairs as it has been show in the past that these metrics perform even better on low and mid resource languages. 
+Future works could take a closer look at these metrics for different spoken language pairs, as it has been show in the past that these metrics perform even better on low and mid resource languages. Further work could take a look at combining multiple of these scores to see how well this estimates the quality both for MT and for ST, as well as explore the behaviour of methods like the softmax entropy and standard deviation of token probabilities during dropout and the quality estimation property of these.
