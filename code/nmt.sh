@@ -12,6 +12,7 @@ source qe-whitebox/bin/activate
 #export SPMMODEL
 ws=$2
 output=$3
+base=$PWD
 python spm.py $ws/data-bin/dropouttest.de $ws/data-bin/dropout.spm.de $SPMMODEL
 python spm.py $ws/data-bin/dropouttest.en $ws/data-bin/dropout.spm.en $SPMMODEL
 
