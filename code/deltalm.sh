@@ -7,14 +7,19 @@
 #SBATCH --time=12:00:00
 #SBATCH --output=deltaeval.txt
 
-SPMMODEL=$(ws_find finals)/spm.model
+SPMMODEL=$1/spm.model
 source qe-whitebox/bin/activate
+ws=$2
+output=$3
+base=$PWD
+dlmmodel=$4
 #export SPMMODEL
 #ws=$(ws_find finals)/
-rm $(ws_find finals)/data-bin/dropout.spm*
-rm $(ws_find finals)/data-bin/dropout/test.*
-source nmt.sh
-cd $(ws_find finals)/results-${SLURM_JOB_ID}/
+rm $2/data-bin/dropout.spm*
+rm $2/data-bin/dropout/test.*
+source nmt.sh $1 $2 $3 $4
+cd $3
 rename generate-test.txt dropout-test.txt generate-test.txt
-cd 
-source dropoutlessnmt.sh
+cd $base
+
+source dropoutlessnmt.sh $1 $2 $3 $4
