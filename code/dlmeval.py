@@ -4,21 +4,26 @@ import qeLogic
 import numpy as np
 import torch
 from itertools import groupby
-BASE = "/pfs/work7/workspace/scratch/utqma-finals/results-25078050/"
+import argparse
+# path to the deltaLM experiments output
+argparser = argparse.ArgumentParser()
+argparser.add_argument("--base", type=str, help="path to the deltaLM experiments output (without / at the end)")
+args = argparser.parse_args()
+BASE = args.base
 #BASE = "~/uni/BA/BA-Thesis/code/"
 ref = []
 transcriptscore=[]
 transcript=[]
 reftranscript=[]
 transcriptmean=[]
-with open("/pfs/work7/workspace/scratch/utqma-finals/results-25081042/dropoutfulltranscriptions.csv","r") as trnsscore:
+with open(BASE+"/dropoutfulltranscriptions.csv","r") as trnsscore:
     reader = csv.DictReader(trnsscore, dialect="excel")
     for i in reader:
         transcriptscore.append(float(i["qe"].strip("(){[]}").split(",")[0]))
         transcriptmean.append(float(i["qe"].strip("(){[]}").split(",")[1]))
         transcript.append(i["regulartransaltion"])
         reftranscript.append(i["reference transcript"])
-with open("results/dlmresults.csv", "w") as csvfile:
+with open(BASE+"/dlmresults.csv", "w") as csvfile:
     csvwriter = csv.writer(csvfile)
     csvwriter.writerow(
         [
@@ -259,7 +264,8 @@ with open("results/dlmresults.csv", "w") as csvfile:
             ref[i],
             "\t", wer[i], 
             "\t",uniscoreref[i],
-            file=open("dlmallscores.txt", "a")),"\t"
+            file=open(BASE+"dlmallscores.txt", "a")
+        )
     
     for a in range(100):
         uniscore=[(1-a/100)*i[0]+(a/100)*i[1] for i in zip(transcriptscore, probs)]
