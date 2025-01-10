@@ -13,6 +13,7 @@ source qe-whitebox/bin/activate
 ws=$2
 output=$3
 base=$PWD
+dlmmodel=$4
 python spm.py $ws/data-bin/dropouttest.de $ws/data-bin/dropout.spm.de $SPMMODEL
 python spm.py $ws/data-bin/dropouttest.en $ws/data-bin/dropout.spm.en $SPMMODEL
 
@@ -29,7 +30,7 @@ fairseq-preprocess \
 echo "preprocessing done"
 
 python $base/deltalm/unilm/deltalm/generate.py $ws/data-bin/dropout/ \
-  --path ~/checkpoint_avg_last5.pt \
+  --path $dlmmodel \
   --arch deltalm_large --model-overrides "{'pretrained_deltalm_checkpoint': 'deltalm-large.pt'}" \
   --source-lang en --target-lang de --batch-size 1 --beam 1 --remove-bpe=sentencepiece --unkpen 5 --retain-dropout --results-path $output
 #sed -i "/^V-.*$/d" $ws/results-${SLURM_JOB_ID}/generate-test.txt
