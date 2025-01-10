@@ -217,11 +217,11 @@ def readCSV(path):
                     )
                     for i in probabilities
                 ]
-            maxqe = qetranscript.index(max(qe, key=(lambda x: x[1])))
+            maxqe = qe.index(max(qe, key=(lambda x: x[1])))
             #del qetranscript
 
             transcript = [row[i] for i in transcpipts][maxqe]
-            print(transcript, row["refscript"], row["reference transcript"], row["reference translation"])
+            print(transcript,"\t",qe[maxqe],"\t", row["refscript"],"\t", row["reference transcript"],"\t", row["reference translation"],"\t", file=open("transcriptshift.txt","a"))
             data["qe"].append(qe)
             data["reftranscript"].append(row["refscript"])
                     

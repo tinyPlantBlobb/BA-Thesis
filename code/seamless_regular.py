@@ -23,9 +23,11 @@ def run_inference(rank, world_size, dataset):
     model.generation_config.forced_decoder_ids = None
     num = 280
     num = dataset.num_rows["train"] // world_size
-    print(num)
+    #print(num)
     # num = 3
     offset = 0 + rank * (num)
+    if rank ==world_size-1:
+        num += dataset.num_rows%world_size
     # num = (len(dataset)) // (world_size)
     # print(len(dataset), world_size)
     csv = []

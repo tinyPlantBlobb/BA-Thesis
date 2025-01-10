@@ -23,6 +23,10 @@ def run_inference(rank, world_size, dataset):
     offset = 0 + rank * ((len(dataset)) // world_size)
     #num = 3
     num = (len(dataset)) // (world_size)
+    if (rank ==  world_size -1):
+        print(num)
+        num +=len(dataset)%world_size
+        print(num)
     csv = []
     with torch.no_grad():
         for i in tqdm(range(offset, offset + num, 1)):
@@ -85,14 +89,14 @@ def run_inference(rank, world_size, dataset):
                 continue
             csv.extend(output[i])
 
-        writeCSV(csv, TEMPDIR + "/results/fulltranscriptions.csv", dropout=False)
-        writedict(
-            TEMPDIR,
-            generated_transcript=[csv[i][3] for i in range(len(csv))],
-            transcription_reference=[csv[i][1] for i in range(len(csv))],
-            translation_reference=[csv[i][2] for i in range(len(csv))],
-        )
-        print(TEMPDIR + "/results/fulltranscriptions.csv")
+        writeCSV(csv,"workspaces/pfs5wor7/utqma-finals/results/alltranscriptions.csv", dropout=False)
+        #writedict(
+        #    TEMPDIR,
+        #    generated_transcript=[csv[i][3] for i in range(len(csv))],
+        #    transcription_reference=[csv[i][1] for i in range(len(csv))],
+        #    translation_reference=[csv[i][2] for i in range(len(csv))],
+        #)
+        #print(TEMPDIR + "/results/fulltranscriptions.csv")
 
 
 BASE = ""
@@ -115,9 +119,6 @@ def main():
     torchrunrank = int(os.environ["LOCAL_RANK"])
     trglrank = int(os.environ["RANK"])
     print("start rank", torchrunrank, trglrank)
-    smp = mp.get_context("spawn")
-    q = smp.SimpleQueue()
-    q.put([["sample", "reference", "reference"]])
     mp.spawn(run_inference, args=(world_size, dataset), nprocs=world_size, join=True)
 
 

@@ -33,10 +33,13 @@ def run_inference(rank, world_size, dataset):
     #num = 3
     num = (len(dataset) // (world_size*2))
     #print(num)
-    num = 3
+    #num = 3
     offset = 0 + rank * (num)
     # num = (len(dataset)) // (world_size)
     # print(len(dataset), world_size)
+    if rank==world_size-1:
+        num +=len(dataset)%world_size
+
     csv = []
     print("starting seamless regular on", num)
 
@@ -83,6 +86,7 @@ def run_inference(rank, world_size, dataset):
             ## result = Result(sample["audiofile"],sample["timestamp"],sample["transcript"],trans,res,qe)
             # torch.save(result, TEMPDIR + "/results/seamless_result" + str(i) + ".pt")
             torch.cuda.empty_cache()
+            del res
             dpresults = []
             dropoutres = []
             for i in range(30):
@@ -116,18 +120,18 @@ def run_inference(rank, world_size, dataset):
                 )[0]
                 # refscore = cometscore([text], [trans], [sample["translation"]])
                 dqe = getQE(res, dropout=False, translation=True)
-                dpresults.append(res)
+                del res
                 dropoutres.append((dropout_translation, dqe))
             # csv overview: row, model transcript transcripttion reference , modeltranslation, translation reference, qe
-            dropoutqe = getQE(dpresults, dropout=True, translation=True)
-            print(dropoutqe)
+            #dropoutqe = getQE(dpresults, dropout=True, translation=True)
+            #print(dropoutqe)
             row = [
                 i,
                 sample["transcript"],
                 sample["translation"], 
                 model_translation,
                 qe,
-                dropoutqe,
+                #dropoutqe,
             ]
             row.extend(dropoutres)
             csv.append(row)
