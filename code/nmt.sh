@@ -27,7 +27,7 @@ fairseq-preprocess \
 
 echo "preprocessing done"
 
-srun python ~/deltalm/generate.py $(ws_find finals)/data-bin/dropout/ \
+srun python $base/deltalm/unilm/deltalm/generate.py $ws/data-bin/dropout/ \
   --path ~/checkpoint_avg_last5.pt \
   --arch deltalm_large --model-overrides "{'pretrained_deltalm_checkpoint': 'deltalm-large.pt'}" \
   --source-lang en --target-lang de --batch-size 1 --beam 1 --remove-bpe=sentencepiece --unkpen 5 --retain-dropout --results-path $output
