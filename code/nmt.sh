@@ -12,8 +12,8 @@ source qe-whitebox/bin/activate
 #export SPMMODEL
 ws=$2
 output=$3
-srun python spm.py $ws/data-bin/dropouttest.de $ws/data-bin/dropout.spm.de $SPMMODEL
-srun python spm.py $ws/data-bin/dropouttest.en $ws/data-bin/dropout.spm.en $SPMMODEL
+python spm.py $ws/data-bin/dropouttest.de $ws/data-bin/dropout.spm.de $SPMMODEL
+python spm.py $ws/data-bin/dropouttest.en $ws/data-bin/dropout.spm.en $SPMMODEL
 
 echo "building done"
 
@@ -27,7 +27,7 @@ fairseq-preprocess \
 
 echo "preprocessing done"
 
-srun python $base/deltalm/unilm/deltalm/generate.py $ws/data-bin/dropout/ \
+python $base/deltalm/unilm/deltalm/generate.py $ws/data-bin/dropout/ \
   --path ~/checkpoint_avg_last5.pt \
   --arch deltalm_large --model-overrides "{'pretrained_deltalm_checkpoint': 'deltalm-large.pt'}" \
   --source-lang en --target-lang de --batch-size 1 --beam 1 --remove-bpe=sentencepiece --unkpen 5 --retain-dropout --results-path $output
