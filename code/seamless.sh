@@ -3,8 +3,8 @@
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
 #SBATCH --mail-type=END,BEGIN,FAIL
-#SBATCH --gres=gpu:8
-#SBATCH --time=9:30:00
+#SBATCH --gres=gpu:4
+#SBATCH --time=13:30:00
 #SBATCH --output=seamlesendtoend.txt
 
 nodes=($(scontrol show hostnames $SLURM_JOB_NODELIST))
@@ -16,7 +16,7 @@ head_node_ip=$(srun --nodes=1 --time=1:00 --ntasks=1 -w "$head_node" hostname --
 echo Node IP: $head_node_ip
 export LOGLEVEL=INFO
 mkdir -p $TMPDIR/data
-tar -C $TMPDIR/data -vxzf $(ws_find iswslt-dataset)/segments_IWSLT-23.en-de.tar.gz
+tar -C $TMPDIR/data -vxzf $(ws_find finals)/segments_IWSLT-23.en-de.tar.gz
 source qe-whitebox/bin/activate
 
 #pip install transformers --upgrade

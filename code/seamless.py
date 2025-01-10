@@ -31,11 +31,13 @@ def run_inference(rank, world_size, dataset):
     num_samples = 30
     print(torch.cuda.memory_allocated(), torch.cuda.max_memory_allocated(), torch.cuda.memory_reserved())
     
-    elemdp = dataset.num_rows // world_size
+    elemdp = dataset.num_rows//world_size
+    if rank == world_size-1:
+        elemdp += dataset.numrows%world_size
     #elemdp = 3 
     model.to(rank)
     model.generation_config.forced_decoder_ids = None
-    offset = 0 + rank * elemdp
+    offset = 0+rank*elemdp
     csv = []
     writeCSV(csv, TEMPDIR + "/results/translation" + str(rank)+ ".csv", dropout=True, appen=False) 
     with torch.no_grad():
@@ -113,10 +115,7 @@ def run_inference(rank, world_size, dataset):
             currrow.extend(translation)
             # currrow.extend(dropoutdata)
             writeCSV(currrow, TEMPDIR + "/results/translation" + str(rank)+ ".csv", dropout=True, appen=True)
-            del currrow
-            
-            del qelist
-             
+            #print(currrow)
             torch.cuda.empty_cache()
             #output = [None for _ in range(world_size)]
             #dist.gather_object(
@@ -150,13 +149,13 @@ if not os.path.exists(respath):
 
 
 def main():
-    dataset = Dataset.from_dict(readCSV(BASE + "results/dropoutfulltranscriptions.csv"))
+    dataset = Dataset.from_dict(readCSV("/pfs/work7/workspace/scratch/utqma-finals/results-25081042/dropoutfulltranscriptions.csv"))
     world_size = torch.cuda.device_count()
     torchrunrank = int(os.environ["LOCAL_RANK"])
     trglrank = int(os.environ["RANK"])
     print("start rank", torchrunrank, trglrank)
-    mp.spawn(run_inference, args=(world_size, dataset), nprocs=world_size, join=True)
-
+    #mp.spawn(run_inference, args=(world_size, dataset), nprocs=world_size, join=True)
+    run_inference(torchrunrank, world_size, dataset)
 
 if __name__ == "__main__":
     main()

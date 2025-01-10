@@ -4,7 +4,7 @@
 #SBATCH --ntasks=1
 #SBATCH --mail-type=END,BEGIN,FAIL
 #SBATCH --gres=gpu:4
-#SBATCH --time=0:25:00
+#SBATCH --time=6:30:00
 #SBATCH --output=seamlessdropoutounceeval.txt
 
 nodes=($(scontrol show hostnames $SLURM_JOB_NODELIST))
@@ -19,9 +19,9 @@ export LOGLEVEL=INFO
 mkdir -p $TMPDIR/data
 mkdir $TMPDIR/results
 source qe-whitebox/bin/activate
-cp $ws/results-24973453/dropoutfulltranscriptions.csv $TMPDIR/results/
+cp $ws/results-25081042/dropoutfulltranscriptions.csv $TMPDIR/results/
 curl https://raw.githubusercontent.com/google/sentencepiece/refs/heads/master/python/src/sentencepiece/sentencepiece_model_pb2.py -o /pfs/data5/home/kit/stud/utqma/qe-whitebox/lib64/python3.9/site-packages/sentencepiece/sentencepiece_model_pb2.py 
-torchrun --nnodes 1 --nproc_per_node 4 dropoutseamless.py
+torchrun --nnodes 1 --nproc_per_node 4 seamless.py
 echo "seamless done"
 cd $TMPDIR
 #srun python ~/dropoutevaluations.py

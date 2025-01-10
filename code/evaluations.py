@@ -5,8 +5,9 @@ import os
 import csv
 
 TMPDIR = os.environ["TMPDIR"]
-
-with open(TMPDIR + "/results/translation0.csv", "r", newline="") as file:
+filepath=TMPDIR + "/results/seamlessfulltranscriptions.csv" 
+#filepath = ""
+with open(filepath, "r", newline="") as file:
     reader = csv.DictReader(
         file,
         dialect="excel",
@@ -30,6 +31,7 @@ with open(TMPDIR + "/results/translation0.csv", "r", newline="") as file:
     tpscore = []
     softmaxent = []
     stddiv = []
+    fullscore=[]
 
     for r in reader:
         # print(r)
@@ -39,20 +41,20 @@ with open(TMPDIR + "/results/translation0.csv", "r", newline="") as file:
             reference_translation.append(r["reference translation"])
             reference_trancsript.append(r["reference transcript"])
             # print(r["qe"][1:-1].split(", "))
-            qe = re.findall(r"-?\d+\.\d+", r["qe"])
-            transcriptionprob.append(r["transcript prob"])
+            qe = r["qe"][1:-1].split(", ")
+            transcriptionprob.append(float(r["transcript prob"]))
             print(r["transcript mean"], " probability  ", r["transcript prob"])
-            transcriptmean.append(r["transcript mean"])
-            tpscore.append(qe[0])
-            softmaxent.append(qe[1])
-            stddiv.append(qe[2])
-
+            transcriptmean.append(float(r["transcript mean"]))
+            tpscore.append(flaot(qe[0]))
+            softmaxent.append(float(qe[1]))
+            stddiv.append(float(qe[2]))
+            fullscore.append(float(qe[0])*float(r["transcript mean"]))
     refscores = cometscore(transcripts, translation, reference_translation)
 
     refscore = refscores["scores"]
-    with open(TMPDIR + "referencescores.txt", "w") as export:
+    with open(TMPDIR + "/results/referencescores.txt", "w") as export:
         for i in refscore:
-            export.write(i)
+            export.write(str(i))
             export.write("\n")
     wer = [
         worderror([transcripts[i].lower()], [reference_trancsript[i].lower()])
@@ -65,13 +67,15 @@ with open(TMPDIR + "/results/translation0.csv", "r", newline="") as file:
     softres = pearsoncorr(softmaxent, refscore)
     stdres = pearsoncorr(stddiv, refscore)
     transcriptresult = pearsoncorr(transcriptionprob, wer)
+    reffullscore = [i[0]/i[1] for i in zip(cometscore, wer)]
+    fullscorecor= pearsoncorr(fullscore, reffullscore)
     print(transcriptresult, tpresult, softres, stdres)
     with open(TMPDIR + "/results/scores.txt", "w") as resfile:
         # resfile.write("reference scores\n")
         # resfile.write(str(refscore))
         resfile.write("\n\n\n pearsoncorr of the translation probability")
         resfile.write(str(tpresult["pearsonr"]))
-        resfile.write("\nsoftmax entropy correlation\n")
+        resfile.write("\nsoftmax correlation\n")
         resfile.write(str(softres["pearsonr"]))
         resfile.write("\n standart div\n")
         resfile.write(str(stdres["pearsonr"]))
@@ -79,6 +83,8 @@ with open(TMPDIR + "/results/translation0.csv", "r", newline="") as file:
         resfile.write(str(transcriptresult["pearsonr"]))
         resfile.write("\n trasncript mean\n")
         resfile.write(str(meanresult["pearsonr"]))
+        resfile.write("\n fullscore\n")
+        resfile.write(str(fullscorecor["pearsonr"]))
         resfile.close()
     # for row in reader:
     #    score = cometscore(row["transcript"], row["translation"], row["reference"])
