@@ -26,7 +26,7 @@ fairseq-preprocess \
 
 echo "preprocessing done"
 
-python ~$base/deltalm/generate.py $ws/ \
+python ~$base/deltalm/unilm/deltalm/generate.py $ws/ \
   --path $dlmmodel \
   --arch deltalm_large --model-overrides "{'pretrained_deltalm_checkpoint': '$ws/deltalm-large.pt'}" \
   --source-lang en --target-lang de --batch-size 1 --beam 1 \
