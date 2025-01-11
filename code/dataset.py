@@ -109,4 +109,5 @@ def readfromtar(BASE):
     tar.close()
     return resdataset
 
-readfromtar("/home/plantpalfynn/uni/BA/BA-Thesis/code/")
+readfromtar(os.environ["HOME"])
+
