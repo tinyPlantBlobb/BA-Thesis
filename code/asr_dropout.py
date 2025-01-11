@@ -29,8 +29,10 @@ def run_inference(rank, world_size, dataset):
         #print(len(dataset)-num*world_size)
         num += len(dataset)%world_size
     csv = []
-    print(world_size, rank, offset, num)
-    writeCSV(csv, "/pfs/work7/workspace/scratch/utqma-finals/transcript"+str(rank)+".csv",dropout=True, appen=False)
+    #print(world_size, rank, offset, num)
+    
+    
+    writeCSV(csv, respath+"transcript"+str(rank)+".csv",dropout=True, appen=False)
 
     with torch.no_grad():
         for i in tqdm(range(offset, offset+num, 1)):
@@ -88,7 +90,7 @@ def run_inference(rank, world_size, dataset):
             csv.append(row)
             del qelist
             del generated_transcripts
-            writeCSV(row,"/pfs/work7/workspace/scratch/utqma-finals/transcript"+str(rank)+".csv",dropout=True, appen=True)
+            writeCSV(row,respath+"/transcript"+str(rank)+".csv",dropout=True, appen=True)
             torch.cuda.empty_cache()
     output = [None for _ in range(world_size)]
     dist.gather_object(
@@ -113,8 +115,8 @@ def run_inference(rank, world_size, dataset):
             csv.extend(output[i])
 
         writeCSV(csv, TEMPDIR + "/results/dropoutfulltranscriptions.csv", dropout=True)
-        print(TEMPDIR + "/results/dropoutfulltranscriptions.csv")
-        destroy_process_group()
+
+        
 
 BASE = ""
 
@@ -138,11 +140,7 @@ def main():
     world_size = torch.cuda.device_count()
     torchrunrank = int(os.environ["LOCAL_RANK"])
     trglrank = int(os.environ["RANK"])
-    print("start rank", torchrunrank, trglrank)
-    # smp = mp.get_context("spawn")
-    # q = smp.SimpleQueue()
-    # q.put([["sample", "reference", "reference"]])
-    mp.spawn(run_inference, args=(world_size, dataset), nprocs=world_size, join=True)
+    run_inference(torchrunrank, world_size, dataset)
 
 
 if __name__ == "__main__":

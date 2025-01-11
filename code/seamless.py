@@ -147,9 +147,9 @@ BASE = TEMPDIR + "/"
 if not os.path.exists(respath):
     os.mkdir(respath)
 
-
+input = os.environ["INPUTDIR"]
 def main():
-    dataset = Dataset.from_dict(readCSV("/pfs/work7/workspace/scratch/utqma-finals/results-25081042/dropoutfulltranscriptions.csv"))
+    dataset = Dataset.from_dict(readCSV(input+"/dropoutfulltranscriptions.csv"))
     world_size = torch.cuda.device_count()
     torchrunrank = int(os.environ["LOCAL_RANK"])
     trglrank = int(os.environ["RANK"])

@@ -89,7 +89,7 @@ def run_inference(rank, world_size, dataset):
                 continue
             csv.extend(output[i])
 
-        writeCSV(csv,"workspaces/pfs5wor7/utqma-finals/results/alltranscriptions.csv", dropout=False)
+        writeCSV(csv,outputdir +"alltranscriptions.csv", dropout=False)
         #writedict(
         #    TEMPDIR,
         #    generated_transcript=[csv[i][3] for i in range(len(csv))],
@@ -109,6 +109,7 @@ model = WhisperForConditionalGeneration.from_pretrained("openai/whisper-medium.e
 TEMPDIR = os.environ["TMPDIR"]
 respath = os.path.join(TEMPDIR, "results")
 BASE = TEMPDIR + "/"
+outputdir = os.environ["output"]
 if not os.path.exists(respath):
     os.mkdir(respath)
 
@@ -118,8 +119,8 @@ def main():
     world_size = torch.cuda.device_count()
     torchrunrank = int(os.environ["LOCAL_RANK"])
     trglrank = int(os.environ["RANK"])
-    print("start rank", torchrunrank, trglrank)
-    mp.spawn(run_inference, args=(world_size, dataset), nprocs=world_size, join=True)
+    #print("start rank", torchrunrank, trglrank)
+    run_inference(torchrunrank, world_size, dataset)
 
 
 if __name__ == "__main__":

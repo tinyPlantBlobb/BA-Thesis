@@ -31,7 +31,7 @@ echo "preprocessing done"
 
 python $base/deltalm/unilm/deltalm/generate.py $ws/data-bin/dropout/ \
   --path $dlmmodel \
-  --arch deltalm_large --model-overrides "{'pretrained_deltalm_checkpoint': 'deltalm-large.pt'}" \
+  --arch deltalm_large --model-overrides "{'pretrained_deltalm_checkpoint': '$ws/deltalm-large.pt'}" \
   --source-lang en --target-lang de --batch-size 1 --beam 1 --remove-bpe=sentencepiece --unkpen 5 --retain-dropout --results-path $output
 #sed -i "/^V-.*$/d" $ws/results-${SLURM_JOB_ID}/generate-test.txt
 sed -i "/202\d-\d+.*/d" $output/generate-test.txt
