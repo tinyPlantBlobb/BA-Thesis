@@ -114,7 +114,7 @@ def run_inference(rank, world_size, dataset):
                 continue
             csv.extend(output[i])
 
-        writeCSV(csv, TEMPDIR + "/results/dropoutfulltranscriptions.csv", dropout=True)
+        writeCSV(csv, TEMPDIR + "/dropoutfulltranscriptions.csv", dropout=True)
 
         
 
