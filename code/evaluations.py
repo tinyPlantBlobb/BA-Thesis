@@ -1,6 +1,6 @@
 import re
 from datasets.features import translation
-from qeLogic import cometscore, pearsoncorr, worderror
+from qeLogic import cometscore, pearsoncorr, wer as worderror
 import os
 import csv
 
@@ -45,7 +45,7 @@ with open(filepath, "r", newline="") as file:
             transcriptionprob.append(float(r["transcript prob"]))
             print(r["transcript mean"], " probability  ", r["transcript prob"])
             transcriptmean.append(float(r["transcript mean"]))
-            tpscore.append(flaot(qe[0]))
+            tpscore.append(float(qe[0]))
             softmaxent.append(float(qe[1]))
             stddiv.append(float(qe[2]))
             fullscore.append(float(qe[0])*float(r["transcript mean"]))
@@ -57,7 +57,7 @@ with open(filepath, "r", newline="") as file:
             export.write(str(i))
             export.write("\n")
     wer = [
-        worderror([transcripts[i].lower()], [reference_trancsript[i].lower()])
+        worderror(transcripts, reference_trancsript)
         for i in range(len(transcripts))
     ]
     # print(wer, len(wer), len(transcriptmean))
