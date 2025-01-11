@@ -5,7 +5,7 @@ import os
 import csv
 
 TMPDIR = os.environ["TMPDIR"]
-filepath=TMPDIR + "/results/seamlessfulltranscriptions.csv" 
+filepath=TMPDIR + "results/seamlessfulltranscriptions.csv" 
 #filepath = ""
 with open(filepath, "r", newline="") as file:
     reader = csv.DictReader(
