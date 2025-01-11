@@ -331,26 +331,43 @@ def writedict(
     TEMPDIR, generated_transcript, transcription_reference, translation_reference
 ):
     with open(
-        "/pfs/work7/workspace/scratch/utqma-finals/data-bin/test.en", "w"
+        TEMPDIR +"/data-bin/test.en", "w"
     ) as src:
         for i in range(len(generated_transcript)):
             src.write(generated_transcript[i])
             src.write("\n")
         src.close()
     with open(
-        "/pfs/work7/workspace/scratch/utqma-finals/data-bin/test.de", "w"
+        TEMPDIR +"/data-bin/test.de", "w"
     ) as tgt:
         for i in range(len(translation_reference)):
             tgt.write(translation_reference[i])
             tgt.write("\n")
         src.close()
     with open(
-        "/pfs/work7/workspace/scratch/utqma-finals/data-bin/ref.de", "w"
+        TEMPDIR +"/data-bin/ref.de", "w"
     ) as ref:
         for i in range(len(translation_reference)):
             ref.write(translation_reference[i])
             ref.write("\n")
         ref.close()
+    with open(
+        TEMPDIR +"/data-bin/dropouttest.en", "w"
+    ) as src:
+        for i in range(30):
+
+            for i in range(len(generated_transcript)):
+                src.write(generated_transcript[i])
+                src.write("\n")
+            src.close()
+    with open(
+        TEMPDIR +"/data-bin/dropouttest.de", "w"
+    ) as tgt:
+        for i in range(30):
+            for i in range(len(translation_reference)):
+                tgt.write(translation_reference[i])
+                tgt.write("\n")
+            src.close()
 
 
 def worderror(hypothesis, references):

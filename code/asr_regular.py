@@ -90,12 +90,12 @@ def run_inference(rank, world_size, dataset):
             csv.extend(output[i])
 
         writeCSV(csv,outputdir +"fulltranscriptions.csv", dropout=False)
-        #writedict(
-        #    TEMPDIR,
-        #    generated_transcript=[csv[i][3] for i in range(len(csv))],
-        #    transcription_reference=[csv[i][1] for i in range(len(csv))],
-        #    translation_reference=[csv[i][2] for i in range(len(csv))],
-        #)
+        writedict(
+            os.environ["dlmresults"],
+            generated_transcript=[csv[i][3] for i in range(len(csv))],
+            transcription_reference=[csv[i][1] for i in range(len(csv))],
+            translation_reference=[csv[i][2] for i in range(len(csv))],
+        )
         #print(TEMPDIR + "/results/fulltranscriptions.csv")
 
 

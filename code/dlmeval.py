@@ -1,4 +1,4 @@
-import re
+import os, re
 import csv
 import qeLogic
 import numpy as np
@@ -9,7 +9,7 @@ import argparse
 argparser = argparse.ArgumentParser()
 argparser.add_argument("--base", type=str, help="path to the deltaLM experiments output (without / at the end)")
 args = argparser.parse_args()
-BASE = args.base
+BASE = os.environ.get("BASE", args.base)
 #BASE = "~/uni/BA/BA-Thesis/code/"
 ref = []
 transcriptscore=[]
