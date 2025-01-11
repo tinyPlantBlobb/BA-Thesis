@@ -136,8 +136,7 @@ def main():
     # smp = mp.get_context("spawn")
     # q = smp.SimpleQueue()
     # q.put([["sample", "reference", "reference"]])
-    mp.spawn(run_inference, args=(world_size, dataset), nprocs=world_size, join=True)
-
+    run_inference(torchrunrank, world_size, dataset)
 
 if __name__ == "__main__":
     main()
