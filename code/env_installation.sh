@@ -1,5 +1,5 @@
 #!/bin/bash
-python3 -m venv qe-whitebox
+python3.9 -m venv qe-whitebox
 source qe-whitebox/bin/activate
 pip install torch torchaudio --index-url https://download.pytorch.org/whl/cu118
 pip install transformers
