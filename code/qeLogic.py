@@ -8,10 +8,11 @@ import torch
 from comet import download_model, load_from_checkpoint
 import evaluate
 import yaml
-import torchaudio
+#import torchaudio
 import werpy
 
 def getAudios(TEMPDIR):
+    import torchaudio
     # print("starting reading from tar")
     with open(TEMPDIR + "data/IWSLT.TED.tst2023.en-de.matched.yaml") as matched:
         data = yaml.load(matched, Loader=yaml.FullLoader)

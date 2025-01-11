@@ -16,4 +16,4 @@ source qe-whitebox/bin/activate
 curl https://raw.githubusercontent.com/google/sentencepiece/refs/heads/master/python/src/sentencepiece/sentencepiece_model_pb2.py -o qe-whitebox/lib64/python3.9/site-packages/sentencepiece/sentencepiece_model_pb2.py
 TMPDIR=$1 output=$3 torchrun --nnodes 1 --nproc_per_node 1 asr_regular.py
 TMPDIR=$3 output=$3 torchrun --nnodes 1 --nproc_per_node 1 seamless_regular.py
-python evaluations.py
+TMPDIR=$3 python evaluations.py
