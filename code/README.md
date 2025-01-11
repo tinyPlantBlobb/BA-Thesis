@@ -11,13 +11,16 @@ download the deltalm large model from <https://deltalm.blob.core.windows.net/del
 place both in the workspace directory
 the workspace directory is the directory where the data-bin and dictionaries are placed in
 
-This repo includes the dataset used in the experiments of the thesis, this can be found in the segmented_IWSLT-23.en-ed.zip file. to run the experiments, the segmented_IWSLT-23.en-ed.zip file should be placed in the workspace directory.
+to prepare the dataset for running the experiments run the following command with the path to the unzipped IWSLT-23.en-de.zip file
+to segemtn the data a yaml file is used, this can be generated with the getyaml funktion in the dataset.py file but it is also included in the repository, if that is used the yaml file should be placed in the IWSLT-23.en-de folder under IWSLT-23.tst2023.en-de/benchmark/en-de/tst2023/
+
+HOME=/path/to/IWSLT-23.en-de.zip python dataset.py
 
 # Seamless based runs
 
 to run the regularpipe.sh script for running whisper and seamless without using dropout, this also creates the base file for running deltalm in data-bin folder.
 
-source regularpipe.sh path/to/segemented_IWSLT-23.en-de.zip path/to/workspace path/to/output path/to/deltadatadir
+source regularpipe.sh path/to/IWSLT-23.en-de.zip path/to/workspace path/to/output path/to/deltadatadir
 
 # Dropout experiments
 
@@ -30,6 +33,8 @@ for the end to end experiments, run the seamless.sh script. this will run seamle
 
 # Deltalm
 
+before running the deltalm script please run the regularpipe.sh script to generate the transcriptions that are input into deltalm.
+
 to run the deltalm experiments, run the deltalm.sh script.
 
 source deltalm.sh path/to/sentencepiece.model path/to/workspace path/to/output path/to/deltalm-model
@@ -41,4 +46,9 @@ this will run the deltalm model on the generated base file and generate the resu
 # Evaluation
 
 To evaluate the results, run the evaluation.sh script
+
 source evaluation.sh path/to/seamlessresults path/to/seamless_dropout_results path/to/deltaLm_results
+
+some of the scores and correlation scores are calulated in the plotting.py which generates teh plots for the thesis. for this the evaluation.sh script needs to be run first.
+to run this run the following command
+RES_DIR=path/to/base python plotting.py --seamless path/to/seamlessallscores.txt --dlm path/to/dlmallscores.txt --whisper path/to/fulltransciption.csv --split true
