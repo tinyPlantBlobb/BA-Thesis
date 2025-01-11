@@ -3,25 +3,28 @@ import argparse
 import csv
 from scipy.stats import pearsonr
 
-base = "/home/plantpalfynn/uni/BA/BA-Thesis/Latex/sections/images/"
+base = "../Latex/sections/images/"
 args = argparse.ArgumentParser()
-args.add_argument("--inp", type=str, default="inp.txt")
-args.add_argument("--ref", type=str, default="ref.txt")
+args.add_argument("--seamless", type=str, default="seamlessallscores.txt")
+args.add_argument("--dlm", type=str, default="dlmallscores.txt")
+agrs.add_argument("--whisper", type=str, default="fulltranscriptions.csv")
 args.add_argument("--split", type=bool, default=False)
 args.add_argument("--model", type=str, default="out")
-ref = args.parse_args().ref
-input = args.parse_args().inp
+ref = args.parse_args().dlm
+input = args.parse_args().seamless
 splitting = args.parse_args().split
 model = args.parse_args().model
+whisper = args.parse_args().whisper
+resdir = os.environ["RES_DIR"]
 transcriptbasescore = []
 transcriptmeanbasescore = []
-with open("results/alltranscriptions.csv", "r") as transcriptfile:
+with open(whisper, "r") as transcriptfile:
     reader = csv.DictReader(transcriptfile, dialect="excel")
     for row in reader:
         # print(row)
         transcriptbasescore.append(float(row["transcript prob"]))
         transcriptmeanbasescore.append(float(row["transcript mean"]))
-with open("results/seamlessallscores.txt", "r") as reffile:
+with open(input, "r") as reffile:
     lines = reffile.readlines()
     refs = [
         [float(j.strip("qwertzuiopasdfghjklyxcvbn() ")) for j in i.split("\t")]
