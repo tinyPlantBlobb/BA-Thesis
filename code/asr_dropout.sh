@@ -7,15 +7,15 @@
 #SBATCH --time=9:30:00
 #SBATCH --output=dropouteval.txt
 ws=$2
+TMPDIR=$1
 tar -C $TMPDIR/data -vxzf $ws/segments_IWSLT-23.en-de.tar.gz
 source qe-whitebox/bin/activate
 output=$3
-TMPDIR=$1
 input=$TMPDIR/results
 curl https://raw.githubusercontent.com/google/sentencepiece/refs/heads/master/python/src/sentencepiece/sentencepiece_model_pb2.py -o qe-whitebox/lib64/python3.9/site-packages/sentencepiece/sentencepiece_model_pb2.py
 TMPDIR=$1 torchrun --nnodes 1 --nproc_per_node 1 asr_dropout.py
 echo "\n dropout done \n"
-TMPDIR=$1 torchrun --nnodes 1 --nproc_per_node 1 seamless.py
+TMPDIR=$1 INPUTDIR=$TMPDIR torchrun --nnodes 1 --nproc_per_node 1 seamless.py
 #echo "seamless done"
 #cd $TMPDIR
 TMPDIR=$1 python dropoutevaluations.py $output
