@@ -12,7 +12,7 @@ source qe-whitebox/bin/activate
 output=$3
 TMPDIR=$1
 input=$TMPDIR/results
-curl https://raw.githubusercontent.com/google/sentencepiece/refs/heads/master/python/src/sentencepiece/sentencepiece_model_pb2.py -o /pfs/data5/home/kit/stud/utqma/qe-whitebox/lib64/python3.9/site-packages/sentencepiece/sentencepiece_model_pb2.py
+curl https://raw.githubusercontent.com/google/sentencepiece/refs/heads/master/python/src/sentencepiece/sentencepiece_model_pb2.py -o qe-whitebox/lib64/python3.9/site-packages/sentencepiece/sentencepiece_model_pb2.py
 torchrun --nnodes 1 --nproc_per_node 1 asr_dropout.py
 echo "\n dropout done \n"
 rsrun torchrun --nnodes 1 --nproc_per_node 1 seamless.py
