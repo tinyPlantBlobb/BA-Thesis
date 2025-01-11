@@ -49,6 +49,6 @@ To evaluate the results, run the evaluation.sh script
 
 source evaluation.sh path/to/seamlessresults path/to/seamless_dropout_results path/to/deltaLm_results
 
-some of the scores and correlation scores are calulated in the plotting.py which generates teh plots for the thesis. for this the evaluation.sh script needs to be run first.
+some of the scores and correlation scores are calculated in the plotting.py which generates the plots for the thesis. for this the evaluation.sh script needs to be run first.
 to run this run the following command
 RES_DIR=path/to/base python plotting.py --seamless path/to/seamlessallscores.txt --dlm path/to/dlmallscores.txt --whisper path/to/fulltransciption.csv --split true
