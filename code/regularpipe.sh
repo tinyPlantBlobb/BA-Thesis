@@ -8,7 +8,7 @@
 #SBATCH --output=baseeval.txt
 
 ws=$1
-
+TMPDIR=$ws
 mkdir -p $ws/data
 tar -C $ws/data -vxzf $ws/segments_IWSLT-23.en-de.tar.gz
 source qe-whitebox/bin/activate
