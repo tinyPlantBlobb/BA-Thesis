@@ -114,7 +114,7 @@ def run_inference(rank, world_size, dataset):
             currrow.extend(qelist)
             currrow.extend(translation)
             # currrow.extend(dropoutdata)
-            writeCSV(currrow, TEMPDIR + "/results/translation" + str(rank)+ ".csv", dropout=True, appen=True)
+            writeCSV(currrow, TEMPDIR + "/translation" + str(rank)+ ".csv", dropout=True, appen=True)
             #print(currrow)
             torch.cuda.empty_cache()
             #output = [None for _ in range(world_size)]

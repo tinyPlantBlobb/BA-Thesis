@@ -111,7 +111,7 @@ def run_inference(rank, world_size, dataset):
             ],
         )
         writeCSV(
-            csv, TEMPDIR + "/results/seamlessfulltranscriptions.csv", dropout=False
+            csv, TEMPDIR + "/seamlessfulltranscriptions.csv", dropout=False
         )
 
 
@@ -125,7 +125,6 @@ if not os.path.exists(respath):
 
 
 def main():
-    print(TEMPDIR + "/results/fulltranscriptions.csv")
     dataset = load_dataset(
         "csv", data_files=TEMPDIR + "/fulltranscriptions.csv"
     )
