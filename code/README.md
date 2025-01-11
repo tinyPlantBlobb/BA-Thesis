@@ -17,12 +17,12 @@ This repo includes the dataset used in the experiments of the thesis, this can b
 
 to run the regularpipe.sh script for running whisper and seamless without using dropout, this also creates the base file for running deltalm in data-bin folder.
 
-source regularpipe.sh path/to/segemented_IWSLT-23.en-de.zip path/to/workspace path/to/output
+source regularpipe.sh path/to/segemented_IWSLT-23.en-de.zip path/to/workspace path/to/output path/to/deltadatadir
 
 # Dropout experiments
 
 for the dropout experiments, run the asr_dropout.sh script. this will run the whisper and seamless with dropout.
-source asr_dropout.sh path/to/segemented_IWSLT-23.en-ed.zip path/to/workspace path/to/output
+source asr_dropout.sh path/to/segemented_IWSLT-23.en-ed.zip path/to/workspace path/to/output/
 
 # End to end experiments
 
@@ -39,3 +39,6 @@ the worspace being the folder where the data-bin, dictionaries and deltalm-large
 this will run the deltalm model on the generated base file and generate the results for both the non dropout and dropout experiments.
 
 # Evaluation
+
+To evaluate the results, run the evaluation.sh script
+source evaluation.sh path/to/seamlessresults path/to/seamless_dropout_results path/to/deltaLm_results

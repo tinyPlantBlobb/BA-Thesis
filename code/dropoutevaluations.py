@@ -6,7 +6,7 @@ import os
 import csv
 import math
 
-TMPDIR = "/pfs/data5/home/kit/stud/utqma/workspaces/pfs5wor7/utqma-finals"
+#TMPDIR = "/pfs/data5/home/kit/stud/utqma/workspaces/pfs5wor7/utqma-finals"
 transcrptqes = ["transcript probability " + str(i) for i in range(0, 30)]
 # TMPDIR = os.environ["TMPDIR"]
 row = [
