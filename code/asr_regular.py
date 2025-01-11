@@ -89,7 +89,7 @@ def run_inference(rank, world_size, dataset):
                 continue
             csv.extend(output[i])
 
-        writeCSV(csv,outputdir +"alltranscriptions.csv", dropout=False)
+        writeCSV(csv,outputdir +"fulltranscriptions.csv", dropout=False)
         #writedict(
         #    TEMPDIR,
         #    generated_transcript=[csv[i][3] for i in range(len(csv))],
