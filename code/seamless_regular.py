@@ -127,7 +127,7 @@ if not os.path.exists(respath):
 def main():
     print(TEMPDIR + "/results/fulltranscriptions.csv")
     dataset = load_dataset(
-        "csv", data_files=TEMPDIR + "/results/fulltranscriptions.csv"
+        "csv", data_files=TEMPDIR + "/fulltranscriptions.csv"
     )
     world_size = torch.cuda.device_count()
     torchrunrank = int(os.environ["LOCAL_RANK"])
