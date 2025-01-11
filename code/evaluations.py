@@ -1,6 +1,6 @@
 import re
 from datasets.features import translation
-from qeLogic import cometscore, pearsoncorr, wer as worderror
+from qeLogic import cometscore, pearsoncorr, worderror
 import os
 import csv
 
@@ -49,17 +49,16 @@ with open(filepath, "r", newline="") as file:
             softmaxent.append(float(qe[1]))
             stddiv.append(float(qe[2]))
             fullscore.append(float(qe[0])*float(r["transcript mean"]))
-    refscores = cometscore(transcripts, translation, reference_translation)
+    refscores = comet(transcripts, translation, reference_translation)
 
     refscore = refscores["scores"]
     with open(TMPDIR + "/results/referencescores.txt", "w") as export:
         for i in refscore:
             export.write(str(i))
             export.write("\n")
-    wer = [
-        worderror(transcripts, reference_trancsript)
-        for i in range(len(transcripts))
-    ]
+    wer = worderror(transcripts, reference_trancsript)
+        
+    
     # print(wer, len(wer), len(transcriptmean))
     # print(transcriptmean)
     meanresult = pearsoncorr(transcriptmean, wer)
