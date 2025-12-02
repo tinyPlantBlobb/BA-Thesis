@@ -1,17 +1,17 @@
-*.gitignore filter=lfs diff=lfs merge=lfs -text
-*.cls filter=lfs diff=lfs merge=lfs -text
-*.png filter=lfs diff=lfs merge=lfs -text
-*.eps filter=lfs diff=lfs merge=lfs -text
-*.pdf filter=lfs diff=lfs merge=lfs -text
-*.tex filter=lfs diff=lfs merge=lfs -text
-*.tikz filter=lfs diff=lfs merge=lfs -text
-*.bib filter=lfs diff=lfs merge=lfs -text
-*.py filter=lfs diff=lfs merge=lfs -text
-*.sh filter=lfs diff=lfs merge=lfs -text
-*.txt filter=lfs diff=lfs merge=lfs -text
-*.yaml filter=lfs diff=lfs merge=lfs -text
-*.gz filter=lfs diff=lfs merge=lfs -text
-*.code-profile filter=lfs diff=lfs merge=lfs -text
+*.gitignore diff=lfs merge=lfs -text
+*.cls diff=lfs merge=lfs -text
+*.png diff=lfs merge=lfs -text
+*.eps diff=lfs merge=lfs -text
+*.pdf diff=lfs merge=lfs -text
+*.tex diff=lfs merge=lfs -text
+*.tikz diff=lfs merge=lfs -text
+*.bib diff=lfs merge=lfs -text
+*.py diff=lfs merge=lfs -text
+*.sh diff=lfs merge=lfs -text
+*.txt diff=lfs merge=lfs -text
+*.yaml diff=lfs merge=lfs -text
+*.gz diff=lfs merge=lfs -text
+*.code-profile diff=lfs merge=lfs -text
 *.* !text !filter !merge !diff
 . !text !filter !merge !diff
 * !text !filter !merge !diff
